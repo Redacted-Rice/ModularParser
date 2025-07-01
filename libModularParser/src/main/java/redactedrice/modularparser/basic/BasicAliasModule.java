@@ -3,6 +3,8 @@ package redactedrice.modularparser.basic;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.regex.*;
 
@@ -56,9 +58,9 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
 
 	@Override
 	public Set<String> getReservedWords() {
-		Set<String> all = super.getReservedWords();
+		Set<String> all = new HashSet<>(super.getReservedWords());
 		all.addAll(getAliases());
-		return all;
+		return Collections.unmodifiableSet(all);
 	}
 	
 	@Override
@@ -79,6 +81,6 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
 
 	@Override
 	public Set<String> getAliases() {
-		return aliases.keySet();
+		return Collections.unmodifiableSet(aliases.keySet());
 	}
 }
