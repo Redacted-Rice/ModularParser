@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.ReservedWord;
+import redactedrice.modularparser.WordReserver;
 
-public abstract class LineStartMatchModule extends BaseModule implements LineHandler, ReservedWord {
+public abstract class LineStartMatchModule extends BaseModule implements LineHandler, WordReserver {
     protected final Set<String> reservedWords;
 
     protected LineStartMatchModule(String name, String... reservedWords) {
