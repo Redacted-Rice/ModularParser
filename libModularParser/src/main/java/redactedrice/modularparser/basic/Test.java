@@ -28,7 +28,7 @@ public class Test {
         parser.addModule(new BasicVariableModule());
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
-                line -> System.out.println("Print: " + line.substring(8))));
+                line -> System.out.println("Print: " + line.substring(8)), "println"));
 
         // Test script as a multiline string
         String script = """
@@ -41,25 +41,31 @@ public class Test {
                 variable num4 = 42.3d
                 variable num5 = 42i
                 variable num6 = 42.3e3
-                variable num7 = 42e3
+                variable num7 = \\
+                  42e3
                 variable num8 = 42e3L
+                variable num9 = num
                 variable str = "This is a string test"
                 variable ch = '\t'
                 variable bool1 = TRUE
                 variable bool2 = f
-                let bar = true ->
-                   and something
+                variable bar = "true ->
+                   and something"
                 def myFunc(x) \\
                   println x
                 // Some comment  (
                 alias greet = println "Hello"
                 alias greet = println "Hello 2"
                 alias def = println "Hello 3"
-                def myFunc(x) \\
-                  println x
                 // a comment end)
                 greet
-                (greet) // TODO handle this case
+                (greet)
+                println str
+                println "Trailing comment" // Comment at the end
+                variable annoying = /*just to be annoying*/ 5
+                variable strange = "interstingly /* you
+                  can insert a comment like this
+                  across multiple lines and */ this works"
                 """;
 
         // Run parser
