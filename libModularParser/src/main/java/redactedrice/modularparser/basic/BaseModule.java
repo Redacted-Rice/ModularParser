@@ -18,8 +18,8 @@ public abstract class BaseModule implements Module {
         return name;
     }
 
-	@Override
+    @Override
     public void setParser(Parser parser) {
-    	this.parser = parser;
+        this.parser = parser;
     }
 }
