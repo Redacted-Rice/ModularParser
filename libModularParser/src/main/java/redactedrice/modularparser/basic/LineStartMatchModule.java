@@ -4,9 +4,10 @@ package redactedrice.modularparser.basic;
 import java.util.HashSet;
 import java.util.Set;
 
-import redactedrice.modularparser.LineHandlerModule;
+import redactedrice.modularparser.LineHandler;
+import redactedrice.modularparser.ReservedWord;
 
-public abstract class LineStartMatchModule extends BaseModule implements LineHandlerModule {
+public abstract class LineStartMatchModule extends BaseModule implements LineHandler, ReservedWord {
     protected final Set<String> reservedWords;
 
     protected LineStartMatchModule(String name, String... reservedWords) {

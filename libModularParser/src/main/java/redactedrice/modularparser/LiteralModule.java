@@ -1,8 +1,5 @@
 package redactedrice.modularparser;
 
+public interface LiteralModule extends LiteralHandler, Module{
 
-import java.util.Optional;
-
-public interface LiteralModule extends Module {
-	Optional<Object> tryEvaluateLiteral(String literal);
 }

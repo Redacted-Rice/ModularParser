@@ -18,7 +18,7 @@ public class Test {
 		parser.addSingleLineComment("#");
 		parser.addMultiLineComment("/*", "*/");
 	
-		parser.addModule(new LambdaModule(
+		parser.addModule(new BasicLambdaModule(
 		    "definitions",
 		    line -> System.out.println("DEF → " + line),
 		    "def"
@@ -26,10 +26,11 @@ public class Test {
 
 		parser.addModule(new BasicNumberParser());
 		parser.addModule(new BasicCharParser());
+		parser.addModule(new BasicBoolParser());
 		parser.addModule(new BasicAliasModule());
 		parser.addModule(new BasicVariableModule());
 		
-		parser.addModule(new LambdaModule(
+		parser.addModule(new BasicLambdaModule(
 			    "TestPrintHandler",
 			    line -> System.out.println("Print: " + line.substring(8))
 			));
@@ -49,6 +50,8 @@ public class Test {
 	      variable num8 = 42e3L
 	      variable str = "This is a string test"
 	      variable ch = '\t'
+	      variable bool1 = TRUE
+	      variable bool2 = f
 	      let bar = true ->
 	         and something 
 	      def myFunc(x) \\

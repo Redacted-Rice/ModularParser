@@ -5,9 +5,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.VariableModule;
+import redactedrice.modularparser.VariableHandler;
 
-public class BasicVariableModule extends LineStartMatchModule implements VariableModule {
+public class BasicVariableModule extends LineStartMatchModule implements VariableHandler {
 	private final static Pattern varDef = Pattern.compile("^\\s*variable\\s+(\\w+)\\s*=\\s*(.+)$");
 	
 	private final Map<String, Object> variables = new LinkedHashMap<>();

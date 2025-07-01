@@ -3,9 +3,9 @@ package redactedrice.modularparser.basic;
 
 import java.util.Optional;
 
-import redactedrice.modularparser.LiteralModule;
+import redactedrice.modularparser.LiteralHandler;
 
-public class BasicNumberParser extends BaseModule implements LiteralModule {    
+public class BasicNumberParser extends BaseModule implements LiteralHandler {    
 	public BasicNumberParser() {
 		super("BasicNumberParser");
 	}
