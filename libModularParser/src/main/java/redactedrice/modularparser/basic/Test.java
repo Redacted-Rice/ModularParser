@@ -66,6 +66,11 @@ public class Test {
                 variable strange = "interstingly /* you
                   can insert a comment like this
                   across multiple lines and */ this works"
+                variable anotherCase = \\
+                    /* test a multi line comment on a continuation
+                    line as well */ "works too"
+                variable yetAnother = \\
+                    "works" // test a single line comment on a continuation
                 """;
 
         // Run parser
