@@ -102,12 +102,7 @@ public class Parser {
     public void parse(BufferedReader in) throws IOException {
         String raw;
         while ((raw = in.readLine()) != null) {
-            raw = removeAnySingleLineComment(raw.trim());
-            if (raw.isBlank()) {
-                continue;
-            }
-
-            raw = removeMultiLineComment(raw, in);
+            raw = removeAnyComments(raw, in);
             if (raw.isBlank()) {
                 continue;
             }
@@ -117,6 +112,16 @@ public class Parser {
             String logical = accumulate(raw, in);
             dispatch(logical);
         }
+    }
+
+    private String removeAnyComments(String raw, BufferedReader in) throws IOException {
+        raw = removeAnySingleLineComment(raw.trim());
+        if (raw.isBlank()) {
+            return "";
+        }
+
+        raw = removeMultiLineComment(raw, in);
+        return raw;
     }
 
     // Read until we find the end of the multiline comment
@@ -180,6 +185,7 @@ public class Parser {
                 throw new MissingFormatArgumentException(
                         "Reach end of file while parsing parenthesis");
             }
+            next = removeAnyComments(next, in);
             stripped = endsWith(next, lineContinue);
             if (!stripped.isEmpty()) {
                 next = stripped.trim();
@@ -187,10 +193,12 @@ public class Parser {
                 next = next.trim();
             }
 
-            System.out.println("'" + next + "'");
-            sb.append(" ");
-            sb.append(next);
-            parenDepth += determineParenthesisDelta(next);
+            // System.out.println("'" + next + "'");
+            if (!next.isBlank()) {
+                sb.append(" ");
+                sb.append(next);
+                parenDepth += determineParenthesisDelta(next);
+            }
         }
         return sb.toString();
     }
