@@ -23,7 +23,7 @@ public class Parser {
     private final List<LiteralHandler> literalModules = new ArrayList<>();
     private final List<AliasHandler> aliasModules = new ArrayList<>();
     private final List<VariableHandler> variableModules = new ArrayList<>();
-    private final List<ReservedWord> reservedWordModules = new ArrayList<>();
+    private final List<WordReserver> reservedWordModules = new ArrayList<>();
     private final List<LineHandler> lineHandlerModules = new ArrayList<>();
     private final Map<String, Module> index = new HashMap<>();
 
@@ -47,10 +47,10 @@ public class Parser {
         }
         
         // Check for reserved-word conflicts:
-        if (module instanceof ReservedWord) {
-        	ReservedWord asParserModule = (ReservedWord) module;
+        if (module instanceof WordReserver) {
+        	WordReserver asParserModule = (WordReserver) module;
 	        Set<String> newRes = asParserModule.getReservedWords();
-	        for (ReservedWord existing : reservedWordModules) {
+	        for (WordReserver existing : reservedWordModules) {
 	            Set<String> common = new HashSet<>(existing.getReservedWords());
 	            common.retainAll(newRes);
 	            if (!common.isEmpty()) {
@@ -243,7 +243,7 @@ public class Parser {
     // TODO make this a hashset with type as value?
     public Set<String> getAllReservedWords() {
         Set<String> all = new HashSet<>();
-        for (ReservedWord h : reservedWordModules) {
+        for (WordReserver h : reservedWordModules) {
             all.addAll(h.getReservedWords());
         }
         return all;
