@@ -1,18 +1,19 @@
 package redactedrice.modularparser.basic;
 
+
 import java.util.Optional;
 
 import redactedrice.modularparser.LiteralHandler;
 
-public class BasicCharParser extends BaseModule implements LiteralHandler {    
-	public BasicCharParser() {
-		super("BasicCharParser");
-	}
-	
-	@Override
-	public Optional<Object> tryEvaluateLiteral(String literal) {
+public class BasicCharParser extends BaseModule implements LiteralHandler {
+    public BasicCharParser() {
+        super("BasicCharParser");
+    }
+
+    @Override
+    public Optional<Object> tryEvaluateLiteral(String literal) {
         if (literal == null || literal.trim().isEmpty()) {
-        	return Optional.empty();
+            return Optional.empty();
         }
 
         String trimmed = literal.trim();
@@ -32,5 +33,5 @@ public class BasicCharParser extends BaseModule implements LiteralHandler {
         }
 
         return Optional.empty();
-	}
+    }
 }
