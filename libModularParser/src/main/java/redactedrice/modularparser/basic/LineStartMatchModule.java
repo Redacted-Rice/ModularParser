@@ -1,6 +1,7 @@
 package redactedrice.modularparser.basic;
 
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public abstract class LineStartMatchModule extends BaseModule implements LineHan
 
 	@Override
 	public Set<String> getReservedWords() {
-		return reservedWords;
+		return Collections.unmodifiableSet(reservedWords);
 	}
 	
 }

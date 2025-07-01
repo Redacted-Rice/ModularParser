@@ -16,11 +16,6 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
 		super("BasicVariableHandler", "variable");
 	}
 	
-	/** Retrieve all defined variables (immutable view). */
-	public Map<String,Object> getVariables() {
-		return Collections.unmodifiableMap(variables);
-	}
-	
 	@Override
 	public void handle(String line) {
 		Matcher m = varDef.matcher(line);
@@ -53,14 +48,9 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
 
 	@Override
 	public Set<String> getReservedWords() {
-		Set<String> all = super.getReservedWords();
+		Set<String> all = new HashSet<>(super.getReservedWords());
 		all.addAll(variables.keySet());
-		return all;
-	}
-
-	@Override
-	public boolean isVariable(String alias) {
-		return variables.containsKey(alias);
+		return Collections.unmodifiableSet(all);
 	}
 
 	@Override
@@ -69,6 +59,16 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
 			return Optional.ofNullable(variables.get(literal));
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public boolean isVariable(String alias) {
+		return variables.containsKey(alias);
+	}
+
+	@Override
+	public Map<String,Object> getVariables() {
+		return Collections.unmodifiableMap(variables);
 	}
 }
 
