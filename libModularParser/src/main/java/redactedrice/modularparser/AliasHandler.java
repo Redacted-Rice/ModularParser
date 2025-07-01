@@ -1,7 +1,9 @@
 package redactedrice.modularparser;
 
+import java.util.Set;
 
-public interface AliasModule extends LineHandlerModule {
+public interface AliasHandler {
 	String replaceAliases(String line);
 	boolean isAlias(String alias);
+    Set<String> getAliases();
 }

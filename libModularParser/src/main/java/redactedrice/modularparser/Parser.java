@@ -20,10 +20,11 @@ public class Parser {
     private final Set<String> singleLineComment = new HashSet<>();
     private final Map<String, String> multiLineComment = new HashMap<>();
 
-    private final List<LiteralModule> literalModules = new ArrayList<>();
-    private final List<AliasModule> aliasModules = new ArrayList<>();
-    private final List<VariableModule> variableModules = new ArrayList<>();
-    private final List<LineHandlerModule> lineHandlerModules = new ArrayList<>();
+    private final List<LiteralHandler> literalModules = new ArrayList<>();
+    private final List<AliasHandler> aliasModules = new ArrayList<>();
+    private final List<VariableHandler> variableModules = new ArrayList<>();
+    private final List<ReservedWord> reservedWordModules = new ArrayList<>();
+    private final List<LineHandler> lineHandlerModules = new ArrayList<>();
     private final Map<String, Module> index = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------     
@@ -46,33 +47,42 @@ public class Parser {
         }
         
         // Check for reserved-word conflicts:
-        if (module instanceof LineHandlerModule) {
-        	LineHandlerModule asParserModule = (LineHandlerModule) module;
+        if (module instanceof ReservedWord) {
+        	ReservedWord asParserModule = (ReservedWord) module;
 	        Set<String> newRes = asParserModule.getReservedWords();
-	        for (LineHandlerModule existing : lineHandlerModules) {
+	        for (ReservedWord existing : reservedWordModules) {
 	            Set<String> common = new HashSet<>(existing.getReservedWords());
 	            common.retainAll(newRes);
 	            if (!common.isEmpty()) {
-	                throw new IllegalArgumentException("Module '" + module.getName() +
-	                                   "' and module '" + existing.getName() +
-	                                   "' both reserve " + common);
+	            	// This should always be true but just in case have it here
+	                if (existing instanceof Module) {
+		                throw new IllegalArgumentException("Module '" + module.getName() +
+		                                   "' and module '" + ((Module)existing).getName() +
+		                                   "' both reserve " + common);
+	                } else {
+		                throw new IllegalArgumentException("Module '" + module.getName() +
+                                "' and an unknown module both reserve " + common);
+	                }
 	            }
 	        }
-	        lineHandlerModules.add(asParserModule);
+	        reservedWordModules.add(asParserModule);
         }
         
         module.setParser(this);
         index.put(module.getName(), module);
         
         // If its an alias replacer as well, kept track of it
-        if (module instanceof LiteralModule) {
-        	literalModules.add((LiteralModule)module);
+        if (module instanceof LineHandler) {
+        	lineHandlerModules.add((LineHandler)module);
         }
-        if (module instanceof AliasModule) {
-        	aliasModules.add((AliasModule)module);
+        if (module instanceof LiteralHandler) {
+        	literalModules.add((LiteralHandler)module);
         }
-        if (module instanceof VariableModule) {
-        	variableModules.add((VariableModule)module);
+        if (module instanceof AliasHandler) {
+        	aliasModules.add((AliasHandler)module);
+        }
+        if (module instanceof VariableHandler) {
+        	variableModules.add((VariableHandler)module);
         }
     }
 
@@ -183,12 +193,12 @@ public class Parser {
 
     private void dispatch(String logicalLine) {
       // Apply any alias‐substitutions
-      for (AliasModule aliaser : aliasModules) {
+      for (AliasHandler aliaser : aliasModules) {
           logicalLine = aliaser.replaceAliases(logicalLine);
       }
       
       // Now route to the first matching Module
-      for (LineHandlerModule h : lineHandlerModules) {
+      for (LineHandler h : lineHandlerModules) {
         if (h.matches(logicalLine)) {
           h.handle(logicalLine);
           return;
@@ -201,7 +211,7 @@ public class Parser {
     
     public Object evaluateLiteral(String literal) {
     	Optional<Object> ret;
-        for (LiteralModule literalModule : literalModules) {
+        for (LiteralHandler literalModule : literalModules) {
         	ret = literalModule.tryEvaluateLiteral(literal);
         	if (ret.isPresent()) {
         		return ret.get();
@@ -211,7 +221,7 @@ public class Parser {
     }
     
     public boolean isAliasDefined(String alias) {
-        for (AliasModule aliasModule : aliasModules) {
+        for (AliasHandler aliasModule : aliasModules) {
             if (aliasModule.isAlias(alias)) {
             	return true;
             }
@@ -220,7 +230,7 @@ public class Parser {
     }
     
     public boolean isVariableDefined(String var) {
-        for (VariableModule variableModule : variableModules) {
+        for (VariableHandler variableModule : variableModules) {
             if (variableModule.isVariable(var)) {
             	return true;
             }
@@ -233,7 +243,7 @@ public class Parser {
     // TODO make this a hashset with type as value?
     public Set<String> getAllReservedWords() {
         Set<String> all = new HashSet<>();
-        for (LineHandlerModule h : lineHandlerModules) {
+        for (ReservedWord h : reservedWordModules) {
             all.addAll(h.getReservedWords());
         }
         return all;
@@ -241,16 +251,16 @@ public class Parser {
     
     public Set<String> getAllAliases() {
         Set<String> all = new HashSet<>();
-        for (AliasModule aliaser : aliasModules) {
-            all.addAll(aliaser.getReservedWords());
+        for (AliasHandler aliaser : aliasModules) {
+            all.addAll(aliaser.getAliases());
         }
         return all;
     }
     
-    public Set<String> getAllVariables() {
-        Set<String> all = new HashSet<>();
-        for (VariableModule varModule : variableModules) {
-            all.addAll(varModule.getReservedWords());
+    public Map<String, Object> getAllVariables() {
+        Map<String, Object> all = new HashMap<>();
+        for (VariableHandler varModule : variableModules) {
+            all.putAll(varModule.getVariables());
         }
         return all;
     }
@@ -259,7 +269,7 @@ public class Parser {
         return index.get(name);
     }
     
-    public List<AliasModule> getAliasModules(String name) {
+    public List<AliasHandler> getAliasModules(String name) {
         return aliasModules;
     }
 }

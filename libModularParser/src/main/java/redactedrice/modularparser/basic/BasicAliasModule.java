@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.regex.*;
 
-import redactedrice.modularparser.AliasModule;
+import redactedrice.modularparser.AliasHandler;
 
-public class BasicAliasModule extends LineStartMatchModule implements AliasModule {
+public class BasicAliasModule extends LineStartMatchModule implements AliasHandler {
 	private final static Pattern aliasDef = Pattern.compile("^\\s*alias\\s+(\\w+)\\s*=\\s*(.+)$");
 	
 	private final Map<String,String> aliases = new LinkedHashMap<>();
@@ -57,7 +57,7 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasModul
 	@Override
 	public Set<String> getReservedWords() {
 		Set<String> all = super.getReservedWords();
-		all.addAll(aliases.keySet());
+		all.addAll(getAliases());
 		return all;
 	}
 	
@@ -75,5 +75,10 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasModul
 	@Override
 	public boolean isAlias(String alias) {
 		return aliases.containsKey(alias);
+	}
+
+	@Override
+	public Set<String> getAliases() {
+		return aliases.keySet();
 	}
 }
