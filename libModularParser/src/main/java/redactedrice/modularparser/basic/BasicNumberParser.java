@@ -8,7 +8,7 @@ import redactedrice.modularparser.LiteralModule;
 public class BasicNumberParser extends BaseModule implements LiteralModule {    
 	public BasicNumberParser() {
 		super("BasicNumberParser");
-	};
+	}
 	
 	private enum PRIMITIVE_TYPE {INT, LONG, DOUBLE, UNSPECIFIED}
 	
@@ -24,8 +24,8 @@ public class BasicNumberParser extends BaseModule implements LiteralModule {
         String number = hasSuffix ? trimmed.substring(0, trimmed.length() - 1) : trimmed;
 
         return switch (suffix) {
+        	case "i" -> parseWithType(number, PRIMITIVE_TYPE.INT);
             case "l" -> parseWithType(number, PRIMITIVE_TYPE.LONG);
-            case "f" -> parseWithType(number, PRIMITIVE_TYPE.DOUBLE);
             case "d" -> parseWithType(number, PRIMITIVE_TYPE.DOUBLE);
             default -> parseWithType(number, PRIMITIVE_TYPE.UNSPECIFIED);
         };
