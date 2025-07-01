@@ -38,7 +38,7 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
 		Object obj = parser.evaluateLiteral(literal);
 		if (obj != null) {
 			variables.put(varName, obj);
-			System.out.println("Variable: Added variable " + varName + " with value: " + literal);
+			System.out.println("Variable: Added variable " + varName + " with value: " + obj);
 		} else {
 			throw new IllegalArgumentException(
 			  "VariableHandler: For variable \"" + varName + "\" + cannot parse value: " + literal
@@ -61,6 +61,14 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
 	@Override
 	public boolean isVariable(String alias) {
 		return variables.containsKey(alias);
+	}
+
+	@Override
+	public Optional<Object> tryEvaluateLiteral(String literal) {
+		if (isVariable(literal)) {
+			return Optional.ofNullable(variables.get(literal));
+		}
+		return Optional.empty();
 	}
 }
 

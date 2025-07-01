@@ -4,31 +4,19 @@ package redactedrice.modularparser.basic;
 import java.util.HashSet;
 import java.util.Set;
 
-import redactedrice.modularparser.Parser;
-import redactedrice.modularparser.ParserModule;
+import redactedrice.modularparser.LineHandlerModule;
 
-public abstract class LineStartMatchModule implements ParserModule {
-    private final String name;
-    protected Parser parser;
+public abstract class LineStartMatchModule extends BaseModule implements LineHandlerModule {
     protected final Set<String> reservedWords;
 
     protected LineStartMatchModule(String name, String... reservedWords) {
-        this.name = name;
+    	super(name);
         
         this.reservedWords = new HashSet<>();
         for (String word : reservedWords) {
         	this.reservedWords.add(word);
         }
     }
-
-    public String getName() {
-        return name;
-    }
-
-	@Override
-    public void setParser(Parser parser) {
-    	this.parser = parser;
-    }    
 
 	@Override
 	public boolean matches(String logicalLine) {

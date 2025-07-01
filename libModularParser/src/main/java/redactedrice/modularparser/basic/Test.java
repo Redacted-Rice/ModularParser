@@ -18,16 +18,17 @@ public class Test {
 		parser.addSingleLineComment("#");
 		parser.addMultiLineComment("/*", "*/");
 	
-		parser.addHandler(new LambdaModule(
+		parser.addModule(new LambdaModule(
 		    "definitions",
 		    line -> System.out.println("DEF → " + line),
 		    "def"
 		));
+
+		parser.addModule(new BasicNumberParser());
+		parser.addModule(new BasicAliasModule());
+		parser.addModule(new BasicVariableModule());
 		
-		parser.addHandler(new BasicAliasModule());
-		parser.addHandler(new BasicVariableModule());
-		
-		parser.addHandler(new LambdaModule(
+		parser.addModule(new LambdaModule(
 			    "TestPrintHandler",
 			    line -> System.out.println("Print: " + line.substring(8))
 			));
@@ -58,14 +59,14 @@ public class Test {
 	    
 
 		// Unhappy test cases
-//		parser.addHandler(new SimpleHandler(
+//		parser.addModule(new SimpleHandler(
 //			    "definitions",
 //			    line -> line.trim().startsWith("def "),
 //			    line -> System.out.println("DEF → " + line),
 //			    "defs"
 //			));
 //		
-//		parser.addHandler(new SimpleHandler(
+//		parser.addModule(new SimpleHandler(
 //			    "definitions2",
 //			    line -> line.trim().startsWith("def "),
 //			    line -> System.out.println("DEF → " + line),
