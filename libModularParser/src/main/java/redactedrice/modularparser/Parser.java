@@ -114,59 +114,6 @@ public class Parser {
         }
     }
 
-    private String removeAnyComments(String raw, BufferedReader in) throws IOException {
-        raw = removeAnySingleLineComment(raw.trim());
-        if (raw.isBlank()) {
-            return "";
-        }
-
-        raw = removeMultiLineComment(raw, in);
-        return raw;
-    }
-
-    // Read until we find the end of the multiline comment
-    private String removeMultiLineComment(String firstLine, BufferedReader in) throws IOException {
-        String startToken = "";
-        String endToken = "";
-        int firstIdx = -1;
-        int idx = -1;
-        // Do we have a start token?
-        for (Entry<String, String> token : multiLineComment.entrySet()) {
-            idx = firstLine.indexOf(token.getKey());
-            if (idx >= 0) {
-                if (firstIdx < 0 || idx < firstIdx) {
-                    firstIdx = idx;
-                    startToken = token.getKey();
-                    endToken = token.getValue();
-                }
-            }
-        }
-        if (firstIdx < 0) {
-            return firstLine;
-        }
-
-        // Add the start of the line
-        StringBuilder sb = new StringBuilder(firstLine.substring(0, firstIdx).trim());
-        String line = firstLine;
-
-        // Continue grabbing lines till we find the end
-        int endIdx = line.indexOf(endToken);
-        while (endIdx < 0) {
-            line = in.readLine();
-            if (line == null) {
-                throw new MissingFormatArgumentException(
-                        "Reach end of file while parsing multiline comment starting with "
-                                + startToken + " and end of " + endToken);
-            }
-            endIdx = line.indexOf(endToken);
-            // No need to append - its just thrown away
-        }
-        // Append any trailing line of the comment with a space between
-        sb.append(' ');
-        sb.append(line.substring(endIdx + endToken.length()).trim());
-        return sb.toString();
-    }
-
     // Merge lines until outer () balance is zero and no continuer
     private String accumulate(String firstLine, BufferedReader in) throws IOException {
         String stripped = endsWith(firstLine, lineContinue);
@@ -214,6 +161,60 @@ public class Parser {
             }
         }
         return d;
+    }
+
+    private String removeAnyComments(String raw, BufferedReader in) throws IOException {
+        raw = removeAnySingleLineComment(raw.trim());
+        if (raw.isBlank()) {
+            return "";
+        }
+
+        raw = removeAnyMultiLineComment(raw, in);
+        return raw;
+    }
+
+    // Read until we find the end of the multiline comment
+    private String removeAnyMultiLineComment(String firstLine, BufferedReader in)
+            throws IOException {
+        String startToken = "";
+        String endToken = "";
+        int firstIdx = -1;
+        int idx = -1;
+        // Do we have a start token?
+        for (Entry<String, String> token : multiLineComment.entrySet()) {
+            idx = firstLine.indexOf(token.getKey());
+            if (idx >= 0) {
+                if (firstIdx < 0 || idx < firstIdx) {
+                    firstIdx = idx;
+                    startToken = token.getKey();
+                    endToken = token.getValue();
+                }
+            }
+        }
+        if (firstIdx < 0) {
+            return firstLine;
+        }
+
+        // Add the start of the line
+        StringBuilder sb = new StringBuilder(firstLine.substring(0, firstIdx).trim());
+        String line = firstLine;
+
+        // Continue grabbing lines till we find the end
+        int endIdx = line.indexOf(endToken);
+        while (endIdx < 0) {
+            line = in.readLine();
+            if (line == null) {
+                throw new MissingFormatArgumentException(
+                        "Reach end of file while parsing multiline comment starting with "
+                                + startToken + " and end of " + endToken);
+            }
+            endIdx = line.indexOf(endToken);
+            // No need to append - its just thrown away
+        }
+        // Append any trailing line of the comment with a space between
+        sb.append(' ');
+        sb.append(line.substring(endIdx + endToken.length()).trim());
+        return sb.toString();
     }
 
     private String removeAnySingleLineComment(String line) {
