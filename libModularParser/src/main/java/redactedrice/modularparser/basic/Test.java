@@ -25,6 +25,7 @@ public class Test {
 		));
 
 		parser.addModule(new BasicNumberParser());
+		parser.addModule(new BasicCharParser());
 		parser.addModule(new BasicAliasModule());
 		parser.addModule(new BasicVariableModule());
 		
@@ -38,7 +39,16 @@ public class Test {
 	      # This is a comment (
 	      /* This is (
 	         a block comment */
-	      variable foo = 42
+	      variable num = 42
+	      variable num2 = 42.3
+	      variable num3 = 42L
+	      variable num4 = 42.3d
+	      variable num5 = 42i
+	      variable num6 = 42.3e3
+	      variable num7 = 42e3
+	      variable num8 = 42e3L
+	      variable str = "This is a string test"
+	      variable ch = '\t'
 	      let bar = true ->
 	         and something 
 	      def myFunc(x) \\
