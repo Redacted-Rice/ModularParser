@@ -3,10 +3,7 @@ package redactedrice.modularparser;
 
 import java.util.Set;
 
-public interface ParserModule {
-    String getName();
-    void setParser(Parser parser);
-    
+public interface LineHandlerModule extends Module {    
     boolean matches(String logicalLine);
     void handle(String logicalLine);
     

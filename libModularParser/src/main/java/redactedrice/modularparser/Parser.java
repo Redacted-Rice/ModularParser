@@ -1,4 +1,6 @@
 package redactedrice.modularparser;
+
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
@@ -6,22 +8,23 @@ import java.util.Map.Entry;
 
 /**
  * A flexible Parser that can be configured to your needs and customized
- * with handlers for specific syntax. This includes:
+ * with modules for specific syntax. This includes:
  *   Line end (in progress)
  *   Line breaks
  *   Single line comments
  *   Multi line comments
- *   Handlers for parsing instructions
+ *   Modules for parsing instructions
  */
 public class Parser {
     private final Set<String> lineContinue = new HashSet<>();
     private final Set<String> singleLineComment = new HashSet<>();
     private final Map<String, String> multiLineComment = new HashMap<>();
 
-    private final List<AliasModule> aliasHandlers = new ArrayList<>();
-    private final List<VariableModule> variableHandlers = new ArrayList<>();
-    private final List<ParserModule> handlers = new ArrayList<>();
-    private final Map<String, ParserModule> index = new HashMap<>();
+    private final List<LiteralModule> literalModules = new ArrayList<>();
+    private final List<AliasModule> aliasModules = new ArrayList<>();
+    private final List<VariableModule> variableModules = new ArrayList<>();
+    private final List<LineHandlerModule> lineHandlerModules = new ArrayList<>();
+    private final Map<String, Module> index = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------     
     public void addLineContinue(String token) {
@@ -36,34 +39,40 @@ public class Parser {
     	multiLineComment.put(startToken, endToken);
     }
 
-    public void addHandler(ParserModule handler) {
+    public void addModule(Module module) {
     	// Check for name conflicts
-        if (index.containsKey(handler.getName())) {
-            throw new IllegalArgumentException("Handler '" + handler.getName() + "' already exists");
+        if (index.containsKey(module.getName())) {
+            throw new IllegalArgumentException("Module '" + module.getName() + "' already exists");
         }
         
         // Check for reserved-word conflicts:
-        Set<String> newRes = handler.getReservedWords();
-        for (ParserModule existing : handlers) {
-            Set<String> common = new HashSet<>(existing.getReservedWords());
-            common.retainAll(newRes);
-            if (!common.isEmpty()) {
-                throw new IllegalArgumentException("Handler '" + handler.getName() +
-                                   "' and handler '" + existing.getName() +
-                                   "' both reserve " + common);
-            }
+        if (module instanceof LineHandlerModule) {
+        	LineHandlerModule asParserModule = (LineHandlerModule) module;
+	        Set<String> newRes = asParserModule.getReservedWords();
+	        for (LineHandlerModule existing : lineHandlerModules) {
+	            Set<String> common = new HashSet<>(existing.getReservedWords());
+	            common.retainAll(newRes);
+	            if (!common.isEmpty()) {
+	                throw new IllegalArgumentException("Module '" + module.getName() +
+	                                   "' and module '" + existing.getName() +
+	                                   "' both reserve " + common);
+	            }
+	        }
+	        lineHandlerModules.add(asParserModule);
         }
         
-        handler.setParser(this);
-        handlers.add(handler);
-        index.put(handler.getName(), handler);
+        module.setParser(this);
+        index.put(module.getName(), module);
         
         // If its an alias replacer as well, kept track of it
-        if (handler instanceof AliasModule) {
-        	aliasHandlers.add((AliasModule)handler);
+        if (module instanceof LiteralModule) {
+        	literalModules.add((LiteralModule)module);
         }
-        if (handler instanceof VariableModule) {
-        	variableHandlers.add((VariableModule)handler);
+        if (module instanceof AliasModule) {
+        	aliasModules.add((AliasModule)module);
+        }
+        if (module instanceof VariableModule) {
+        	variableModules.add((VariableModule)module);
         }
     }
 
@@ -174,12 +183,12 @@ public class Parser {
 
     private void dispatch(String logicalLine) {
       // Apply any alias‐substitutions
-      for (AliasModule aliaser : aliasHandlers) {
+      for (AliasModule aliaser : aliasModules) {
           logicalLine = aliaser.replaceAliases(logicalLine);
       }
       
-      // Now route to the first matching Handler
-      for (ParserModule h : handlers) {
+      // Now route to the first matching Module
+      for (LineHandlerModule h : lineHandlerModules) {
         if (h.matches(logicalLine)) {
           h.handle(logicalLine);
           return;
@@ -191,13 +200,19 @@ public class Parser {
     // ------------- Public Fns for Modules ------------
     
     public Object evaluateLiteral(String literal) {
-    	// TODO
-		return literal;
+    	Optional<Object> ret;
+        for (LiteralModule literalModule : literalModules) {
+        	ret = literalModule.tryEvaluateLiteral(literal);
+        	if (ret.isPresent()) {
+        		return ret.get();
+        	}
+        }
+        return null;
     }
     
     public boolean isAliasDefined(String alias) {
-        for (AliasModule aliasHandler : aliasHandlers) {
-            if (aliasHandler.isAlias(alias)) {
+        for (AliasModule aliasModule : aliasModules) {
+            if (aliasModule.isAlias(alias)) {
             	return true;
             }
         }
@@ -205,8 +220,8 @@ public class Parser {
     }
     
     public boolean isVariableDefined(String var) {
-        for (VariableModule variableHandler : variableHandlers) {
-            if (variableHandler.isVariable(var)) {
+        for (VariableModule variableModule : variableModules) {
+            if (variableModule.isVariable(var)) {
             	return true;
             }
         }
@@ -216,10 +231,9 @@ public class Parser {
     // ------------------ Getters ----------------------
     
     // TODO make this a hashset with type as value?
-    // Then make all modules implement ReservedWordHandler?
     public Set<String> getAllReservedWords() {
         Set<String> all = new HashSet<>();
-        for (ParserModule h : handlers) {
+        for (LineHandlerModule h : lineHandlerModules) {
             all.addAll(h.getReservedWords());
         }
         return all;
@@ -227,7 +241,7 @@ public class Parser {
     
     public Set<String> getAllAliases() {
         Set<String> all = new HashSet<>();
-        for (AliasModule aliaser : aliasHandlers) {
+        for (AliasModule aliaser : aliasModules) {
             all.addAll(aliaser.getReservedWords());
         }
         return all;
@@ -235,17 +249,17 @@ public class Parser {
     
     public Set<String> getAllVariables() {
         Set<String> all = new HashSet<>();
-        for (VariableModule varHandler : variableHandlers) {
-            all.addAll(varHandler.getReservedWords());
+        for (VariableModule varModule : variableModules) {
+            all.addAll(varModule.getReservedWords());
         }
         return all;
     }
     
-    public ParserModule getHandler(String name) {
+    public Module getModule(String name) {
         return index.get(name);
     }
     
-    public List<AliasModule> getAliasHandlers(String name) {
-        return aliasHandlers;
+    public List<AliasModule> getAliasModules(String name) {
+        return aliasModules;
     }
 }
