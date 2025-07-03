@@ -1,12 +1,15 @@
 package redactedrice.modularparser.basic;
 
 
-import java.util.Map;
-import java.util.Set;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.regex.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import redactedrice.modularparser.AliasHandler;
 
@@ -35,7 +38,7 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
         }
 
         // Check for collisions with reserved words
-        if (parser.getAllReservedWords().contains(key)) {
+        if (parser.getAllReservedWords().containsKey(key)) {
             System.err.println(
                     "Warning: alias '" + key + "' conflicts reserved word and will be ignored!");
             return;
@@ -52,15 +55,28 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
     }
 
     @Override
-    public boolean isReservedWord(String word) {
-        return super.isReservedWord(word) || isAlias(word);
+    public boolean isReservedWord(String word, Optional<ReservedType> type) {
+        if (type.isEmpty() || type.get() == ReservedType.EXCLUSIVE) {
+            return super.isReservedWord(word) || isAlias(word);
+        }
+        return false;
     }
 
     @Override
-    public Set<String> getReservedWords() {
-        Set<String> all = new HashSet<>(super.getReservedWords());
-        all.addAll(getAliases());
-        return Collections.unmodifiableSet(all);
+    public Map<String, ReservedType> getAllReservedWords() {
+        HashMap<String, ReservedType> all = new HashMap<>(super.getAllReservedWords());
+        getAliases().stream().forEach(alias -> all.put(alias, ReservedType.EXCLUSIVE));
+        return Collections.unmodifiableMap(all);
+    }
+
+    @Override
+    public Set<String> getReservedWords(ReservedType type) {
+        if (type == ReservedType.EXCLUSIVE) {
+            Set<String> all = new HashSet<>(super.getReservedWords(type));
+            all.addAll(getAliases());
+            return Collections.unmodifiableSet(all);
+        }
+        return Collections.emptySet();
     }
 
     @Override

@@ -2,21 +2,23 @@ package redactedrice.modularparser.basic;
 
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.WordReserver;
 
 public abstract class LineStartMatchModule extends BaseModule implements LineHandler, WordReserver {
-    protected final Set<String> reservedWords;
+    protected final Map<String, ReservedType> reservedWords;
 
-    protected LineStartMatchModule(String name, String... reservedWords) {
+    protected LineStartMatchModule(String name, String... exclusiveWords) {
         super(name);
 
-        this.reservedWords = new HashSet<>();
-        for (String word : reservedWords) {
-            this.reservedWords.add(word);
+        this.reservedWords = new HashMap<>();
+        for (String word : exclusiveWords) {
+            this.reservedWords.put(word, ReservedType.EXCLUSIVE);
         }
     }
 
@@ -27,17 +29,26 @@ public abstract class LineStartMatchModule extends BaseModule implements LineHan
         }
 
         String[] words = logicalLine.trim().split("\\s+", 2);
-        return !words[0].isEmpty() && reservedWords.contains(words[0]);
+        return !words[0].isEmpty() && reservedWords.containsKey(words[0]);
     }
 
     @Override
-    public boolean isReservedWord(String word) {
-        return reservedWords.contains(word);
+    public boolean isReservedWord(String word, Optional<ReservedType> type) {
+        if (type.isEmpty()) {
+            return reservedWords.containsKey(word);
+        }
+        return reservedWords.get(word) == type.get();
     }
 
     @Override
-    public Set<String> getReservedWords() {
-        return Collections.unmodifiableSet(reservedWords);
+    public Map<String, ReservedType> getAllReservedWords() {
+        return Collections.unmodifiableMap(reservedWords);
+    }
+
+    @Override
+    public Set<String> getReservedWords(ReservedType type) {
+        return Set.copyOf(reservedWords.entrySet().stream()
+                .filter(entry -> entry.getValue() == type).map(Map.Entry::getKey).toList());
     }
 
 }
