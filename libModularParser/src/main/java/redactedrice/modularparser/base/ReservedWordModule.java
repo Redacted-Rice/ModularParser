@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.base;
 
 
 import java.util.Collections;
@@ -7,29 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.WordReserver;
 
-public abstract class LineStartMatchModule extends BaseModule implements LineHandler, WordReserver {
-    protected final Map<String, ReservedType> reservedWords;
+public class ReservedWordModule extends BaseModule implements WordReserver {
+    protected final Map<String, ReservedType> reservedWords = new HashMap<>();
 
-    protected LineStartMatchModule(String name, String... exclusiveWords) {
+    protected ReservedWordModule(String name) {
         super(name);
-
-        this.reservedWords = new HashMap<>();
-        for (String word : exclusiveWords) {
-            this.reservedWords.put(word, ReservedType.EXCLUSIVE);
-        }
-    }
-
-    @Override
-    public boolean matches(String logicalLine) {
-        if (logicalLine == null || logicalLine.isBlank()) {
-            return false;
-        }
-
-        String[] words = logicalLine.trim().split("\\s+", 2);
-        return !words[0].isEmpty() && reservedWords.containsKey(words[0]);
     }
 
     @Override
@@ -50,5 +34,4 @@ public abstract class LineStartMatchModule extends BaseModule implements LineHan
         return Set.copyOf(reservedWords.entrySet().stream()
                 .filter(entry -> entry.getValue() == type).map(Map.Entry::getKey).toList());
     }
-
 }

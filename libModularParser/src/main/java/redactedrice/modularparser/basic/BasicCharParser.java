@@ -4,6 +4,7 @@ package redactedrice.modularparser.basic;
 import java.util.Optional;
 
 import redactedrice.modularparser.LiteralHandler;
+import redactedrice.modularparser.base.BaseModule;
 
 public class BasicCharParser extends BaseModule implements LiteralHandler {
     public BasicCharParser() {

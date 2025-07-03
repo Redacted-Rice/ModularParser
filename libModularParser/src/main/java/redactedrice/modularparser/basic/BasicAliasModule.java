@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.AliasHandler;
+import redactedrice.modularparser.base.LineStartMatchModule;
 
 public class BasicAliasModule extends LineStartMatchModule implements AliasHandler {
     private final static Pattern aliasDef = Pattern.compile("^\\s*alias\\s+(\\w+)\\s*=\\s*(.+)$");

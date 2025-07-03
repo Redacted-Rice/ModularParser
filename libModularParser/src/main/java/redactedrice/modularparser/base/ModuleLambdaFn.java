@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.base;
 
 
 // To support simple Lambda Handlers mostly for testing
