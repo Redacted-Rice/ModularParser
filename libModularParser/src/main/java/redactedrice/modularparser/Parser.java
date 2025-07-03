@@ -34,6 +34,7 @@ public class Parser {
     private final List<VariableHandler> variableModules = new ArrayList<>();
     private final List<WordReserver> reservedWordModules = new ArrayList<>();
     private final List<LineHandler> lineHandlerModules = new ArrayList<>();
+    private final List<ScopeHandler> scopeModules = new ArrayList<>();
     private final Map<String, Module> index = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------
@@ -92,6 +93,9 @@ public class Parser {
         }
         if (module instanceof VariableHandler) {
             variableModules.add((VariableHandler) module);
+        }
+        if (module instanceof ScopeHandler) {
+            scopeModules.add((ScopeHandler) module);
         }
     }
 
@@ -326,5 +330,18 @@ public class Parser {
 
     public List<AliasHandler> getAliasModules(String name) {
         return aliasModules;
+    }
+
+    public List<ScopeHandler> getScoperModules(String name) {
+        return scopeModules;
+    }
+
+    public ScopeHandler getScoperFor(String module) {
+        for (ScopeHandler scope : scopeModules) {
+            if (scope.handlesModule(module)) {
+                return scope;
+            }
+        }
+        return null;
     }
 }
