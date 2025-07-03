@@ -1,19 +1,14 @@
 package redactedrice.modularparser.basic;
 
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.ScopeHandler;
 import redactedrice.modularparser.VariableHandler;
-import redactedrice.modularparser.WordReserver.ReservedType;
 import redactedrice.modularparser.base.ReservedWordModule;
 
 public class BasicScopedVariableModule extends ReservedWordModule
@@ -27,12 +22,11 @@ public class BasicScopedVariableModule extends ReservedWordModule
         super(moduleName);
         this.keyword = keyword.toLowerCase();
         this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
-        matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(?!" + this.keyword
-                + "\\b)(\\w+)\\s*=\\s*(.+)$");
+        matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
-    public Class<?> dataClass() {
+    public Class<?> getDataClass() {
         return HashMap.class;
     }
 
@@ -43,12 +37,25 @@ public class BasicScopedVariableModule extends ReservedWordModule
             return false;
         }
 
-        String scopeless = scope.matchesScope(logicalLine);
-        if (scopeless.isEmpty()) {
+        logicalLine = scope.matchesScope(logicalLine);
+        if (logicalLine.isEmpty()) {
             return false;
         }
 
         return matcher.matcher(logicalLine).find();
+    }
+
+    private void addLiteral(ScopeHandler scope, String literal, String scopeName, String name,
+            boolean assignment) {
+        Object obj = parser.evaluateLiteral(literal);
+        if (obj != null) {
+            scope.setDataForScope(scopeName, name, getName(), obj);
+            System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
+                    + " " + name + " in scope " + scopeName + " with value: " + obj);
+        } else {
+            throw new IllegalArgumentException("VariableHandler: For " + keyword + " " + name
+                    + "\" + cannot parse value: " + literal);
+        }
     }
 
     @Override
@@ -63,84 +70,63 @@ public class BasicScopedVariableModule extends ReservedWordModule
             return;
         }
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) scope.getDataForScope(scopeLine[0],
-                getName());
-
         Matcher m = matcher.matcher(scopeLine[1]);
-
-        // At this point we either have assign or reassign. If we have both
-        // it doesn't matter which we use
-        String varName = assign.matches() ? assign.group(2) : reassign.group(1);
-        String literal = assign.matches() ? assign.group(3) : reassign.group(2);
-
-        Object obj = parser.evaluateLiteral(literal);
-        if (obj != null) {
-            scopedVariables.get(foundScope).put(varName, obj);
-            System.out.println(getName() + ": Added " + keyword + " " + varName + " in scope "
-                    + foundScope + " with value: " + obj);
+        if (!m.matches()) {
+            return;
+        }
+        if (m.group(1) == null) {
+            // reassignment
+            String owner;
+            if (scopeLine[1].equals(line)) { // scope was specified
+                owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
+            } else {
+                String[] ownerScope = scope.getLowestOwnerAndScope(m.group(2));
+                if (ownerScope.length <= 0) {
+                    System.err.println(getName() + ": Attempted to reassign non exsiting " + keyword
+                            + " " + m.group(2) + " with " + m.group(3));
+                    return;
+                }
+                owner = ownerScope[0];
+                scopeLine[0] = ownerScope[1];
+            }
+            if (owner == getName()) {
+                if (reassignmentAllowed) {
+                    addLiteral(scope, m.group(3), scopeLine[0], m.group(2), false);
+                } else {
+                    System.err.println(getName() + ": Attempted to reassign " + keyword + " "
+                            + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
+                }
+            } else {
+                System.err.println(getName() + ": Attempted to reassign unowned " + keyword + " "
+                        + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
+            }
         } else {
-            throw new IllegalArgumentException("VariableHandler: For variable \"" + varName
-                    + "\" + cannot parse value: " + literal);
+            // Assignment
+            String owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
+            if (!owner.isEmpty()) {
+                System.err.println("Value " + m.group(2) + " is already defined for scope "
+                        + scopeLine[0] + " by " + owner);
+            } else {
+                addLiteral(scope, m.group(3), scopeLine[0], m.group(2), true);
+            }
         }
-    }
-
-    @Override
-    public boolean isReservedWord(String word, Optional<ReservedType> type) {
-        if (type.isEmpty()) {
-            return reservedWords.containsKey(word) || isVariable(word);
-        } else if (type.get() == ReservedType.SHAREABLE) {
-            return reservedWords.get(word) == ReservedType.SHAREABLE || isVariable(word);
-        } else {
-            return reservedWords.get(word) == type.get();
-        }
-    }
-
-    @Override
-    public Map<String, ReservedType> getAllReservedWords() {
-        Map<String, ReservedType> all = new HashMap<>(reservedWords);
-        scopedVariables.values().stream().forEach(variables -> variables.keySet().stream()
-                .forEach(var -> all.put(var, ReservedType.SHAREABLE)));
-        return Collections.unmodifiableMap(all);
-    }
-
-    @Override
-    public Set<String> getReservedWords(ReservedType type) {
-        Set<String> all = new HashSet<>(reservedWords.entrySet().stream()
-                .filter(entry -> entry.getValue() == type).map(Map.Entry::getKey).toList());
-        if (type == ReservedType.SHAREABLE) {
-            scopedVariables.values().stream().forEach(variables -> all.addAll(variables.keySet()));
-        }
-        return Collections.unmodifiableSet(all);
     }
 
     @Override
     public Optional<Object> tryEvaluateLiteral(String literal) {
-        for (String scope : scopeOrder) {
-            if (scopedVariables.get(scope).containsKey(literal)) {
-                return Optional.ofNullable(scopedVariables.get(scope).get(literal));
-            }
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(scope.getDataInLowestScope(literal, getName()));
     }
 
     @Override
     public boolean isVariable(String var) {
-        for (String scope : scopeOrder) {
-            if (scopedVariables.get(scope).containsKey(var)) {
-                return true;
-            }
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return false;
         }
-        return false;
-    }
-
-    @Override
-    public Map<String, Object> getVariables() {
-        Map<String, Object> all = new HashMap<>();
-        for (String scope : scopeOrder) {
-            scopedVariables.get(scope).entrySet().stream()
-                    .forEach(entry -> all.putIfAbsent(entry.getKey(), entry.getValue()));
-        }
-        return Collections.unmodifiableMap(all);
+        return scope.getDataInLowestScope(var, getName()) != null;
     }
 }

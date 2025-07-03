@@ -316,14 +316,6 @@ public class Parser {
         return all;
     }
 
-    public Map<String, Object> getAllVariables() {
-        Map<String, Object> all = new HashMap<>();
-        for (VariableHandler varModule : variableModules) {
-            all.putAll(varModule.getVariables());
-        }
-        return all;
-    }
-
     public Module getModule(String name) {
         return index.get(name);
     }
