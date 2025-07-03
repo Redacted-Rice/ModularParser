@@ -13,6 +13,8 @@ import java.util.MissingFormatArgumentException;
 import java.util.Optional;
 import java.util.Set;
 
+import redactedrice.modularparser.WordReserver.ReservedType;
+
 /**
  * A flexible Parser that can be configured to your needs and customized
  * with modules for specific syntax. This includes:
@@ -53,22 +55,22 @@ public class Parser {
             throw new IllegalArgumentException("Module '" + module.getName() + "' already exists");
         }
 
-        // Check for reserved-word conflicts:
+        // Check for exclusive reserved-word conflicts:
         if (module instanceof WordReserver) {
             WordReserver asParserModule = (WordReserver) module;
-            Set<String> newRes = asParserModule.getReservedWords();
+            Set<String> exclusive = asParserModule.getReservedWords(ReservedType.EXCLUSIVE);
             for (WordReserver existing : reservedWordModules) {
-                Set<String> common = new HashSet<>(existing.getReservedWords());
-                common.retainAll(newRes);
+                Map<String, ReservedType> common = new HashMap<>(existing.getAllReservedWords());
+                common.keySet().retainAll(exclusive);
                 if (!common.isEmpty()) {
                     // This should always be true but just in case have it here
                     if (existing instanceof Module) {
                         throw new IllegalArgumentException("Module '" + module.getName()
-                                + "' and module '" + ((Module) existing).getName()
-                                + "' both reserve " + common);
+                                + "' exclusively reserves the following keys already reserved by '"
+                                + ((Module) existing).getName() + "': " + common);
                     } else {
                         throw new IllegalArgumentException("Module '" + module.getName()
-                                + "' and an unknown module both reserve " + common);
+                                + "' and an unknown module both reserve: " + common);
                     }
                 }
             }
@@ -286,11 +288,18 @@ public class Parser {
 
     // ------------------ Getters ----------------------
 
-    // TODO make this a hashset with type as value?
-    public Set<String> getAllReservedWords() {
+    public Map<String, ReservedType> getAllReservedWords() {
+        Map<String, ReservedType> all = new HashMap<>();
+        for (WordReserver h : reservedWordModules) {
+            all.putAll(h.getAllReservedWords());
+        }
+        return all;
+    }
+
+    public Set<String> getReservedWords(ReservedType type) {
         Set<String> all = new HashSet<>();
         for (WordReserver h : reservedWordModules) {
-            all.addAll(h.getReservedWords());
+            all.addAll(h.getReservedWords(type));
         }
         return all;
     }

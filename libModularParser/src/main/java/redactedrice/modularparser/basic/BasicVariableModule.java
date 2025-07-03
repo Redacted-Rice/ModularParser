@@ -1,7 +1,13 @@
 package redactedrice.modularparser.basic;
 
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,13 +47,26 @@ public class BasicVariableModule extends LineStartMatchModule implements Variabl
     }
 
     @Override
-    public boolean isReservedWord(String word) {
-        return super.isReservedWord(word) || isVariable(word);
+    public boolean isReservedWord(String word, Optional<ReservedType> type) {
+        if (super.isReservedWord(word, type)) {
+            return true;
+        }
+        if (type.isEmpty() || type.get() == ReservedType.SHAREABLE) {
+            return isVariable(word);
+        }
+        return false;
     }
 
     @Override
-    public Set<String> getReservedWords() {
-        Set<String> all = new HashSet<>(super.getReservedWords());
+    public Map<String, ReservedType> getAllReservedWords() {
+        Map<String, ReservedType> all = new HashMap<>(super.getAllReservedWords());
+        getVariables().keySet().stream().forEach(alias -> all.put(alias, ReservedType.SHAREABLE));
+        return Collections.unmodifiableMap(all);
+    }
+
+    @Override
+    public Set<String> getReservedWords(ReservedType type) {
+        Set<String> all = new HashSet<>(super.getReservedWords(type));
         all.addAll(variables.keySet());
         return Collections.unmodifiableSet(all);
     }

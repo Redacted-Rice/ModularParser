@@ -4,11 +4,52 @@ package redactedrice.modularparser.basic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import redactedrice.modularparser.Parser;
+import redactedrice.modularparser.WordReserver;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
+    static private class ShareableReservedTest extends BaseModule implements WordReserver {
+        Set<String> sharedWords = new HashSet<>();
+
+        protected ShareableReservedTest(String name, String... shareables) {
+            super(name);
+            for (String shareable : shareables) {
+                sharedWords.add(shareable);
+            }
+        }
+
+        @Override
+        public boolean isReservedWord(String word, Optional<ReservedType> type) {
+            // Not needed
+            return false;
+        }
+
+        @Override
+        public Map<String, ReservedType> getAllReservedWords() {
+            Map<String, ReservedType> all = new HashMap<>();
+            for (String word : sharedWords) {
+                all.put(word, ReservedType.SHAREABLE);
+            }
+            return all;
+        }
+
+        @Override
+        public Set<String> getReservedWords(ReservedType type) {
+            if (type == ReservedType.SHAREABLE) {
+                return sharedWords;
+            }
+            return Collections.emptySet();
+        }
+    };
+
     public static void main(String[] args) throws IOException {
         Parser parser = new Parser();
 
@@ -76,19 +117,17 @@ public class Test {
         // Run parser
         parser.parse(new BufferedReader(new StringReader(script)));
 
+        parser.addModule(new ShareableReservedTest("shareable1", "commonWord", "anotherOne"));
+        parser.addModule(new ShareableReservedTest("shareable2", "commonWord", "anotherOne"));
+
         // Unhappy test cases
-        // parser.addModule(new SimpleHandler(
-        // "definitions",
-        // line -> line.trim().startsWith("def "),
-        // line -> System.out.println("DEF → " + line),
-        // "defs"
-        // ));
+        // parser.addModule(new BasicLambdaModule("definitions",
+        // line -> System.out.println("DEF → " + line), "defs"));
         //
-        // parser.addModule(new SimpleHandler(
-        // "definitions2",
-        // line -> line.trim().startsWith("def "),
-        // line -> System.out.println("DEF → " + line),
-        // "def"
-        // ));
+        // parser.addModule(new BasicLambdaModule("definitions2",
+        // line -> System.out.println("DEF → " + line), "def"));
+        //
+        // parser.addModule(new BasicLambdaModule("exclusive",
+        // line -> System.out.println("DEF → " + line), "commonWord", "anotherOne"));
     }
 }
