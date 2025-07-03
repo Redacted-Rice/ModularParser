@@ -8,92 +8,66 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import redactedrice.modularparser.LineHandler;
+import redactedrice.modularparser.ScopeHandler;
 import redactedrice.modularparser.VariableHandler;
 import redactedrice.modularparser.WordReserver.ReservedType;
-import redactedrice.modularparser.base.ScopedLineMatchModule;
+import redactedrice.modularparser.base.ReservedWordModule;
 
-public class BasicScopedVariableModule extends ScopedLineMatchModule<Object>
-        implements VariableHandler {
+public class BasicScopedVariableModule extends ReservedWordModule
+        implements LineHandler, VariableHandler {
     protected final boolean reassignmentAllowed;
-
     protected final String keyword;
+    protected final Pattern matcher;
 
-    public BasicScopedVariableModule(String moduleName, boolean implicitAllowed,
-            boolean reassignmentAllowed, String keyword) {
-        super(moduleName, implicitAllowed);
+    public BasicScopedVariableModule(String moduleName, boolean reassignmentAllowed,
+            String keyword) {
+        super(moduleName);
         this.keyword = keyword.toLowerCase();
         this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
+        matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(?!" + this.keyword
+                + "\\b)(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
-    private String findReassignScope(Matcher reassign) {
-        // if its reassign, ensure we have an in scope variable to use
-        for (String scope : scopeOrder) {
-            if (scopedVariables.get(scope).containsKey(reassign.group(1))) {
-                return scope;
-            }
-        }
-        System.err.println(
-                "Attempting to reassign a value not defined in any scope: " + reassign.group(1));
-        return "";
-    }
-
-    private boolean checkAssignScope(String assignScope, Matcher assign) {
-        // if its reassign, ensure we have an in scope variable to use
-        for (String scope : scopeOrder) {
-            if (scopedVariables.get(scope).containsKey(assign.group(2))) {
-                if (assignScope == scope) {
-                    System.err.println("Attempting to redefine existing value: " + assign.group(2));
-                    return false;
-                } else {
-                    System.err.println("Definition for val " + assign.group(2) + " in scope "
-                            + scope + " will be obscured with value in scope " + assignScope);
-                }
-            }
-        }
-        return true;
+    public Class<?> dataClass() {
+        return HashMap.class;
     }
 
     @Override
-    public void handle(String logicalLine, Map<String, Object> scopedVal) {
-        // TODO Auto-generated method stub
+    public boolean matches(String logicalLine) {
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return false;
+        }
 
-    }
+        String scopeless = scope.matchesScope(logicalLine);
+        if (scopeless.isEmpty()) {
+            return false;
+        }
 
-    @Override
-    public boolean matches(String logicalLine, Map<String, Object> scopedMap) {
-        // TODO Auto-generated method stub
-        return false;
+        return matcher.matcher(logicalLine).find();
     }
 
     @Override
     public void handle(String line) {
-        Matcher assign = assignDef.matcher(line);
-        // If its assign and not specified, use the most recent scope
-        String foundScope = assign.matches() && assign.group(1) != null ? assign.group(1)
-                : scopeOrder.peek();
-
-        Matcher reassign = null;
-        if (reassignmentAllowed) {
-            reassign = reassignmentDef.matcher(line);
-            if (!reassign.matches() && !assign.matches()) {
-                return;
-            } else if (!assign.matches()) {
-                foundScope = findReassignScope(reassign);
-                if (!foundScope.isEmpty()) {
-                    return;
-                }
-            } else if (!reassign.matches()) {
-                if (!checkAssignScope(foundScope, assign)) {
-                    return;
-                }
-            }
-        } else if (!assign.matches()) {
-            return;
-        } else if (!checkAssignScope(foundScope, assign)) {
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
             return;
         }
+
+        String[] scopeLine = scope.separateScope(line);
+        if (scopeLine.length <= 0) {
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> data = (Map<String, Object>) scope.getDataForScope(scopeLine[0],
+                getName());
+
+        Matcher m = matcher.matcher(scopeLine[1]);
 
         // At this point we either have assign or reassign. If we have both
         // it doesn't matter which we use
