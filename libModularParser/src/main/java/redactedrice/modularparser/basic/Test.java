@@ -13,6 +13,7 @@ import java.util.Set;
 
 import redactedrice.modularparser.Parser;
 import redactedrice.modularparser.WordReserver;
+import redactedrice.modularparser.basic.BasicVariableModule.ImplicitType;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -66,7 +67,12 @@ public class Test {
         parser.addModule(new BasicCharParser());
         parser.addModule(new BasicBoolParser());
         parser.addModule(new BasicAliasModule());
-        parser.addModule(new BasicVariableModule());
+        parser.addModule(new BasicVariableModule("BasicGlobalVarHandler", "variable", "global",
+                ImplicitType.KEYWORD));
+        parser.addModule(new BasicVariableModule("BasicLocalVarHandler", "variable", "local",
+                ImplicitType.ALL));
+        parser.addModule(new BasicVariableModule("BasicLocalConstHandler", "const", "local",
+                ImplicitType.NONE));
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
@@ -77,16 +83,16 @@ public class Test {
                 /* This is (
                    a block comment */
                 variable num = 42
-                variable num2 = 42.3
-                variable num3 = 42L
-                variable num4 = 42.3d
+                local const num2 = 42.3
+                global num3 = 42L
+                local variable num4 = 42.3d
                 variable num5 = 42i
-                variable num6 = 42.3e3
+                num6 = 42.3e3
                 variable num7 = \\
                   42e3
                 variable num8 = 42e3L
                 variable num9 = num
-                variable str = "This is a string test"
+                global variable str = "This is a string test"
                 variable ch = '\t'
                 variable bool1 = TRUE
                 variable bool2 = f
