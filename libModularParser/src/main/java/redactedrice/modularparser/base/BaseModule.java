@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.base;
 
 
 import redactedrice.modularparser.Module;

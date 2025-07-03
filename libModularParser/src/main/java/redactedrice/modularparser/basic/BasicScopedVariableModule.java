@@ -1,81 +1,30 @@
 package redactedrice.modularparser.basic;
 
 
-import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.VariableHandler;
-import redactedrice.modularparser.WordReserver;
+import redactedrice.modularparser.WordReserver.ReservedType;
+import redactedrice.modularparser.base.ScopedLineMatchModule;
 
-public class BasicScopedVariableModule extends BaseModule
-        implements LineHandler, VariableHandler, WordReserver {
-    public enum ImplicitType {
-        NONE, KEYWORD, ALL
-    }
-
-    protected final String keyword;
-    protected final Map<String, ReservedType> reservedWords = new HashMap<>();
-    protected final Map<String, Map<String, Object>> scopedVariables = new HashMap<>();
-    Deque<String> scopeOrder = new ArrayDeque<>();
-    protected final Pattern assignDef;
-    protected final Pattern reassignmentDef;
+public class BasicScopedVariableModule extends ScopedLineMatchModule<Object>
+        implements VariableHandler {
     protected final boolean reassignmentAllowed;
 
+    protected final String keyword;
+
     public BasicScopedVariableModule(String moduleName, boolean implicitAllowed,
-            boolean reassignmentAllowed, String keyword, String... qualifiedScopes) {
-        super(moduleName);
-
+            boolean reassignmentAllowed, String keyword) {
+        super(moduleName, implicitAllowed);
         this.keyword = keyword.toLowerCase();
-        reservedWords.put(this.keyword, ReservedType.EXCLUSIVE);
-
-        for (String scope : qualifiedScopes) {
-            reservedWords.put(scope.toLowerCase(), ReservedType.SHAREABLE);
-            scopedVariables.put(scope, new HashMap<>());
-            scopeOrder.addFirst(scope.toLowerCase());
-        }
-
-        if (implicitAllowed) {
-            assignDef = Pattern.compile("^\\s*(?:(?!" + this.keyword + "\\b)(\\w+)\\s+)?(?:"
-                    + this.keyword + "\\s+)?(\\w+)\\s*=\\s*(.+)$");
-        } else {
-            assignDef = Pattern
-                    .compile("^\\s*(?:(\\w+)\\s+)?" + this.keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
-        }
-
+        this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
         this.reassignmentAllowed = reassignmentAllowed;
-        if (reassignmentAllowed) {
-            reassignmentDef = Pattern.compile("^\\s*(\\w+)\\s*=\\s*(.+)$");
-        } else {
-            reassignmentDef = Pattern.compile("(?!)"); // never matches
-        }
-
-    }
-
-    @Override
-    public boolean matches(String logicalLine) {
-        if (logicalLine == null || logicalLine.isBlank()) {
-            return false;
-        }
-
-        Matcher assign = assignDef.matcher(logicalLine);
-        if (assign.matches()) {
-            if (assign.group(1) == null) {
-                return true; // will use default scope
-            } else {
-                return scopedVariables.containsKey(assign.group(1));
-            }
-        }
-
-        return reassignmentAllowed && reassignmentDef.matcher(logicalLine).matches();
     }
 
     private String findReassignScope(Matcher reassign) {
@@ -107,6 +56,18 @@ public class BasicScopedVariableModule extends BaseModule
     }
 
     @Override
+    public void handle(String logicalLine, Map<String, Object> scopedVal) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean matches(String logicalLine, Map<String, Object> scopedMap) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
     public void handle(String line) {
         Matcher assign = assignDef.matcher(line);
         // If its assign and not specified, use the most recent scope
@@ -129,6 +90,8 @@ public class BasicScopedVariableModule extends BaseModule
                 }
             }
         } else if (!assign.matches()) {
+            return;
+        } else if (!checkAssignScope(foundScope, assign)) {
             return;
         }
 

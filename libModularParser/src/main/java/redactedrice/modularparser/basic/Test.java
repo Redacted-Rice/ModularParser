@@ -13,6 +13,7 @@ import java.util.Set;
 
 import redactedrice.modularparser.Parser;
 import redactedrice.modularparser.WordReserver;
+import redactedrice.modularparser.base.BaseModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -93,10 +94,13 @@ public class Test {
                   42e3
                 variable num8 = 42e3L
                 variable num9 = num
+                constant num9 = 1
                 global variable str = "This is a string test"
                 variable ch = '\t'
                 global constant bool1 = TRUE
                 constant bool2 = f
+                constant bool2 = t
+                bool2 = f // TODO: Need to conflict with const def
                 variable bar = "true ->
                    and something"
                 def myFunc(x) \\
