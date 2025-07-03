@@ -1,21 +1,16 @@
 package redactedrice.modularparser.basic;
 
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import redactedrice.modularparser.ScopeHandler;
 import redactedrice.modularparser.base.BaseModule;
 
 public class BasicScopeModule extends BaseModule implements ScopeHandler {
-    private class OwnedObject {
-        public String owner;
-        public Object obj;
-    }
+    private record OwnedObject(String owner, Object obj) {}
 
     protected final Map<String, Class<?>> modules = new HashMap<>();
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
@@ -30,15 +25,6 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     @Override
     public void addScopedModule(String module, Class<?> dataClass) {
         modules.put(module, dataClass);
-        for (Map<String, Object> scopedMap : scopedVals.values()) {
-            try {
-                scopedMap.put(module, dataClass.getDeclaredConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -73,8 +59,55 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     }
 
     @Override
-    public Object getDataForScope(String scope, String module) {
+    public String getOwnerForScope(String scope, String name) {
+        Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
+        if (scopeMap != null) {
+            OwnedObject obj = scopeMap.get(name);
+            if (obj != null) {
+                return obj.owner();
+            }
+        }
+        return "";
+    }
+
+    @Override
+    public String[] getLowestOwnerAndScope(String name) {
+        for (String scope : scopeOrder) {
+            OwnedObject obj = scopedVals.get(scope).get(name);
+            if (obj != null) {
+                return new String[] { obj.owner, scope
+                };
+            }
+        }
+        return new String[] {};
+    }
+
+    @Override
+    public Object getDataForScope(String scope, String name, String module) {
+        Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
+        if (scopeMap != null) {
+            OwnedObject obj = scopeMap.get(name);
+            if (obj != null) {
+                return obj.obj();
+            }
+        }
         return scopedVals.get(scope).get(module);
+    }
+
+    @Override
+    public Object getDataInLowestScope(String name, String module) {
+        for (String scope : scopeOrder) {
+            Object obj = getDataForScope(scope, name, module);
+            if (obj != null) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setDataForScope(String scope, String name, String module, Object data) {
+        scopedVals.get(scope).put(name, new OwnedObject(module, data));
     }
 
     @Override
@@ -88,18 +121,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
             System.err.println("Adding already exising scope, moving to last defined: " + scope);
             scopeOrder.remove(scope);
         } else {
-            HashMap<String, Object> map = new HashMap<>();
-            for (Entry<String, Class<?>> module : modules.entrySet()) {
-                try {
-                    map.put(module.getKey(),
-                            module.getValue().getDeclaredConstructor().newInstance());
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-            scopedVals.put(scope, map);
+            scopedVals.put(scope, new HashMap<>());
         }
         scopeOrder.addFirst(scope);
     }

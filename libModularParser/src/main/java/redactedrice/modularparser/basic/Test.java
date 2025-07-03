@@ -60,19 +60,25 @@ public class Test {
         parser.addSingleLineComment("#");
         parser.addMultiLineComment("/*", "*/");
 
-        parser.addModule(new BasicLambdaModule("definitions",
-                line -> System.out.println("DEF → " + line), "def"));
-
         parser.addModule(new BasicNumberParser());
         parser.addModule(new BasicCharParser());
         parser.addModule(new BasicBoolParser());
         parser.addModule(new BasicAliasModule());
         // tring moduleName, boolean implicitAllowed,
         // boolean reassignmentAllowed, String keyword, String... qualifiedScopes
-        parser.addModule(new BasicScopedVariableModule("BasicVarHandler", true, true, "variable",
-                "global", "file"));
-        parser.addModule(new BasicScopedVariableModule("BasicConstHandler", false, false,
-                "constant", "global", "file"));
+        BasicScopedVariableModule vars = new BasicScopedVariableModule("BasicVarHandler", true,
+                "variable");
+        BasicScopedVariableModule consts = new BasicScopedVariableModule("BasicConstHandler", false,
+                "constant");
+        BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
+        scope.addScopedModule(vars.getName(), vars.getDataClass());
+        scope.addScopedModule(consts.getName(), consts.getDataClass());
+        scope.pushScope("global");
+        scope.pushScope("file");
+
+        parser.addModule(vars);
+        parser.addModule(consts);
+        parser.addModule(scope);
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
@@ -85,11 +91,18 @@ public class Test {
                 variable num = 42
                 num = 43
                 file constant num2 = 42.3
-                global num3 = 42L
-                file num3 = 47L
+                global num3 = 41L   // ERROR nor defined yet
+                global variable num3 = 42L // global
+                num3 = 43           // global TODO: Not working
+                file num3 = 44L     // TODO: Should error
+                file variable num3 = 45L // file def
+                file num3 = 46L     // file
+                num3 = 47           // file
+                global num3 = 48L   // global TODO: Not working - assigning file still
                 file variable num4 = 42.3d
                 variable num5 = 42i
-                num6 = 42.3e3
+                num5 = 42.3e3
+                global variable num5 =
                 variable num7 = \\
                   42e3
                 variable num8 = 42e3L
@@ -103,12 +116,9 @@ public class Test {
                 bool2 = f // TODO: Need to conflict with const def
                 variable bar = "true ->
                    and something"
-                def myFunc(x) \\
-                  println x
                 // Some comment  (
                 alias greet = println "Hello"
                 alias greet = println "Hello 2"
-                alias def = println "Hello 3"
                 // a comment end)
                 greet
                 (greet)

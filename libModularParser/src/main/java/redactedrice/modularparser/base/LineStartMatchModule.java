@@ -20,6 +20,6 @@ public abstract class LineStartMatchModule extends ReservedWordModule implements
         }
 
         String[] words = logicalLine.trim().split("\\s+", 2);
-        return !words[0].isEmpty() && words[0] == keyword;
+        return words[0].equals(keyword);
     }
 }
