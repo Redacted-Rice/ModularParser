@@ -1,4 +1,4 @@
-package redactedrice.modularparser.base;
+package redactedrice.modularparser.basic;
 
 
 import java.util.Collections;
