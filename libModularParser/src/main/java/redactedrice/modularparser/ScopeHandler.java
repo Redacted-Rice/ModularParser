@@ -1,34 +1,33 @@
 package redactedrice.modularparser;
 
+import java.util.Optional;
 
 public interface ScopeHandler {
     void addScopedModule(String module, Class<?> dataClass);
 
     boolean handlesModule(String module);
 
-    String matchesScope(String logicalLine);
-
-    String[] separateScope(String logicalLine);
-
-    String getOwnerForScope(String scope, String name);
-
-    String[] getLowestOwnerAndScope(String name);
-
-    default boolean isOwnedForLowestScope(String scope, String name, String module) {
-        return getOwnerForScope(scope, name) == module;
-    }
-
-    Object getDataForScope(String scope, String name, String module);
-
-    Object getDataInLowestScope(String name, String module);
-
-    void setDataForScope(String scope, String name, String module, Object data);
-
-    String currentScope();
-
     void pushScope(String scope);
 
     void popScope();
 
     void removeScope(String scope);
+
+    String currentScope();
+
+    // Splits the scope from the logical line if present or implicit is allowed. 
+    // Otherwise returns null
+    String[] splitScope(String logicalLine);
+
+    default boolean doesOwn(String module, Optional<String> scope, String name) {
+        return getOwner(scope, name) == module;
+    }
+    
+    String getOwner(Optional<String> scope, String name);
+
+    String getScope(String name);
+
+    Object getData(Optional<String> scope, String name, String owner);
+
+    boolean setData(String scope, String name, String owner, Object data);
 }

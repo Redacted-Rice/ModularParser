@@ -36,21 +36,20 @@ public class BasicScopedVariableModule extends ReservedWordModule
             return false;
         }
 
-        logicalLine = scope.matchesScope(logicalLine);
-        if (logicalLine.isEmpty()) {
+        String[] split = scope.splitScope(logicalLine);
+        if (split == null) {
             return false;
         }
-
-        return matcher.matcher(logicalLine).find();
+        return matcher.matcher(split[1]).find();
     }
 
     private void addLiteral(ScopeHandler scope, String literal, String scopeName, String name,
             boolean assignment) {
         Object obj = parser.evaluateLiteral(literal);
         if (obj != null) {
-            scope.setDataForScope(scopeName, name, getName(), obj);
-            System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
+            System.out.println(getName() + ": " + (assignment ? "Adding " : "Changing ") + keyword
                     + " " + name + " in scope " + scopeName + " with value: " + obj);
+            scope.setData(scopeName, name, getName(), obj);
         } else {
             throw new IllegalArgumentException("VariableHandler: For " + keyword + " " + name
                     + "\" + cannot parse value: " + literal);
@@ -64,7 +63,7 @@ public class BasicScopedVariableModule extends ReservedWordModule
             return;
         }
 
-        String[] scopeLine = scope.separateScope(line);
+        String[] scopeLine = scope.splitScope(line);
         if (scopeLine.length <= 0) {
             return;
         }
@@ -75,20 +74,16 @@ public class BasicScopedVariableModule extends ReservedWordModule
         }
         if (m.group(1) == null) {
             // reassignment
-            String owner;
-            if (scopeLine[1].equals(line)) { // scope was not specified
-                String[] ownerScope = scope.getLowestOwnerAndScope(m.group(2));
-                if (ownerScope.length <= 0) {
-                    System.err.println(getName() + ": Attempted to reassign non-exsiting " + keyword
+            if (scopeLine[0].isEmpty()) { // scope was not specified
+            	scopeLine[0] = scope.getScope(m.group(2));
+                if (scopeLine[0] == null) {
+                    System.err.println(getName() + ": Attempted to reassign undefined " + keyword
                             + " " + m.group(2) + " with " + m.group(3));
                     return;
                 }
-                owner = ownerScope[0];
-                scopeLine[0] = ownerScope[1];
-            } else { // scope specified
-                owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
             }
-            if (owner == getName()) {
+            
+            if (!scope.getOwner(Optional.of(scopeLine[0]), m.group(2)).isEmpty()) {
                 if (reassignmentAllowed) {
                     addLiteral(scope, m.group(3), scopeLine[0], m.group(2), false);
                 } else {
@@ -96,17 +91,20 @@ public class BasicScopedVariableModule extends ReservedWordModule
                             + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
                 }
             } else {
-                System.err.println(getName() + ": Attempted to reassign non-existing/unowned " + keyword + " "
+                System.err.println(getName() + ": Attempted to reassign non-existing " + keyword + " "
                         + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
             }
         } else {
-            // Assignment
-            String owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
-            if (!owner.isEmpty()) {
-                System.err.println("Value " + m.group(2) + " is already defined for scope "
-                        + scopeLine[0] + " by " + owner);
+        	// Assignment
+            if (scopeLine[0].isEmpty()) { // scope was not specified
+            	scopeLine[0] = scope.currentScope();
+            }
+
+            if (scope.getOwner(Optional.of(scopeLine[0]), m.group(2)).isEmpty()) {
+            	addLiteral(scope, m.group(3), scopeLine[0], m.group(2), true);
             } else {
-                addLiteral(scope, m.group(3), scopeLine[0], m.group(2), true);
+                System.err.println(getName() + ": Attempted to redefine existing " + keyword + " "
+                        + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
             }
         }
     }
@@ -117,7 +115,7 @@ public class BasicScopedVariableModule extends ReservedWordModule
         if (scope == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(scope.getDataInLowestScope(literal, getName()));
+        return Optional.ofNullable(scope.getData(Optional.empty(), literal, getName()));
     }
 
     @Override
@@ -126,6 +124,6 @@ public class BasicScopedVariableModule extends ReservedWordModule
         if (scope == null) {
             return false;
         }
-        return scope.getDataInLowestScope(var, getName()) != null;
+        return scope.getData(Optional.empty(), var, getName()) != null;
     }
 }
