@@ -90,14 +90,14 @@ public class Test {
                 variable num = 42
                 num = 43
                 file constant num2 = 42.3
-                global num3 = 41L   // TODO: ERROR Wrong error
+                global num3 = 41L   // ERROR not defined
                 global variable num3 = 42L // global
                 num3 = 43           // global 
-                file num3 = 44L     // error
+                file num3 = 44L     // error not defined
                 file variable num3 = 45L // file def
                 file num3 = 46L     // file
                 num3 = 47           // file
-                global num3 = 48L   // global TODO: Not working - assigning file still
+                global num3 = 48L   // global
                 file variable num4 = 42.3d
                 variable num5 = 42i
                 num5 = 42.3e3

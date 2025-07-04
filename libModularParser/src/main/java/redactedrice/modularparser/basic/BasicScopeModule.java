@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import redactedrice.modularparser.ScopeHandler;
 
@@ -29,89 +30,6 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     @Override
     public boolean handlesModule(String module) {
         return modules.containsKey(module);
-    }
-
-    @Override
-    public String matchesScope(String logicalLine) {
-        if (logicalLine == null || logicalLine.isBlank()) {
-            return "";
-        }
-
-        String[] words = logicalLine.trim().split("\\s+", 2);
-        if (allowImplicit && !scopeOrder.contains(words[0])) {
-            return logicalLine;
-        } else {
-            return scopeOrder.contains(words[0]) ? words[1] : "";
-        }
-    }
-
-    @Override
-    public String[] separateScope(String logicalLine) {
-        String[] words = logicalLine.trim().split("\\s+", 2);
-        if (scopeOrder.contains(words[0])) {
-            return words;
-        } else if (allowImplicit) {
-            return new String[] { scopeOrder.peek(), logicalLine
-            };
-        }
-        return new String[] {};
-    }
-
-    @Override
-    public String getOwnerForScope(String scope, String name) {
-        Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
-        if (scopeMap != null) {
-            OwnedObject obj = scopeMap.get(name);
-            if (obj != null) {
-                return obj.owner();
-            }
-        }
-        return "";
-    }
-
-    @Override
-    public String[] getLowestOwnerAndScope(String name) {
-        for (String scope : scopeOrder) {
-            OwnedObject obj = scopedVals.get(scope).get(name);
-            if (obj != null) {
-                return new String[] { obj.owner, scope
-                };
-            }
-        }
-        return new String[] {};
-    }
-
-    @Override
-    public Object getDataForScope(String scope, String name, String module) {
-        Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
-        if (scopeMap != null) {
-            OwnedObject obj = scopeMap.get(name);
-            if (obj != null) {
-                return obj.obj();
-            }
-        }
-        return scopedVals.get(scope).get(module);
-    }
-
-    @Override
-    public Object getDataInLowestScope(String name, String module) {
-        for (String scope : scopeOrder) {
-            Object obj = getDataForScope(scope, name, module);
-            if (obj != null) {
-                return obj;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void setDataForScope(String scope, String name, String module, Object data) {
-        scopedVals.get(scope).put(name, new OwnedObject(module, data));
-    }
-
-    @Override
-    public String currentScope() {
-        return scopeOrder.peek();
     }
 
     @Override
@@ -142,5 +60,89 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         } else {
             System.err.println("Attempting to pop undefined scope: " + scope);
         }
+    }
+
+    @Override
+    public String currentScope() {
+        return scopeOrder.peek();
+    }
+
+    @Override
+    public String[] splitScope(String logicalLine) {
+        String[] words = logicalLine.trim().split("\\s+", 2);
+        if (scopeOrder.contains(words[0])) {
+            return words;
+        } else if (allowImplicit) {
+            return new String[] { "", logicalLine
+            };
+        }
+        return null;
+    }
+    
+    private OwnedObject getDataForScopeOrLowestScope(Optional<String> scope, String name) {
+    	if (!scope.isEmpty() && !scope.get().isEmpty()) {
+            Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
+            if (scopeMap != null) {
+                OwnedObject obj = scopeMap.get(name);
+                if (obj != null) {
+                    return obj;
+                }
+            }
+            return null;
+    	}
+        for (String scopeCheck : scopeOrder) {
+            OwnedObject obj = scopedVals.get(scopeCheck).get(name);
+            if (obj != null) {
+            	return obj;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getOwner(Optional<String> scope, String name) {
+        OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
+        if (obj != null) {
+        	return obj.owner();
+        }
+        return "";
+    }
+
+    @Override
+    public String getScope(String name) {
+        for (String scopeCheck : scopeOrder) {
+            OwnedObject obj = scopedVals.get(scopeCheck).get(name);
+            if (obj != null) {
+            	return scopeCheck;
+            }
+        }
+        return "";
+    }
+
+    @Override
+    public Object getData(Optional<String> scope, String name, String module) {
+        OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
+        if (obj != null) {
+            return obj.obj();
+        }  
+        return null;
+    }
+
+    @Override
+    public boolean setData(String scope, String name, String owner, Object data) {
+        Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
+        if (scopeMap == null) {
+			return false;
+        }
+        
+    	OwnedObject obj = scopeMap.get(name);
+    	if (obj != null) {
+    		if (!obj.owner().equals(owner)) {
+    			System.err.println(owner + " attempted to set value for " + name + " in scope " + scope + " that is owned by " + obj.owner());
+    			return false;
+    		}
+    	}
+    	scopeMap.put(name, new OwnedObject(owner, data));
+        return true;
     }
 }
