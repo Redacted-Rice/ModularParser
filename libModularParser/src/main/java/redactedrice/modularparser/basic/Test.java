@@ -13,7 +13,6 @@ import java.util.Set;
 
 import redactedrice.modularparser.Parser;
 import redactedrice.modularparser.WordReserver;
-import redactedrice.modularparser.base.BaseModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -91,10 +90,10 @@ public class Test {
                 variable num = 42
                 num = 43
                 file constant num2 = 42.3
-                global num3 = 41L   // ERROR nor defined yet
+                global num3 = 41L   // TODO: ERROR Wrong error
                 global variable num3 = 42L // global
-                num3 = 43           // global TODO: Not working
-                file num3 = 44L     // TODO: Should error
+                num3 = 43           // global 
+                file num3 = 44L     // error
                 file variable num3 = 45L // file def
                 file num3 = 46L     // file
                 num3 = 47           // file
@@ -112,8 +111,8 @@ public class Test {
                 variable ch = '\t'
                 global constant bool1 = TRUE
                 constant bool2 = f
-                constant bool2 = t
-                bool2 = f // TODO: Need to conflict with const def
+                constant bool2 = t  // error
+                bool2 = f 			// error
                 variable bar = "true ->
                    and something"
                 // Some comment  (

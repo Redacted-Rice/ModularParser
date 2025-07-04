@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.ScopeHandler;
 import redactedrice.modularparser.VariableHandler;
-import redactedrice.modularparser.base.ReservedWordModule;
 
 public class BasicScopedVariableModule extends ReservedWordModule
         implements LineHandler, VariableHandler {
@@ -77,17 +76,17 @@ public class BasicScopedVariableModule extends ReservedWordModule
         if (m.group(1) == null) {
             // reassignment
             String owner;
-            if (scopeLine[1].equals(line)) { // scope was specified
-                owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
-            } else {
+            if (scopeLine[1].equals(line)) { // scope was not specified
                 String[] ownerScope = scope.getLowestOwnerAndScope(m.group(2));
                 if (ownerScope.length <= 0) {
-                    System.err.println(getName() + ": Attempted to reassign non exsiting " + keyword
+                    System.err.println(getName() + ": Attempted to reassign non-exsiting " + keyword
                             + " " + m.group(2) + " with " + m.group(3));
                     return;
                 }
                 owner = ownerScope[0];
                 scopeLine[0] = ownerScope[1];
+            } else { // scope specified
+                owner = scope.getOwnerForScope(scopeLine[0], m.group(2));
             }
             if (owner == getName()) {
                 if (reassignmentAllowed) {
@@ -97,7 +96,7 @@ public class BasicScopedVariableModule extends ReservedWordModule
                             + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
                 }
             } else {
-                System.err.println(getName() + ": Attempted to reassign unowned " + keyword + " "
+                System.err.println(getName() + ": Attempted to reassign non-existing/unowned " + keyword + " "
                         + m.group(2) + " in scope " + scopeLine[0] + " with " + m.group(3));
             }
         } else {

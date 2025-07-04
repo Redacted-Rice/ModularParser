@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import redactedrice.modularparser.ScopeHandler;
-import redactedrice.modularparser.base.BaseModule;
 
 public class BasicScopeModule extends BaseModule implements ScopeHandler {
     private record OwnedObject(String owner, Object obj) {}

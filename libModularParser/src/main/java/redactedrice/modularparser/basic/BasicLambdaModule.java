@@ -1,8 +1,5 @@
 package redactedrice.modularparser.basic;
 
-import redactedrice.modularparser.base.LineStartMatchModule;
-import redactedrice.modularparser.base.ModuleLambdaFn;
-
 public class BasicLambdaModule extends LineStartMatchModule {
     private final ModuleLambdaFn handler;
 

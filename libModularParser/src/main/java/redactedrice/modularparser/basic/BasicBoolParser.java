@@ -4,7 +4,6 @@ package redactedrice.modularparser.basic;
 import java.util.Optional;
 
 import redactedrice.modularparser.LiteralHandler;
-import redactedrice.modularparser.base.BaseModule;
 
 public class BasicBoolParser extends BaseModule implements LiteralHandler {
     public BasicBoolParser() {
