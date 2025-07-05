@@ -55,6 +55,8 @@ public class Parser {
         if (index.containsKey(module.getName())) {
             throw new IllegalArgumentException("Module '" + module.getName() + "' already exists");
         }
+        
+        module.setParser(this);
 
         // Check for exclusive reserved-word conflicts:
         if (module instanceof WordReserver) {
@@ -78,7 +80,6 @@ public class Parser {
             reservedWordModules.add(asParserModule);
         }
 
-        module.setParser(this);
         index.put(module.getName(), module);
 
         // If its an alias replacer as well, kept track of it

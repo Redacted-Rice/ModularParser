@@ -62,19 +62,19 @@ public class Test {
         parser.addModule(new BasicNumberParser());
         parser.addModule(new BasicCharParser());
         parser.addModule(new BasicBoolParser());
-        parser.addModule(new BasicAliasModule());
-        // tring moduleName, boolean implicitAllowed,
-        // boolean reassignmentAllowed, String keyword, String... qualifiedScopes
+        BasicScopedAliasModule aliases = new BasicScopedAliasModule();
         BasicScopedVariableModule vars = new BasicScopedVariableModule("BasicVarHandler", true,
                 "variable");
         BasicScopedVariableModule consts = new BasicScopedVariableModule("BasicConstHandler", false,
                 "constant");
         BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
-        scope.addScopedModule(vars.getName(), vars.getDataClass());
-        scope.addScopedModule(consts.getName(), consts.getDataClass());
+        scope.addScopedModule(aliases.getName());
+        scope.addScopedModule(vars.getName());
+        scope.addScopedModule(consts.getName());
         scope.pushScope("global");
         scope.pushScope("file");
 
+        parser.addModule(aliases);
         parser.addModule(vars);
         parser.addModule(consts);
         parser.addModule(scope);
@@ -87,6 +87,10 @@ public class Test {
                 # This is a comment (
                 /* This is (
                    a block comment */
+                alias greet = println "Hello"
+                file alias greet2 = println "Hello2"
+                global alias greet2 = println "Hello3"
+                greet
                 variable num = 42
                 num = 43
                 file constant num2 = 42.3
@@ -116,10 +120,8 @@ public class Test {
                 variable bar = "true ->
                    and something"
                 // Some comment  (
-                alias greet = println "Hello"
                 alias greet = println "Hello 2"
                 // a comment end)
-                greet
                 (greet)
                 println str
                 println "Trailing comment" // Comment at the end

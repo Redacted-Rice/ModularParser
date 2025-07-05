@@ -4,7 +4,6 @@ package redactedrice.modularparser.basic;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -12,19 +11,46 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.AliasHandler;
+import redactedrice.modularparser.ScopeHandler;
 
-public class BasicAliasModule extends LineStartMatchModule implements AliasHandler {
+public class BasicScopedAliasModule extends LineStartMatchModule implements AliasHandler {
     private final static Pattern aliasDef = Pattern.compile("^\\s*alias\\s+(\\w+)\\s*=\\s*(.+)$");
 
-    private final Map<String, String> aliases = new LinkedHashMap<>();
-
-    public BasicAliasModule() {
+    public BasicScopedAliasModule() {
         super("BasicAliasHandler", "alias");
+    }
+    
+    @Override
+    public boolean matches(String logicalLine) {
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return false;
+        }
+
+        String[] split = scope.splitScope(logicalLine);
+        if (split == null) {
+            return false;
+        }
+        // todo use matcher - replace line start with a custom matcher
+        return super.matches(split[1]);
     }
 
     @Override
     public void handle(String line) {
-        Matcher m = aliasDef.matcher(line);
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return;
+        }
+
+        String[] scopeLine = scope.splitScope(line);
+        if (scopeLine.length <= 0) {
+            return;
+        }
+        if (scopeLine[0].isEmpty()) {
+        	scopeLine[0] = scope.currentScope();
+        }
+        
+        Matcher m = aliasDef.matcher(scopeLine[1]);
         if (!m.find()) {
             return;
         }
@@ -50,8 +76,10 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
                     + "' conflicts already defined alias and will be ignored!");
             return;
         }
-        System.out.println("Alias: Added alias " + key + " with value: " + val);
-        aliases.put(key, val);
+        
+        if (scope.setData(scopeLine[0], key, getName(), val)) {
+            System.out.println("Alias: Added alias " + key + " with value: " + val);
+        }
     }
 
     @Override
@@ -80,24 +108,35 @@ public class BasicAliasModule extends LineStartMatchModule implements AliasHandl
     }
 
     @Override
-    public String replaceAliases(String line) {
-        if (matches(line))
+    public String replaceAliases(String line) {        
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
             return line;
+        }
+        
         String out = line;
-        for (Map.Entry<String, String> e : aliases.entrySet()) {
+        for (Map.Entry<String, Object> e : scope.getAllOwnedData(Optional.empty(), getName()).entrySet()) {
             out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
-                    Matcher.quoteReplacement(e.getValue()));
+                    Matcher.quoteReplacement((String)e.getValue()));
         }
         return out;
     }
 
     @Override
     public boolean isAlias(String alias) {
-        return aliases.containsKey(alias);
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return false;
+        }
+        return scope.getData(Optional.empty(), alias, getName()) != null;
     }
 
     @Override
     public Set<String> getAliases() {
-        return Collections.unmodifiableSet(aliases.keySet());
+        ScopeHandler scope = parser.getScoperFor(getName());
+        if (scope == null) {
+            return Collections.emptySet();
+        }
+        return Collections.unmodifiableSet(scope.getAllOwnedNames(Optional.empty(), getName()));
     }
 }

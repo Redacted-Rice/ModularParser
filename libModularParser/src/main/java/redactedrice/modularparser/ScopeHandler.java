@@ -1,9 +1,11 @@
 package redactedrice.modularparser;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ScopeHandler {
-    void addScopedModule(String module, Class<?> dataClass);
+    public void addScopedModule(String module);
 
     boolean handlesModule(String module);
 
@@ -28,6 +30,10 @@ public interface ScopeHandler {
     String getScope(String name);
 
     Object getData(Optional<String> scope, String name, String owner);
+    
+    Set<String> getAllOwnedNames(Optional<String> scope, String owner);
+    
+    Map<String, Object> getAllOwnedData(Optional<String> scope, String owner);
 
     boolean setData(String scope, String name, String owner, Object data);
 }

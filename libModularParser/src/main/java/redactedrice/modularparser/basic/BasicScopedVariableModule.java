@@ -1,7 +1,6 @@
 package redactedrice.modularparser.basic;
 
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,10 +24,6 @@ public class BasicScopedVariableModule extends ReservedWordModule
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
-    public Class<?> getDataClass() {
-        return HashMap.class;
-    }
-
     @Override
     public boolean matches(String logicalLine) {
         ScopeHandler scope = parser.getScoperFor(getName());
@@ -47,9 +42,10 @@ public class BasicScopedVariableModule extends ReservedWordModule
             boolean assignment) {
         Object obj = parser.evaluateLiteral(literal);
         if (obj != null) {
-            System.out.println(getName() + ": " + (assignment ? "Adding " : "Changing ") + keyword
-                    + " " + name + " in scope " + scopeName + " with value: " + obj);
-            scope.setData(scopeName, name, getName(), obj);
+            if (scope.setData(scopeName, name, getName(), obj)) {
+                System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
+                        + " " + name + " in scope " + scopeName + " with value: " + obj);
+            }
         } else {
             throw new IllegalArgumentException("VariableHandler: For " + keyword + " " + name
                     + "\" + cannot parse value: " + literal);
