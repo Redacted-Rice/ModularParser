@@ -47,7 +47,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         } else {
             scopedVals.put(scope, new HashMap<>());
             for (Map<String, Set<String>> scopeMap : ownerMap.values()) {
-            	scopeMap.put(scope, new HashSet<String>());
+                scopeMap.put(scope, new HashSet<String>());
             }
         }
         scopeOrder.addFirst(scope);
@@ -67,7 +67,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
             scopeOrder.remove(scope);
             scopedVals.remove(scope);
             for (Map<?, ?> scopeMap : ownerMap.values()) {
-            	scopeMap.remove(scope);
+                scopeMap.remove(scope);
             }
         } else {
             System.err.println("Attempting to remove undefined scope: " + scope);
@@ -92,7 +92,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     }
     
     private OwnedObject getDataForScopeOrLowestScope(Optional<String> scope, String name) {
-    	if (!scope.isEmpty() && !scope.get().isEmpty()) {
+        if (!scope.isEmpty() && !scope.get().isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
             if (scopeMap != null) {
                 OwnedObject obj = scopeMap.get(name);
@@ -101,11 +101,11 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
                 }
             }
             return null;
-    	}
+        }
         for (String scopeCheck : scopeOrder) {
             OwnedObject obj = scopedVals.get(scopeCheck).get(name);
             if (obj != null) {
-            	return obj;
+                return obj;
             }
         }
         return null;
@@ -115,7 +115,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     public String getOwner(Optional<String> scope, String name) {
         OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
         if (obj != null) {
-        	return obj.owner();
+            return obj.owner();
         }
         return "";
     }
@@ -125,7 +125,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         for (String scopeCheck : scopeOrder) {
             OwnedObject obj = scopedVals.get(scopeCheck).get(name);
             if (obj != null) {
-            	return scopeCheck;
+                return scopeCheck;
             }
         }
         return "";
@@ -144,42 +144,42 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     public Set<String> getAllOwnedNames(Optional<String> scope, String owner) {
         Map<String, Set<String>> owned = ownerMap.get(owner);
         if (owned == null) {
-			return Collections.emptySet();
+            return Collections.emptySet();
         }
-		Set<String> vars;
-    	if (!scope.isEmpty() && !scope.get().isEmpty()) {
-    		vars = owned.get(scope.get());
-    	} else {
-    		vars = new HashSet<>();
-    		owned.values().forEach(scopeVars -> vars.addAll(scopeVars));
-    	}
-    	return vars;
+        Set<String> vars;
+        if (!scope.isEmpty() && !scope.get().isEmpty()) {
+            vars = owned.get(scope.get());
+        } else {
+            vars = new HashSet<>();
+            owned.values().forEach(scopeVars -> vars.addAll(scopeVars));
+        }
+        return vars;
     }
     
     @Override
     public Map<String, Object> getAllOwnedData(Optional<String> scope, String owner) {
-    	Set<String> names = getAllOwnedNames(scope, owner);
-    	Map<String, Object> data = new HashMap<>();
-    	names.stream().forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
-    	return data;
+        Set<String> names = getAllOwnedNames(scope, owner);
+        Map<String, Object> data = new HashMap<>();
+        names.stream().forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
+        return data;
     }
 
     @Override
     public boolean setData(String scope, String name, String owner, Object data) {
         Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
         if (scopeMap == null) {
-			return false;
+            return false;
         }
         
-    	OwnedObject obj = scopeMap.get(name);
-    	if (obj != null) {
-    		if (!obj.owner().equals(owner)) {
-    			System.err.println(owner + " attempted to set value for " + name + " in scope " + scope + " that is owned by " + obj.owner());
-    			return false;
-    		}
-    	}
-    	scopeMap.put(name, new OwnedObject(owner, data));
-    	ownerMap.get(owner).get(scope).add(name);
+        OwnedObject obj = scopeMap.get(name);
+        if (obj != null) {
+            if (!obj.owner().equals(owner)) {
+                System.err.println(owner + " attempted to set value for " + name + " in scope " + scope + " that is owned by " + obj.owner());
+                return false;
+            }
+        }
+        scopeMap.put(name, new OwnedObject(owner, data));
+        ownerMap.get(owner).get(scope).add(name);
         return true;
     }
 }

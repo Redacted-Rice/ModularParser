@@ -23,8 +23,7 @@ public abstract class BaseModule implements Module {
         this.parser = parser;
     }
 
-	boolean isValidName(String name) {
-		return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
-
-	}
+    boolean isValidName(String name) {
+        return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
+    } 
 }
