@@ -2,18 +2,24 @@ package redactedrice.modularparser.basic;
 
 
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import redactedrice.modularparser.ScopeHandler;
 
 public class BasicScopeModule extends BaseModule implements ScopeHandler {
     private record OwnedObject(String owner, Object obj) {}
 
-    protected final Map<String, Class<?>> modules = new HashMap<>();
+    protected final Set<String> modules = new HashSet<>();
+    // Scope -> var -> owner + data
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
+    // Owner -> scope -> vars
+    protected final Map<String, Map<String, Set<String>>> ownerMap = new HashMap<>();
     protected final Deque<String> scopeOrder = new ArrayDeque<>();
     protected final boolean allowImplicit;
 
@@ -23,13 +29,14 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     }
 
     @Override
-    public void addScopedModule(String module, Class<?> dataClass) {
-        modules.put(module, dataClass);
+    public void addScopedModule(String module) {
+        modules.add(module);
+        ownerMap.put(module, new HashMap<>());
     }
 
     @Override
     public boolean handlesModule(String module) {
-        return modules.containsKey(module);
+        return modules.contains(module);
     }
 
     @Override
@@ -39,6 +46,9 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
             scopeOrder.remove(scope);
         } else {
             scopedVals.put(scope, new HashMap<>());
+            for (Map<String, Set<String>> scopeMap : ownerMap.values()) {
+            	scopeMap.put(scope, new HashSet<String>());
+            }
         }
         scopeOrder.addFirst(scope);
     }
@@ -48,8 +58,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         if (scopeOrder.isEmpty()) {
             System.err.println("No scope to pop!");
         }
-        String scope = scopeOrder.removeFirst();
-        scopedVals.remove(scope);
+        removeScope(scopeOrder.peek());
     }
 
     @Override
@@ -57,8 +66,11 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         if (scopedVals.containsKey(scope)) {
             scopeOrder.remove(scope);
             scopedVals.remove(scope);
+            for (Map<?, ?> scopeMap : ownerMap.values()) {
+            	scopeMap.remove(scope);
+            }
         } else {
-            System.err.println("Attempting to pop undefined scope: " + scope);
+            System.err.println("Attempting to remove undefined scope: " + scope);
         }
     }
 
@@ -129,6 +141,30 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     }
 
     @Override
+    public Set<String> getAllOwnedNames(Optional<String> scope, String owner) {
+        Map<String, Set<String>> owned = ownerMap.get(owner);
+        if (owned == null) {
+			return Collections.emptySet();
+        }
+		Set<String> vars;
+    	if (!scope.isEmpty() && !scope.get().isEmpty()) {
+    		vars = owned.get(scope.get());
+    	} else {
+    		vars = new HashSet<>();
+    		owned.values().forEach(scopeVars -> vars.addAll(scopeVars));
+    	}
+    	return vars;
+    }
+    
+    @Override
+    public Map<String, Object> getAllOwnedData(Optional<String> scope, String owner) {
+    	Set<String> names = getAllOwnedNames(scope, owner);
+    	Map<String, Object> data = new HashMap<>();
+    	names.stream().forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
+    	return data;
+    }
+
+    @Override
     public boolean setData(String scope, String name, String owner, Object data) {
         Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
         if (scopeMap == null) {
@@ -143,6 +179,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     		}
     	}
     	scopeMap.put(name, new OwnedObject(owner, data));
+    	ownerMap.get(owner).get(scope).add(name);
         return true;
     }
 }
