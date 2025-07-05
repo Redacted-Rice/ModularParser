@@ -93,6 +93,7 @@ public class Test {
                 greet
                 variable num = 42
                 num = 43
+                2num = 43
                 file constant num2 = 42.3
                 global num3 = 41L   // ERROR not defined
                 global variable num3 = 42L // global
