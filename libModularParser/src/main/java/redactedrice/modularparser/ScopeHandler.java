@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ScopeHandler {
-    public void addScopedModule(String module);
+public interface ScopeHandler {	
+    void addScopedModule(String module);
 
     boolean handlesModule(String module);
 

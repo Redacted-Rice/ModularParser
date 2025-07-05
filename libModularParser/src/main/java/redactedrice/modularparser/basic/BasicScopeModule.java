@@ -27,7 +27,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
         super(name);
         this.allowImplicit = allowImplicit;
     }
-
+    
     @Override
     public void addScopedModule(String module) {
         modules.add(module);

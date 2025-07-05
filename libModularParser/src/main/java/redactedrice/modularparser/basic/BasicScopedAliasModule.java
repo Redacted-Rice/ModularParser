@@ -63,6 +63,11 @@ implements LineHandler, AliasHandler {
         }
 
         String key = m.group(1);
+        if (!isValidName(key)) {
+            System.err.println("Invalid alias name: " + key);
+            return;
+        }
+        
         String val = m.group(2).trim();
         // strip quotes
         if ((val.startsWith("\"") && val.endsWith("\""))

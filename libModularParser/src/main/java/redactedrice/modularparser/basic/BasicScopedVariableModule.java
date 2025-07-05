@@ -78,6 +78,11 @@ public class BasicScopedVariableModule extends ReservedWordModule
                     return;
                 }
             }
+
+            if (!isValidName(m.group(2))) {
+                System.err.println("Invalid variable name: " + m.group(2));
+                return;
+            }
             
             if (!scope.getOwner(Optional.of(scopeLine[0]), m.group(2)).isEmpty()) {
                 if (reassignmentAllowed) {
@@ -96,6 +101,11 @@ public class BasicScopedVariableModule extends ReservedWordModule
             	scopeLine[0] = scope.currentScope();
             }
 
+            if (!isValidName(m.group(2))) {
+                System.err.println("Invalid variable name: " + m.group(2));
+                return;
+            }
+            
             if (scope.getOwner(Optional.of(scopeLine[0]), m.group(2)).isEmpty()) {
             	addLiteral(scope, m.group(3), scopeLine[0], m.group(2), true);
             } else {
