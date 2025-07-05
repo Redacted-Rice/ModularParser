@@ -11,13 +11,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.AliasHandler;
+import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.ScopeHandler;
 
-public class BasicScopedAliasModule extends LineStartMatchModule implements AliasHandler {
-    private final static Pattern aliasDef = Pattern.compile("^\\s*alias\\s+(\\w+)\\s*=\\s*(.+)$");
+public class BasicScopedAliasModule extends ReservedWordModule
+implements LineHandler, AliasHandler {
+    private final Pattern aliasDef;
+    
+    protected final String keyword;
 
     public BasicScopedAliasModule() {
-        super("BasicAliasHandler", "alias");
+        super("BasicAliasHandler");
+        keyword = "alias";
+        aliasDef = Pattern.compile("^\\s*" + keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
     }
     
     @Override
@@ -32,7 +38,8 @@ public class BasicScopedAliasModule extends LineStartMatchModule implements Alia
             return false;
         }
         // todo use matcher - replace line start with a custom matcher
-        return super.matches(split[1]);
+        Matcher m = aliasDef.matcher(split[1]);
+        return m.find();
     }
 
     @Override
