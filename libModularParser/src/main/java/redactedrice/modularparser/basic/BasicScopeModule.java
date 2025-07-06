@@ -30,8 +30,10 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
     
     @Override
     public void addScopedModule(String module) {
-        modules.add(module);
-        ownerMap.put(module, new HashMap<>());
+    	modules.add(module);
+    	Map<String, Set<String>> ownerScopeMap = new HashMap<>();
+    	scopeOrder.stream().forEach(scope -> ownerScopeMap.put(scope, new HashSet<>()));
+        ownerMap.put(module, ownerScopeMap);
     }
 
     @Override
@@ -46,9 +48,7 @@ public class BasicScopeModule extends BaseModule implements ScopeHandler {
             scopeOrder.remove(scope);
         } else {
             scopedVals.put(scope, new HashMap<>());
-            for (Map<String, Set<String>> scopeMap : ownerMap.values()) {
-                scopeMap.put(scope, new HashSet<String>());
-            }
+            ownerMap.values().stream().forEach(scopeMap -> scopeMap.put(scope, new HashSet<>()));
         }
         scopeOrder.addFirst(scope);
     }

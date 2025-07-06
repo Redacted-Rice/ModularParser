@@ -62,21 +62,15 @@ public class Test {
         parser.addModule(new BasicNumberParser());
         parser.addModule(new BasicCharParser());
         parser.addModule(new BasicBoolParser());
-        BasicScopedAliasModule aliases = new BasicScopedAliasModule();
-        BasicScopedVariableModule vars = new BasicScopedVariableModule("BasicVarHandler", true,
-                "variable");
-        BasicScopedVariableModule consts = new BasicScopedVariableModule("BasicConstHandler", false,
-                "constant");
         BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
-        scope.addScopedModule(aliases.getName());
-        scope.addScopedModule(vars.getName());
-        scope.addScopedModule(consts.getName());
         scope.pushScope("global");
         scope.pushScope("file");
 
-        parser.addModule(aliases);
-        parser.addModule(vars);
-        parser.addModule(consts);
+        parser.addModule(new BasicScopedAliasModule(scope));
+        parser.addModule(new BasicScopedVariableModule("BasicVarHandler", true,
+                "variable", scope));
+        parser.addModule(new BasicScopedVariableModule("BasicConstHandler", false,
+                "constant", scope));
         parser.addModule(scope);
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
@@ -123,6 +117,7 @@ public class Test {
                 // Some comment  (
                 alias greet = println "Hello 2"
                 // a comment end)
+                greet
                 (greet)
                 println str
                 println "Trailing comment" // Comment at the end
