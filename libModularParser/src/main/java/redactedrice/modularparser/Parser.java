@@ -4,6 +4,7 @@ package redactedrice.modularparser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,9 +102,6 @@ public class Parser {
     }
 
     // --------------- Main Parser Fns -----------------
-
-    // TODO Remove the comment and keep parsing around it
-    // TODO comments don't have to start the line - anything past/between is ignored
 
     // TODO replace Buffered Reader for newline flexibility?
     public void parse(BufferedReader in) throws IOException {
@@ -330,11 +328,15 @@ public class Parser {
     }
 
     public List<AliasHandler> getAliasModules(String name) {
-        return aliasModules;
+        return Collections.unmodifiableList(aliasModules);
+    }
+
+    public List<VariableHandler> getVariableModules(String name) {
+        return Collections.unmodifiableList(variableModules);
     }
 
     public List<ScopeHandler> getScoperModules(String name) {
-        return scopeModules;
+        return Collections.unmodifiableList(scopeModules);
     }
 
     public ScopeHandler getScoperFor(String module) {
