@@ -29,6 +29,7 @@ public class Parser {
     private final Set<String> lineContinue = new HashSet<>();
     private final Set<String> singleLineComment = new HashSet<>();
     private final Map<String, String> multiLineComment = new HashMap<>();
+    private final Set<String> literalChain = new HashSet<>();
 
     private final List<LiteralHandler> literalModules = new ArrayList<>();
     private final List<AliasHandler> aliasModules = new ArrayList<>();
@@ -51,12 +52,16 @@ public class Parser {
         multiLineComment.put(startToken, endToken);
     }
 
+    public void addLiteralChain(String token) {
+        literalChain.add(token);
+    }
+
     public void addModule(Module module) {
         // Check for name conflicts
         if (index.containsKey(module.getName())) {
             throw new IllegalArgumentException("Module '" + module.getName() + "' already exists");
         }
-        
+
         module.setParser(this);
 
         // Check for exclusive reserved-word conflicts:
@@ -119,28 +124,30 @@ public class Parser {
         }
     }
 
+    // TODO: Handle line continuer/chainer inside quotes
+
     // Merge lines until outer () balance is zero and no continuer
     private String accumulate(String firstLine, BufferedReader in) throws IOException {
-        String stripped = endsWith(firstLine, lineContinue);
-        if (!stripped.isEmpty()) {
-            firstLine = stripped.trim();
-        } else {
+        String continuedLine = handleContination(firstLine);
+        if (!continuedLine.isEmpty()) { // i.e. there is a continuation
+            firstLine = continuedLine.trim();
+        } else { // no continuation
             firstLine = firstLine.trim();
         }
 
         StringBuilder sb = new StringBuilder(firstLine);
         int parenDepth = determineParenthesisDelta(firstLine);
 
-        while (parenDepth > 0 || !stripped.isEmpty()) {
+        while (parenDepth > 0 || !continuedLine.isEmpty()) {
             String next = in.readLine();
             if (next == null) {
                 throw new MissingFormatArgumentException(
                         "Reach end of file while parsing parenthesis");
             }
             next = removeAnyComments(next, in);
-            stripped = endsWith(next, lineContinue);
-            if (!stripped.isEmpty()) {
-                next = stripped.trim();
+            continuedLine = handleContination(next);
+            if (!continuedLine.isEmpty()) {
+                next = continuedLine.trim();
             } else {
                 next = next.trim();
             }
@@ -233,8 +240,13 @@ public class Parser {
         return line.trim();
     }
 
-    private String endsWith(String line, Set<String> tokens) {
-        for (String token : tokens) {
+    private String handleContination(String line) {
+        for (String token : literalChain) {
+            if (line.endsWith(token)) {
+                return line;
+            }
+        }
+        for (String token : lineContinue) {
             if (line.endsWith(token)) {
                 return line.substring(0, line.length() - token.length());
             }
@@ -316,7 +328,7 @@ public class Parser {
     }
 
     public Map<String, Object> getAllVariables() {
-    	Map<String, Object> all = new HashMap<>();
+        Map<String, Object> all = new HashMap<>();
         for (VariableHandler variables : variableModules) {
             all.putAll(variables.getVariables());
         }

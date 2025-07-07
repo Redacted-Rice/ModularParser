@@ -54,10 +54,10 @@ public class Test {
         Parser parser = new Parser();
 
         parser.addLineContinue("\\");
-        parser.addLineContinue("->");
         parser.addSingleLineComment("//");
         parser.addSingleLineComment("#");
         parser.addMultiLineComment("/*", "*/");
+        parser.addLiteralChain("->");
 
         parser.addModule(new BasicNumberParser());
         parser.addModule(new BasicCharParser());
@@ -87,6 +87,8 @@ public class Test {
                 global alias greet2 = println "Hello3"
                 greet
                 variable num = 42
+                variable testCont = ->
+                     42
                 variable so1 = SimpleObject(intVal 5, boolVal true, strVal "test")
                 variable so2 = SimpleObject(5, true, "test with space")
                 variable so3 = SimpleObject(strVal "test with space", intVal 5, boolVal true)
