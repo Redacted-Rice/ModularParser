@@ -9,9 +9,10 @@ public class SimpleObjectParser extends ObjectParser {
     };
 
     public SimpleObjectParser() {
-        super("SimpleObjectParser", "SimpleObject", new String[] {}, argsOrdered,
-                new Object[] { 5, false, ""
-                });
+        super("SimpleObjectParser", "SimpleObject", new String[] { argsOrdered[0]
+        }, new String[] { argsOrdered[1], argsOrdered[2]
+        }, new Object[] { false, ""
+        });
     }
 
     @Override
