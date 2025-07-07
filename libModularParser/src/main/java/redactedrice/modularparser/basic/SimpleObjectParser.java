@@ -43,8 +43,9 @@ public class SimpleObjectParser extends BaseModule implements LiteralHandler {
         List<String> positionalParams = new LinkedList<>();
         Map<String, String> namedParams = new HashMap<>();
         for (String arg : args) {
-            String[] argSplit = arg.trim().split(ARG_NAME_DELIMITER, 2);
-            if (argSplit.length == 1) {
+            arg = arg.trim();
+            String[] argSplit = arg.split(ARG_NAME_DELIMITER, 2);
+            if (argSplit.length == 1 || arg.startsWith("\"") && arg.endsWith("\"")) {
                 positionalParams.add(arg);
             } else {
                 namedParams.put(argSplit[0], argSplit[1]);
