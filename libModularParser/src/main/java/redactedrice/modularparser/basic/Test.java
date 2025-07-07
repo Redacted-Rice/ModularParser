@@ -67,11 +67,12 @@ public class Test {
         scope.pushScope("file");
 
         parser.addModule(new BasicScopedAliasModule(scope));
-        parser.addModule(new BasicScopedVariableModule("BasicVarHandler", true,
-                "variable", scope));
-        parser.addModule(new BasicScopedVariableModule("BasicConstHandler", false,
-                "constant", scope));
+        parser.addModule(new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
+        parser.addModule(
+                new BasicScopedVariableModule("BasicConstHandler", false, "constant", scope));
         parser.addModule(scope);
+
+        parser.addModule(new SimpleObjectParser());
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
@@ -86,12 +87,16 @@ public class Test {
                 global alias greet2 = println "Hello3"
                 greet
                 variable num = 42
+                variable so1 = SimpleObject(intVal 5, boolVal true, strVal "test")
+                variable so2 = SimpleObject(5, true, "test")
+                variable so3 = SimpleObject(strVal "test", intVal 5, boolVal true)
+                variable so4 = SimpleObject(5, strVal "test", boolVal true)
                 num = 43
                 2num = 43
                 file constant num2 = 42.3
                 global num3 = 41L   // ERROR not defined
                 global variable num3 = 42L // global
-                num3 = 43           // global 
+                num3 = 43           // global
                 file num3 = 44L     // error not defined
                 file variable num3 = 45L // file def
                 file num3 = 46L     // file
