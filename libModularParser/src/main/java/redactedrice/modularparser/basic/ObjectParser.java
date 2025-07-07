@@ -65,6 +65,19 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
             return Optional.empty();
         }
 
+        for (String required : requiredArgs) {
+            if (!parsedArgs.containsKey(required)) {
+                System.err.println("Missing required arguement: " + required);
+                return Optional.empty();
+            }
+        }
+
+        for (int idx = 0; idx < optionalArgs.length; idx++) {
+            if (!parsedArgs.containsKey(optionalArgs[idx])) {
+                parsedArgs.put(optionalArgs[idx], optionalDefaults[idx]);
+            }
+        }
+
         return tryEvaluateObject(parsedArgs);
     }
 
@@ -73,6 +86,9 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
         boolean hasFoundNamed = false;
         for (String arg : args) {
             arg = arg.trim();
+            if (arg.isEmpty()) {
+                continue;
+            }
             String[] argSplit = arg.split(ARG_NAME_DELIMITER, 2);
             if (argSplit.length == 1 || arg.startsWith("\"") && arg.endsWith("\"")) {
                 if (hasFoundNamed) {

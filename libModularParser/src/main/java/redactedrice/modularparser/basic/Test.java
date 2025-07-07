@@ -91,6 +91,12 @@ public class Test {
                 variable so2 = SimpleObject(5, true, "test with space")
                 variable so3 = SimpleObject(strVal "test with space", intVal 5, boolVal true)
                 variable so4 = SimpleObject(5, strVal test no quotes, boolVal true)
+                variable so5 = SimpleObject(5)
+                // variable so6 = SimpleObject(boolVal true, 5)
+                //variable so6 = SimpleObject()
+                //variable so6 = SimpleObject( 5, 5, 5, 5)
+                variable so7 = SimpleObject(5, strVal "test")
+                variable so8 = SimpleObject(5, true)
                 num = 43
                 2num = 43
                 file constant num2 = 42.3
