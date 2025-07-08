@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import redactedrice.modularparser.BaseModule;
 import redactedrice.modularparser.ScopeHandler;
 
 public class BasicScopeModule extends BaseModule implements ScopeHandler {

@@ -1,9 +1,12 @@
 package redactedrice.modularparser;
 
+
 import java.util.Map;
 
-public interface VariableHandler extends LiteralHandler {
+import redactedrice.modularparser.literals.LiteralParser;
+
+public interface VariableHandler extends LiteralParser {
     boolean isVariable(String var);
 
-	Map<String, Object> getVariables();
+    Map<String, Object> getVariables();
 }

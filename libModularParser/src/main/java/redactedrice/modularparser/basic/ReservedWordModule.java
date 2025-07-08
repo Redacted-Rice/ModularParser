@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import redactedrice.modularparser.BaseModule;
 import redactedrice.modularparser.WordReserver;
 
 public class ReservedWordModule extends BaseModule implements WordReserver {

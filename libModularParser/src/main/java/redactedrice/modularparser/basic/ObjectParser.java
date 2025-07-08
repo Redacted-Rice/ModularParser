@@ -10,9 +10,12 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.LiteralHandler;
+import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.Module;
+import redactedrice.modularparser.literals.LiteralParser;
+import redactedrice.modularparser.literals.LiteralSupporter;
 
-public abstract class ObjectParser extends BaseModule implements LiteralHandler {
+public abstract class ObjectParser extends BaseModule implements LiteralParser {
     protected final static Pattern OBJ_ARG_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
@@ -22,6 +25,8 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
     protected final String[] optionalArgs;
     protected final Object[] optionalDefaults;
 
+    protected LiteralSupporter literalHandler;
+
     protected ObjectParser(String name, String keyword, String[] requiredArgs,
             String[] optionalArgs, Object[] optionalDefaults) {
         super(name);
@@ -29,6 +34,15 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
         this.requiredArgs = requiredArgs;
         this.optionalArgs = optionalArgs;
         this.optionalDefaults = optionalDefaults;
+    }
+
+    @Override
+    public void configure() {
+        List<Module> literalSupporters = parser.getModulesOfType(LiteralSupporter.class);
+        if (literalSupporters.size() != 1) {
+            throw new RuntimeException("Temp");
+        }
+        literalHandler = (LiteralSupporter) literalSupporters.get(0);
     }
 
     @Override
@@ -109,7 +123,7 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
         int positionalIdx = 0;
         int optionalIdx = 0;
         while (positionalIdx + optionalIdx < positionalParams.size()) {
-            Object parsed = parser
+            Object parsed = literalHandler
                     .evaluateLiteral(positionalParams.get(positionalIdx + optionalIdx));
             if (positionalIdx < requiredArgs.length) {
                 parsedArgs.put(requiredArgs[positionalIdx++], parsed);
@@ -126,7 +140,7 @@ public abstract class ObjectParser extends BaseModule implements LiteralHandler 
     protected boolean handleNamedArgs(Map<String, String> namedParams,
             Map<String, Object> parsedArgs) {
         for (Entry<String, String> entry : namedParams.entrySet()) {
-            parsedArgs.put(entry.getKey(), parser.evaluateLiteral(entry.getValue()));
+            parsedArgs.put(entry.getKey(), literalHandler.evaluateLiteral(entry.getValue()));
         }
         return true;
     }
