@@ -1,11 +1,11 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.literals;
 
 
 import java.util.Optional;
 
-import redactedrice.modularparser.LiteralHandler;
+import redactedrice.modularparser.BaseModule;
 
-public class BasicBoolParser extends BaseModule implements LiteralHandler {
+public class BasicBoolParser extends BaseModule implements LiteralParser {
     public BasicBoolParser() {
         super("BasicBoolParser");
     }

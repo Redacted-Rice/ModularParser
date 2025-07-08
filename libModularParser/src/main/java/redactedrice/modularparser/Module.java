@@ -5,4 +5,6 @@ public interface Module {
     String getName();
 
     void setParser(Parser parser);
+
+    public void configure();
 }

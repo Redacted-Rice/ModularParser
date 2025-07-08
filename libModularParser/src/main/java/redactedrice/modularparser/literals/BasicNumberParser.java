@@ -1,11 +1,11 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.literals;
 
 
 import java.util.Optional;
 
-import redactedrice.modularparser.LiteralHandler;
+import redactedrice.modularparser.BaseModule;
 
-public class BasicNumberParser extends BaseModule implements LiteralHandler {
+public class BasicNumberParser extends BaseModule implements LiteralParser {
     public BasicNumberParser() {
         super("BasicNumberParser");
     }

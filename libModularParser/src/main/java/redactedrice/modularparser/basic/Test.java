@@ -11,8 +11,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import redactedrice.modularparser.BaseModule;
 import redactedrice.modularparser.Parser;
 import redactedrice.modularparser.WordReserver;
+import redactedrice.modularparser.literals.BasicBoolParser;
+import redactedrice.modularparser.literals.BasicChainingParser;
+import redactedrice.modularparser.literals.BasicCharParser;
+import redactedrice.modularparser.literals.BasicNumberParser;
+import redactedrice.modularparser.literals.LiteralSupportModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -53,15 +59,18 @@ public class Test {
     public static void main(String[] args) throws IOException {
         Parser parser = new Parser();
 
-        parser.addLineContinue("\\");
+        parser.addLineContinue("\\", true);
         parser.addSingleLineComment("//");
         parser.addSingleLineComment("#");
         parser.addMultiLineComment("/*", "*/");
-        parser.addLiteralChain("->");
 
-        parser.addModule(new BasicNumberParser());
-        parser.addModule(new BasicCharParser());
-        parser.addModule(new BasicBoolParser());
+        LiteralSupportModule literal = new LiteralSupportModule();
+        parser.addModule(literal);
+        literal.addLiteralParser(new BasicChainingParser("->"));
+        literal.addLiteralParser(new BasicNumberParser());
+        literal.addLiteralParser(new BasicCharParser());
+        literal.addLiteralParser(new BasicBoolParser());
+
         BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
         scope.pushScope("global");
         scope.pushScope("file");
@@ -76,6 +85,7 @@ public class Test {
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
+        parser.configureModules();
 
         // Test script as a multiline string
         String script = """

@@ -4,14 +4,12 @@ package redactedrice.modularparser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.MissingFormatArgumentException;
-import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.WordReserver.ReservedType;
@@ -26,22 +24,21 @@ import redactedrice.modularparser.WordReserver.ReservedType;
  * Modules for parsing instructions
  */
 public class Parser {
-    private final Set<String> lineContinue = new HashSet<>();
+    private final Map<String, Boolean> lineContinue = new HashMap<>();
     private final Set<String> singleLineComment = new HashSet<>();
     private final Map<String, String> multiLineComment = new HashMap<>();
-    private final Set<String> literalChain = new HashSet<>();
 
-    private final List<LiteralHandler> literalModules = new ArrayList<>();
     private final List<AliasHandler> aliasModules = new ArrayList<>();
     private final List<VariableHandler> variableModules = new ArrayList<>();
     private final List<WordReserver> reservedWordModules = new ArrayList<>();
     private final List<LineHandler> lineHandlerModules = new ArrayList<>();
     private final List<ScopeHandler> scopeModules = new ArrayList<>();
+    private final List<Module> modulesOrdered = new ArrayList<>();
     private final Map<String, Module> index = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------
-    public void addLineContinue(String token) {
-        lineContinue.add(token);
+    public void addLineContinue(String token, boolean removeToken) {
+        lineContinue.put(token, removeToken);
     }
 
     public void addSingleLineComment(String token) {
@@ -50,10 +47,6 @@ public class Parser {
 
     public void addMultiLineComment(String startToken, String endToken) {
         multiLineComment.put(startToken, endToken);
-    }
-
-    public void addLiteralChain(String token) {
-        literalChain.add(token);
     }
 
     public void addModule(Module module) {
@@ -92,9 +85,6 @@ public class Parser {
         if (module instanceof LineHandler) {
             lineHandlerModules.add((LineHandler) module);
         }
-        if (module instanceof LiteralHandler) {
-            literalModules.add((LiteralHandler) module);
-        }
         if (module instanceof AliasHandler) {
             aliasModules.add((AliasHandler) module);
         }
@@ -104,6 +94,11 @@ public class Parser {
         if (module instanceof ScopeHandler) {
             scopeModules.add((ScopeHandler) module);
         }
+        modulesOrdered.add(module);
+    }
+
+    public void configureModules() {
+        modulesOrdered.forEach(module -> module.configure());
     }
 
     // --------------- Main Parser Fns -----------------
@@ -117,7 +112,6 @@ public class Parser {
                 continue;
             }
 
-            // System.out.println("Non comment: " + raw);
             // consume nested-parens & continuers
             String logical = accumulate(raw, in);
             dispatch(logical);
@@ -241,14 +235,13 @@ public class Parser {
     }
 
     private String handleContination(String line) {
-        for (String token : literalChain) {
-            if (line.endsWith(token)) {
-                return line;
-            }
-        }
-        for (String token : lineContinue) {
-            if (line.endsWith(token)) {
-                return line.substring(0, line.length() - token.length());
+        for (Entry<String, Boolean> entry : lineContinue.entrySet()) {
+            if (line.endsWith(entry.getKey())) {
+                if (entry.getValue()) {
+                    return line.substring(0, line.length() - entry.getKey().length());
+                } else {
+                    return line;
+                }
             }
         }
         return "";
@@ -271,17 +264,6 @@ public class Parser {
     }
 
     // ------------- Public Fns for Modules ------------
-
-    public Object evaluateLiteral(String literal) {
-        Optional<Object> ret;
-        for (LiteralHandler literalModule : literalModules) {
-            ret = literalModule.tryEvaluateLiteral(literal);
-            if (ret.isPresent()) {
-                return ret.get();
-            }
-        }
-        return null;
-    }
 
     public boolean isAliasDefined(String alias) {
         for (AliasHandler aliasModule : aliasModules) {
@@ -339,16 +321,8 @@ public class Parser {
         return index.get(name);
     }
 
-    public List<AliasHandler> getAliasModules(String name) {
-        return Collections.unmodifiableList(aliasModules);
-    }
-
-    public List<VariableHandler> getVariableModules(String name) {
-        return Collections.unmodifiableList(variableModules);
-    }
-
-    public List<ScopeHandler> getScoperModules(String name) {
-        return Collections.unmodifiableList(scopeModules);
+    public List<Module> getModulesOfType(Class<?> clazz) {
+        return modulesOrdered.stream().filter(module -> clazz.isInstance(module)).toList();
     }
 
     public ScopeHandler getScoperFor(String module) {
