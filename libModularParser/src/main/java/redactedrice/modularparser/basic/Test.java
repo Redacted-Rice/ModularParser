@@ -26,8 +26,8 @@ import redactedrice.modularparser.literal.BasicCharLiteralModule;
 import redactedrice.modularparser.literal.BasicNumberLiteralModule;
 import redactedrice.modularparser.literal.LiteralSupportModule;
 import redactedrice.modularparser.literal.SimpleObjectLiteralModule;
+import redactedrice.modularparser.literal.named.BasicScopedNamedLiteralModule;
 import redactedrice.modularparser.scope.BasicScopeModule;
-import redactedrice.modularparser.variable.BasicScopedVariableModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -94,9 +94,9 @@ public class Test {
         scope.pushScope("file");
 
         literal.addLiteralParser(
-                new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
+                new BasicScopedNamedLiteralModule("BasicVarHandler", true, "variable", scope));
         literal.addLiteralParser(
-                new BasicScopedVariableModule("BasicConstHandler", false, "constant", scope));
+                new BasicScopedNamedLiteralModule("BasicConstHandler", false, "constant", scope));
         reader.addLineModifier(new BasicScopedAliasModule(scope));
         parser.addModule(scope);
 
