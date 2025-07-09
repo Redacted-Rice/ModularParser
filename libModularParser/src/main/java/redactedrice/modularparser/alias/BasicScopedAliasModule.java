@@ -14,10 +14,9 @@ import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.scope.ScopeHandler;
 import redactedrice.modularparser.scope.ScopedModule;
 
-public class BasicScopedAliasModule extends ScopedModule
-implements LineHandler, AliasHandler {
+public class BasicScopedAliasModule extends ScopedModule implements LineHandler, AliasHandler {
     private final Pattern aliasDef;
-    
+
     protected final String keyword;
 
     public BasicScopedAliasModule(ScopeHandler scopeHandler) {
@@ -25,19 +24,35 @@ implements LineHandler, AliasHandler {
         keyword = "alias";
         aliasDef = Pattern.compile("^\\s*" + keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
     }
-    
+
+    @Override
+    public boolean hasOpenModifier(String line) {
+        return false;
+    }
+
+    @Override
+    public String modifyLine(String line) {
+        String out = line;
+        for (Map.Entry<String, Object> e : scopeHandler.getAllOwnedData(Optional.empty(), getName())
+                .entrySet()) {
+            out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
+                    Matcher.quoteReplacement((String) e.getValue()));
+        }
+        return out;
+    }
+
     @Override
     public boolean scopedMatches(String scope, String logicalLine) {
         Matcher m = aliasDef.matcher(logicalLine);
         return m.find();
     }
-    
+
     @Override
     public void scopedHandle(String scope, String logicalLine, String defaultScope) {
         if (scope.isEmpty()) {
-        	scope = defaultScope;
+            scope = defaultScope;
         }
-        
+
         Matcher m = aliasDef.matcher(logicalLine);
         if (!m.find()) {
             return;
@@ -48,7 +63,7 @@ implements LineHandler, AliasHandler {
             System.err.println("Invalid alias name: " + key);
             return;
         }
-        
+
         String val = m.group(2).trim();
         // strip quotes
         if ((val.startsWith("\"") && val.endsWith("\""))
@@ -63,13 +78,6 @@ implements LineHandler, AliasHandler {
             return;
         }
 
-        // Check for collisions with already defined alias
-        if (parser.getAllAliases().contains(key)) {
-            System.err.println("Warning: alias '" + key
-                    + "' conflicts already defined alias and will be ignored!");
-            return;
-        }
-        
         if (scopeHandler.setData(scope, key, getName(), val)) {
             System.out.println("Alias: Added alias " + key + " with value: " + val);
         }
@@ -102,12 +110,7 @@ implements LineHandler, AliasHandler {
 
     @Override
     public String replaceAliases(String line) {
-        String out = line;
-        for (Map.Entry<String, Object> e : scopeHandler.getAllOwnedData(Optional.empty(), getName()).entrySet()) {
-            out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
-                    Matcher.quoteReplacement((String)e.getValue()));
-        }
-        return out;
+        return modifyLine(line);
     }
 
     @Override
@@ -117,6 +120,7 @@ implements LineHandler, AliasHandler {
 
     @Override
     public Set<String> getAliases() {
-        return Collections.unmodifiableSet(scopeHandler.getAllOwnedNames(Optional.empty(), getName()));
+        return Collections
+                .unmodifiableSet(scopeHandler.getAllOwnedNames(Optional.empty(), getName()));
     }
 }
