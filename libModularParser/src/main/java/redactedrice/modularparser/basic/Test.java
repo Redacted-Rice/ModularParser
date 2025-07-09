@@ -15,6 +15,11 @@ import redactedrice.modularparser.BaseModule;
 import redactedrice.modularparser.ModularParser;
 import redactedrice.modularparser.WordReserver;
 import redactedrice.modularparser.alias.BasicScopedAliasModule;
+import redactedrice.modularparser.comment.BasicMutliLineCommentModule;
+import redactedrice.modularparser.comment.BasicSingleLineCommentModule;
+import redactedrice.modularparser.lineformer.BasicBufferedReaderModule;
+import redactedrice.modularparser.lineformer.BasicGroupingConstructModule;
+import redactedrice.modularparser.lineformer.BasicLineContinuerModule;
 import redactedrice.modularparser.literal.BasicBoolLiteralModule;
 import redactedrice.modularparser.literal.BasicChainingLiteralModule;
 import redactedrice.modularparser.literal.BasicCharLiteralModule;
@@ -63,14 +68,22 @@ public class Test {
     public static void main(String[] args) throws IOException {
         ModularParser parser = new ModularParser();
 
-        parser.addLineContinue("\\", true);
-        parser.addSingleLineComment("//");
-        parser.addSingleLineComment("#");
-        parser.addMultiLineComment("/*", "*/");
+        BasicBufferedReaderModule reader = new BasicBufferedReaderModule();
+        parser.addModule(reader);
+        reader.addLineModifier(
+                new BasicSingleLineCommentModule("BasicCSingleLineCommentModule", "//"));
+        reader.addLineModifier(
+                new BasicSingleLineCommentModule("BasicPythonSingleLineCommentModule", "#"));
+        reader.addLineModifier(
+                new BasicMutliLineCommentModule("BasicMutliLineCommentModule", "/*", "*/"));
+        reader.addLineModifier(
+                new BasicGroupingConstructModule("BasicParenthesisModule", "(", ")", false));
+        reader.addLineModifier(
+                new BasicLineContinuerModule("BasicLineContinuerModule", "\\", true));
 
         LiteralSupportModule literal = new LiteralSupportModule();
         parser.addModule(literal);
-        literal.addLiteralParser(new BasicChainingLiteralModule("->"));
+        literal.addLiteralParser(new BasicChainingLiteralModule("->", reader));
         literal.addLiteralParser(new BasicNumberLiteralModule());
         literal.addLiteralParser(new BasicCharLiteralModule());
         literal.addLiteralParser(new BasicBoolLiteralModule());
@@ -80,13 +93,12 @@ public class Test {
         scope.pushScope("global");
         scope.pushScope("file");
 
-        literal.addLiteralParser(new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
+        literal.addLiteralParser(
+                new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
         literal.addLiteralParser(
                 new BasicScopedVariableModule("BasicConstHandler", false, "constant", scope));
-        
-        parser.addModule(new BasicScopedAliasModule(scope));
+        reader.addLineModifier(new BasicScopedAliasModule(scope));
         parser.addModule(scope);
-
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
@@ -159,7 +171,8 @@ public class Test {
                 """;
 
         // Run parser
-        parser.parse(new BufferedReader(new StringReader(script)));
+        reader.setReader(new BufferedReader(new StringReader(script)));
+        parser.parse();
 
         parser.addModule(new ShareableReservedTest("shareable1", "commonWord", "anotherOne"));
         parser.addModule(new ShareableReservedTest("shareable2", "commonWord", "anotherOne"));

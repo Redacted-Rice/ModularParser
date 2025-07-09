@@ -3,7 +3,9 @@ package redactedrice.modularparser.alias;
 
 import java.util.Set;
 
-public interface AliasHandler {
+import redactedrice.modularparser.lineformer.LineModifier;
+
+public interface AliasHandler extends LineModifier {
     String replaceAliases(String line);
 
     boolean isAlias(String alias);
