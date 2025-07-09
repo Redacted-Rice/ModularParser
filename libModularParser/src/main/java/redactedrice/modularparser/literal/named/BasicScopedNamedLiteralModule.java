@@ -1,4 +1,4 @@
-package redactedrice.modularparser.variable;
+package redactedrice.modularparser.literal.named;
 
 
 import java.util.Collections;
@@ -12,15 +12,15 @@ import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.scope.ScopeHandler;
 import redactedrice.modularparser.scope.ScopedModule;
 
-public class BasicScopedVariableModule extends ScopedModule
-        implements LineHandler, VariableHandler {
+public class BasicScopedNamedLiteralModule extends ScopedModule
+        implements LineHandler, NamedLiteralHandler {
     protected final boolean reassignmentAllowed;
     protected final String keyword;
     protected final Pattern matcher;
 
     protected LiteralSupporter literalHandler;
 
-    public BasicScopedVariableModule(String moduleName, boolean reassignmentAllowed, String keyword,
+    public BasicScopedNamedLiteralModule(String moduleName, boolean reassignmentAllowed, String keyword,
             ScopeHandler scopeHandler) {
         super(moduleName, scopeHandler);
         this.keyword = keyword.toLowerCase();

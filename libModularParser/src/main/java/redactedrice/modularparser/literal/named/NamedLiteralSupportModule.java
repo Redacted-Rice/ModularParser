@@ -1,4 +1,4 @@
-package redactedrice.modularparser.variable;
+package redactedrice.modularparser.literal.named;
 
 
 import java.util.ArrayList;
@@ -9,15 +9,15 @@ import java.util.Map;
 import redactedrice.modularparser.BaseModule;
 import redactedrice.modularparser.Module;
 
-public class VariableSupportModule extends BaseModule implements VariableSupporter {
-    private final List<VariableHandler> handlers = new ArrayList<>();
+public class NamedLiteralSupportModule extends BaseModule implements NamedLiteralSupporter {
+    private final List<NamedLiteralHandler> handlers = new ArrayList<>();
 
-    public VariableSupportModule() {
+    public NamedLiteralSupportModule() {
         super("VariableSupportModule");
     }
 
     @Override
-    public void addVariableParser(VariableHandler handler) {
+    public void addVariableParser(NamedLiteralHandler handler) {
     	handlers.add(handler);
         if (handler instanceof Module) {
             parser.addModule((Module) handler);
@@ -26,7 +26,7 @@ public class VariableSupportModule extends BaseModule implements VariableSupport
 
     @Override
     public boolean isVariableDefined(String var) {
-        for (VariableHandler variableModule : handlers) {
+        for (NamedLiteralHandler variableModule : handlers) {
             if (variableModule.isVariable(var)) {
                 return true;
             }
@@ -37,7 +37,7 @@ public class VariableSupportModule extends BaseModule implements VariableSupport
     @Override
     public Map<String, Object> getAllVariables() {
         Map<String, Object> all = new HashMap<>();
-        for (VariableHandler variables : handlers) {
+        for (NamedLiteralHandler variables : handlers) {
             all.putAll(variables.getVariables());
         }
         return all;

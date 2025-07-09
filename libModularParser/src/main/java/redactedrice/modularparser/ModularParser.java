@@ -10,7 +10,6 @@ import java.util.Set;
 
 import redactedrice.modularparser.WordReserver.ReservedType;
 import redactedrice.modularparser.lineformer.LineFormerSupporter;
-import redactedrice.modularparser.scope.ScopeHandler;
 
 /**
  * A flexible Parser that can be configured to your needs and customized
@@ -23,7 +22,6 @@ import redactedrice.modularparser.scope.ScopeHandler;
  */
 public class ModularParser {
     private final List<WordReserver> reservedWordModules = new ArrayList<>();
-    private final List<ScopeHandler> scopeModules = new ArrayList<>();
 
     private LineFormerSupporter lineFormer = null;
     private final List<LineHandler> lineHandlerModules = new ArrayList<>();
@@ -70,9 +68,6 @@ public class ModularParser {
         // If its an alias replacer as well, kept track of it
         if (module instanceof LineHandler) {
             lineHandlerModules.add((LineHandler) module);
-        }
-        if (module instanceof ScopeHandler) {
-            scopeModules.add((ScopeHandler) module);
         }
 
         if (module instanceof LineFormerSupporter) {
@@ -144,14 +139,5 @@ public class ModularParser {
     public <T> T getSupporterOfType(Class<T> clazz) {
         // Should be only one
         return modulesOrdered.stream().filter(clazz::isInstance).findFirst().map(clazz::cast).get();
-    }
-
-    public ScopeHandler getScoperFor(String module) {
-        for (ScopeHandler scope : scopeModules) {
-            if (scope.handlesModule(module)) {
-                return scope;
-            }
-        }
-        return null;
     }
 }
