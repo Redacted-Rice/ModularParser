@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.literal;
 
 
 import java.util.HashMap;
@@ -11,26 +11,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.Module;
-import redactedrice.modularparser.literals.LiteralParser;
-import redactedrice.modularparser.literals.LiteralSupporter;
 
-public abstract class ObjectParser extends BaseModule implements LiteralParser {
-    protected final static Pattern OBJ_ARG_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
+public abstract class ChainableParametersModule extends BaseModule implements ChainableLiteralHandler {
+    protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
 
     protected final String keyword;
+    protected final String chainedArg;
     protected final String[] requiredArgs;
     protected final String[] optionalArgs;
     protected final Object[] optionalDefaults;
 
     protected LiteralSupporter literalHandler;
 
-    protected ObjectParser(String name, String keyword, String[] requiredArgs,
+    protected ChainableParametersModule(String name, String keyword, String chainedArg, String[] requiredArgs,
             String[] optionalArgs, Object[] optionalDefaults) {
         super(name);
         this.keyword = keyword.toLowerCase();
+        this.chainedArg = chainedArg;
         this.requiredArgs = requiredArgs;
         this.optionalArgs = optionalArgs;
         this.optionalDefaults = optionalDefaults;
@@ -38,51 +37,45 @@ public abstract class ObjectParser extends BaseModule implements LiteralParser {
 
     @Override
     public void configure() {
-        List<Module> literalSupporters = parser.getModulesOfType(LiteralSupporter.class);
-        if (literalSupporters.size() != 1) {
-            throw new RuntimeException("Temp");
-        }
-        literalHandler = (LiteralSupporter) literalSupporters.get(0);
+    	literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
     }
-
-    @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
+    
+    protected boolean handleObjectLiteral(String literal, Map<String, Object> parsedArgs) {
         if (literal == null) {
-            return Optional.empty();
+            return false;
         }
         String trimmed = literal.trim();
 
-        Matcher m = OBJ_ARG_PATTERN.matcher(trimmed);
+        Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
         if (!m.find()) {
-            return Optional.empty();
+            return false;
         }
 
         String objName = m.group(1);
         String[] args = m.group(2).split(ARG_DELIMITER);
 
         if (!objName.toLowerCase().equals(keyword)) {
-            return Optional.empty();
+            return false;
         }
 
         List<String> positionalParams = new LinkedList<>();
         Map<String, String> namedParams = new HashMap<>();
         if (!parseArgs(args, positionalParams, namedParams)) {
-            return Optional.empty();
+            return false;
         }
 
-        Map<String, Object> parsedArgs = new HashMap<>();
         if (!handlePositionalArgs(positionalParams, parsedArgs)) {
-            return Optional.empty();
+            return false;
         }
 
         if (!handleNamedArgs(namedParams, parsedArgs)) {
-            return Optional.empty();
+            return false;
         }
 
         for (String required : requiredArgs) {
             if (!parsedArgs.containsKey(required)) {
                 System.err.println("Missing required arguement: " + required);
-                return Optional.empty();
+                return false;
             }
         }
 
@@ -91,9 +84,27 @@ public abstract class ObjectParser extends BaseModule implements LiteralParser {
                 parsedArgs.put(optionalArgs[idx], optionalDefaults[idx]);
             }
         }
+        return true;
+    }
 
+    @Override
+    public Optional<Object> tryEvaluateLiteral(String literal) {
+        Map<String, Object> parsedArgs = new HashMap<>();
+        if(!handleObjectLiteral(literal, parsedArgs)) {
+        	return Optional.empty();
+        }
         return tryEvaluateObject(parsedArgs);
     }
+
+	@Override
+	public Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
+        Map<String, Object> parsedArgs = new HashMap<>();
+        parsedArgs.put(chainedArg, chained);
+        if(!handleObjectLiteral(literal, parsedArgs)) {
+        	return Optional.empty();
+        }
+        return tryEvaluateObject(parsedArgs);
+	}
 
     protected boolean parseArgs(String[] args, List<String> positionalParams,
             Map<String, String> namedParams) {

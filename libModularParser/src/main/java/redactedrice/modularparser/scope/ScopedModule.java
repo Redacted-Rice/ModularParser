@@ -1,8 +1,8 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.scope;
 
 
 import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.ScopeHandler;
+import redactedrice.modularparser.basic.ReservedWordModule;
 
 public abstract class ScopedModule extends ReservedWordModule implements LineHandler {
 	protected final ScopeHandler scopeHandler;

@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.scope;
 
 
 import java.util.ArrayDeque;
@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.ScopeHandler;
 
 public class BasicScopeModule extends BaseModule implements ScopeHandler {
     private record OwnedObject(String owner, Object obj) {}

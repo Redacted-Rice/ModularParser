@@ -12,13 +12,17 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.Parser;
+import redactedrice.modularparser.ModularParser;
 import redactedrice.modularparser.WordReserver;
-import redactedrice.modularparser.literals.BasicBoolParser;
-import redactedrice.modularparser.literals.BasicChainingParser;
-import redactedrice.modularparser.literals.BasicCharParser;
-import redactedrice.modularparser.literals.BasicNumberParser;
-import redactedrice.modularparser.literals.LiteralSupportModule;
+import redactedrice.modularparser.alias.BasicScopedAliasModule;
+import redactedrice.modularparser.literal.BasicBoolLiteralModule;
+import redactedrice.modularparser.literal.BasicChainingLiteralModule;
+import redactedrice.modularparser.literal.BasicCharLiteralModule;
+import redactedrice.modularparser.literal.BasicNumberLiteralModule;
+import redactedrice.modularparser.literal.LiteralSupportModule;
+import redactedrice.modularparser.literal.SimpleObjectLiteralModule;
+import redactedrice.modularparser.scope.BasicScopeModule;
+import redactedrice.modularparser.variable.BasicScopedVariableModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -57,7 +61,7 @@ public class Test {
     };
 
     public static void main(String[] args) throws IOException {
-        Parser parser = new Parser();
+        ModularParser parser = new ModularParser();
 
         parser.addLineContinue("\\", true);
         parser.addSingleLineComment("//");
@@ -66,22 +70,23 @@ public class Test {
 
         LiteralSupportModule literal = new LiteralSupportModule();
         parser.addModule(literal);
-        literal.addLiteralParser(new BasicChainingParser("->"));
-        literal.addLiteralParser(new BasicNumberParser());
-        literal.addLiteralParser(new BasicCharParser());
-        literal.addLiteralParser(new BasicBoolParser());
+        literal.addLiteralParser(new BasicChainingLiteralModule("->"));
+        literal.addLiteralParser(new BasicNumberLiteralModule());
+        literal.addLiteralParser(new BasicCharLiteralModule());
+        literal.addLiteralParser(new BasicBoolLiteralModule());
+        literal.addLiteralParser(new SimpleObjectLiteralModule());
 
         BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
         scope.pushScope("global");
         scope.pushScope("file");
 
-        parser.addModule(new BasicScopedAliasModule(scope));
-        parser.addModule(new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
-        parser.addModule(
+        literal.addLiteralParser(new BasicScopedVariableModule("BasicVarHandler", true, "variable", scope));
+        literal.addLiteralParser(
                 new BasicScopedVariableModule("BasicConstHandler", false, "constant", scope));
+        
+        parser.addModule(new BasicScopedAliasModule(scope));
         parser.addModule(scope);
 
-        parser.addModule(new SimpleObjectParser());
 
         parser.addModule(new BasicLambdaModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
@@ -97,13 +102,11 @@ public class Test {
                 global alias greet2 = println "Hello3"
                 greet
                 variable num = 42
-                variable testCont = ->
-                     42
                 variable so1 = SimpleObject(intVal 5, boolVal true, strVal "test")
                 variable so2 = SimpleObject(5, true, "test with space")
-                variable so3 = SimpleObject(strVal "test with space", intVal 5, boolVal true)
+                variable so3 = SimpleObject(strVal "test with space", intVal 6, boolVal true)
                 variable so4 = SimpleObject(5, strVal test no quotes, boolVal true)
-                variable so5 = SimpleObject(5)
+                variable so5 = SimpleObject(5) -> SimpleObject(4) -> 5
                 // variable so6 = SimpleObject(boolVal true, 5)
                 //variable so6 = SimpleObject()
                 //variable so6 = SimpleObject( 5, 5, 5, 5)
