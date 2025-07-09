@@ -1,4 +1,4 @@
-package redactedrice.modularparser;
+package redactedrice.modularparser.alias;
 
 
 import java.util.Set;

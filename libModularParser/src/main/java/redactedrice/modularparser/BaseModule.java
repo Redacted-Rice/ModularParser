@@ -4,7 +4,7 @@ package redactedrice.modularparser;
 /** A named DSL‐line handler carrying a back‐pointer to its parser. */
 public abstract class BaseModule implements Module {
     private final String name;
-    protected Parser parser;
+    protected ModularParser parser;
 
     protected BaseModule(String name) {
         this.name = name;
@@ -16,7 +16,7 @@ public abstract class BaseModule implements Module {
     }
 
     @Override
-    public void setParser(Parser parser) {
+    public void setParser(ModularParser parser) {
         this.parser = parser;
     }
 

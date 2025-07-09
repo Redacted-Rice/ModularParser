@@ -1,4 +1,4 @@
-package redactedrice.modularparser;
+package redactedrice.modularparser.scope;
 
 import java.util.Map;
 import java.util.Optional;

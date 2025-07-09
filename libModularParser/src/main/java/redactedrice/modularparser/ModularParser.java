@@ -13,6 +13,9 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 
 import redactedrice.modularparser.WordReserver.ReservedType;
+import redactedrice.modularparser.alias.AliasHandler;
+import redactedrice.modularparser.scope.ScopeHandler;
+import redactedrice.modularparser.variable.VariableHandler;
 
 /**
  * A flexible Parser that can be configured to your needs and customized
@@ -23,18 +26,17 @@ import redactedrice.modularparser.WordReserver.ReservedType;
  * Multi line comments
  * Modules for parsing instructions
  */
-public class Parser {
+public class ModularParser {
     private final Map<String, Boolean> lineContinue = new HashMap<>();
     private final Set<String> singleLineComment = new HashSet<>();
     private final Map<String, String> multiLineComment = new HashMap<>();
 
-    private final List<AliasHandler> aliasModules = new ArrayList<>();
-    private final List<VariableHandler> variableModules = new ArrayList<>();
     private final List<WordReserver> reservedWordModules = new ArrayList<>();
     private final List<LineHandler> lineHandlerModules = new ArrayList<>();
     private final List<ScopeHandler> scopeModules = new ArrayList<>();
     private final List<Module> modulesOrdered = new ArrayList<>();
     private final Map<String, Module> index = new HashMap<>();
+    private final Map<String, Supporter> supporters = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------
     public void addLineContinue(String token, boolean removeToken) {
@@ -47,6 +49,9 @@ public class Parser {
 
     public void addMultiLineComment(String startToken, String endToken) {
         multiLineComment.put(startToken, endToken);
+    }
+    
+    public void addSupporter(Supporter supporter) {
     }
 
     public void addModule(Module module) {
@@ -85,14 +90,11 @@ public class Parser {
         if (module instanceof LineHandler) {
             lineHandlerModules.add((LineHandler) module);
         }
-        if (module instanceof AliasHandler) {
-            aliasModules.add((AliasHandler) module);
-        }
-        if (module instanceof VariableHandler) {
-            variableModules.add((VariableHandler) module);
-        }
         if (module instanceof ScopeHandler) {
             scopeModules.add((ScopeHandler) module);
+        }
+        if (module instanceof Supporter) {
+        	supporters.put(module.getClass().getCanonicalName(), (Supporter) module);
         }
         modulesOrdered.add(module);
     }
@@ -265,24 +267,6 @@ public class Parser {
 
     // ------------- Public Fns for Modules ------------
 
-    public boolean isAliasDefined(String alias) {
-        for (AliasHandler aliasModule : aliasModules) {
-            if (aliasModule.isAlias(alias)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isVariableDefined(String var) {
-        for (VariableHandler variableModule : variableModules) {
-            if (variableModule.isVariable(var)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     // ------------------ Getters ----------------------
 
     public Map<String, ReservedType> getAllReservedWords() {
@@ -301,28 +285,23 @@ public class Parser {
         return all;
     }
 
-    public Set<String> getAllAliases() {
-        Set<String> all = new HashSet<>();
-        for (AliasHandler aliaser : aliasModules) {
-            all.addAll(aliaser.getAliases());
-        }
-        return all;
-    }
-
-    public Map<String, Object> getAllVariables() {
-        Map<String, Object> all = new HashMap<>();
-        for (VariableHandler variables : variableModules) {
-            all.putAll(variables.getVariables());
-        }
-        return all;
-    }
-
     public Module getModule(String name) {
         return index.get(name);
     }
 
-    public List<Module> getModulesOfType(Class<?> clazz) {
-        return modulesOrdered.stream().filter(module -> clazz.isInstance(module)).toList();
+    public <T> List<T> getModulesOfType(Class<T> clazz) {
+        return modulesOrdered.stream()
+                .filter(clazz::isInstance)
+                .map(clazz::cast)
+                .toList();
+    }
+
+    public <T> T getSupporterOfType(Class<T> clazz) {
+        return modulesOrdered.stream()
+                .filter(clazz::isInstance)
+                .findFirst()
+                .map(clazz::cast)
+                .get();
     }
 
     public ScopeHandler getScoperFor(String module) {

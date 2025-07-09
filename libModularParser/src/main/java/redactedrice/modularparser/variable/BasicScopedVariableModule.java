@@ -1,18 +1,16 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.variable;
 
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.Module;
-import redactedrice.modularparser.ScopeHandler;
-import redactedrice.modularparser.VariableHandler;
-import redactedrice.modularparser.literals.LiteralSupporter;
+import redactedrice.modularparser.literal.LiteralSupporter;
+import redactedrice.modularparser.scope.ScopeHandler;
+import redactedrice.modularparser.scope.ScopedModule;
 
 public class BasicScopedVariableModule extends ScopedModule
         implements LineHandler, VariableHandler {
@@ -33,11 +31,7 @@ public class BasicScopedVariableModule extends ScopedModule
 
     @Override
     public void configure() {
-        List<Module> literalSupporters = parser.getModulesOfType(LiteralSupporter.class);
-        if (literalSupporters.size() != 1) {
-            throw new RuntimeException("Temp");
-        }
-        literalHandler = (LiteralSupporter) literalSupporters.get(0);
+        literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
     @Override

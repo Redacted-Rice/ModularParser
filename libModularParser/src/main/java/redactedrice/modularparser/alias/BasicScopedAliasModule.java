@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.alias;
 
 
 import java.util.Collections;
@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.AliasHandler;
 import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.ScopeHandler;
+import redactedrice.modularparser.scope.ScopeHandler;
+import redactedrice.modularparser.scope.ScopedModule;
 
 public class BasicScopedAliasModule extends ScopedModule
 implements LineHandler, AliasHandler {
