@@ -12,4 +12,14 @@ public class SimpleObject {
 		this.boolField = boolField;
 		this.strField = strField;
 	}
+	
+	public String toString() {
+		String ret = "int: " + intField + ", bool: " + boolField + ", str: " + strField;
+		if (so == null) {
+			ret += ", so: null";
+		} else {
+			ret += ", so: '" + so.toString() + "'";
+		}
+		return ret;
+	}
 }

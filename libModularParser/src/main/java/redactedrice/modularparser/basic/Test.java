@@ -118,7 +118,7 @@ public class Test {
                 variable so2 = SimpleObject(5, true, "test with space")
                 variable so3 = SimpleObject(strVal "test with space", intVal 6, boolVal true)
                 variable so4 = SimpleObject(5, strVal test no quotes, boolVal true)
-                variable so5 = SimpleObject(5) -> SimpleObject(4) -> 5
+                variable so5 = SimpleObject(5) -> SimpleObject(4) ->  SimpleObject(3) -> 5
                 // variable so6 = SimpleObject(boolVal true, 5)
                 //variable so6 = SimpleObject()
                 //variable so6 = SimpleObject( 5, 5, 5, 5)
