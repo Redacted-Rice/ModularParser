@@ -12,7 +12,7 @@ import java.util.Set;
 
 import redactedrice.modularparser.BaseModule;
 
-public class BasicScopeModule extends BaseModule implements ScopeHandler {
+public class BasicScopeModule extends BaseModule implements ScopeSupporter {
     private record OwnedObject(String owner, Object obj) {}
 
     protected final Set<String> modules = new HashSet<>();

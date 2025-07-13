@@ -5,9 +5,9 @@ import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.basic.ReservedWordModule;
 
 public abstract class ScopedModule extends ReservedWordModule implements LineHandler {
-	protected final ScopeHandler scopeHandler;
+	protected final ScopeSupporter scopeHandler;
 	
-	protected ScopedModule(String name, ScopeHandler scopeHandler) {
+	protected ScopedModule(String name, ScopeSupporter scopeHandler) {
 		super(name);
 		this.scopeHandler = scopeHandler;
 		scopeHandler.addScopedModule(getName());
