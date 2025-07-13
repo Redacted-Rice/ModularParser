@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.literal.LiteralSupporter;
-import redactedrice.modularparser.scope.ScopeHandler;
+import redactedrice.modularparser.scope.ScopeSupporter;
 import redactedrice.modularparser.scope.ScopedModule;
 
 public class BasicScopedNamedLiteralModule extends ScopedModule
@@ -21,7 +21,7 @@ public class BasicScopedNamedLiteralModule extends ScopedModule
     protected LiteralSupporter literalHandler;
 
     public BasicScopedNamedLiteralModule(String moduleName, boolean reassignmentAllowed, String keyword,
-            ScopeHandler scopeHandler) {
+            ScopeSupporter scopeHandler) {
         super(moduleName, scopeHandler);
         this.keyword = keyword.toLowerCase();
         this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
@@ -93,7 +93,7 @@ public class BasicScopedNamedLiteralModule extends ScopedModule
         }
     }
 
-    private void addLiteral(ScopeHandler scope, String literal, String scopeName, String name,
+    private void addLiteral(ScopeSupporter scope, String literal, String scopeName, String name,
             boolean assignment) {
         Object obj = literalHandler.evaluateLiteral(literal);
         if (obj != null) {

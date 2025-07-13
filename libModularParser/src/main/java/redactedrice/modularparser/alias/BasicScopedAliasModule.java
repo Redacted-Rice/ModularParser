@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.scope.ScopeHandler;
+import redactedrice.modularparser.scope.ScopeSupporter;
 import redactedrice.modularparser.scope.ScopedModule;
 
 public class BasicScopedAliasModule extends ScopedModule implements LineHandler, AliasHandler {
@@ -19,7 +19,7 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
 
     protected final String keyword;
 
-    public BasicScopedAliasModule(ScopeHandler scopeHandler) {
+    public BasicScopedAliasModule(ScopeSupporter scopeHandler) {
         super("BasicAliasHandler", scopeHandler);
         keyword = "alias";
         aliasDef = Pattern.compile("^\\s*" + keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
