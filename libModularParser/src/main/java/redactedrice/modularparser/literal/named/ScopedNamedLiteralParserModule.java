@@ -7,24 +7,22 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.LineHandler;
 import redactedrice.modularparser.literal.LiteralSupporter;
+import redactedrice.modularparser.scope.BaseScopedModule;
 import redactedrice.modularparser.scope.ScopeSupporter;
-import redactedrice.modularparser.scope.ScopedModule;
 
-public class BasicScopedNamedLiteralModule extends ScopedModule
-        implements LineHandler, NamedLiteralHandler {
+public class ScopedNamedLiteralParserModule extends BaseScopedModule
+        implements NamedLiteralParser {
     protected final boolean reassignmentAllowed;
     protected final String keyword;
     protected final Pattern matcher;
 
     protected LiteralSupporter literalHandler;
 
-    public BasicScopedNamedLiteralModule(String moduleName, boolean reassignmentAllowed, String keyword,
-            ScopeSupporter scopeHandler) {
-        super(moduleName, scopeHandler);
+    public ScopedNamedLiteralParserModule(String moduleName, boolean reassignmentAllowed, String keyword) {
+        super(moduleName);
         this.keyword = keyword.toLowerCase();
-        this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
+//        this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
         matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
@@ -35,36 +33,31 @@ public class BasicScopedNamedLiteralModule extends ScopedModule
     }
 
     @Override
-    public boolean scopedMatches(String scope, String logicalLine) {
-        return matcher.matcher(logicalLine).find();
-    }
-
-    @Override
-    public void scopedHandle(String scope, String logicalLine, String defaultScope) {
+    public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
         Matcher m = matcher.matcher(logicalLine);
         if (!m.matches()) {
-            return;
+            return false;
         }
 
         if (m.group(1) == null) {
             // reassignment
             if (scope.isEmpty()) { // scope was not specified
-                scope = scopeHandler.getScope(m.group(2));
+                scope = scopeSupporter.getScope(m.group(2));
                 if (scope == null) {
                     System.err.println(getName() + ": Attempted to reassign undefined " + keyword
                             + " " + m.group(2) + " with " + m.group(3));
-                    return;
+                    return true;
                 }
             }
 
             if (!isValidName(m.group(2))) {
                 System.err.println("Invalid variable name: " + m.group(2));
-                return;
+                return true;
             }
 
-            if (!scopeHandler.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
+            if (!scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
                 if (reassignmentAllowed) {
-                    addLiteral(scopeHandler, m.group(3), scope, m.group(2), false);
+                    addLiteral(scopeSupporter, m.group(3), scope, m.group(2), false);
                 } else {
                     System.err.println(getName() + ": Attempted to reassign " + keyword + " "
                             + m.group(2) + " in scope " + scope + " with " + m.group(3));
@@ -81,16 +74,17 @@ public class BasicScopedNamedLiteralModule extends ScopedModule
 
             if (!isValidName(m.group(2))) {
                 System.err.println("Invalid variable name: " + m.group(2));
-                return;
+                return true;
             }
 
-            if (scopeHandler.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
-                addLiteral(scopeHandler, m.group(3), scope, m.group(2), true);
+            if (scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
+                addLiteral(scopeSupporter, m.group(3), scope, m.group(2), true);
             } else {
                 System.err.println(getName() + ": Attempted to redefine existing " + keyword + " "
                         + m.group(2) + " in scope " + scope + " with " + m.group(3));
             }
         }
+        return true;
     }
 
     private void addLiteral(ScopeSupporter scope, String literal, String scopeName, String name,
@@ -108,18 +102,18 @@ public class BasicScopedNamedLiteralModule extends ScopedModule
     }
 
     @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
-        return Optional.ofNullable(scopeHandler.getData(Optional.empty(), literal, getName()));
+    public Optional<Object> tryParseLiteral(String literal) {
+        return Optional.ofNullable(scopeSupporter.getData(Optional.empty(), literal, getName()));
     }
 
     @Override
     public boolean isVariable(String var) {
-        return scopeHandler.getData(Optional.empty(), var, getName()) != null;
+        return scopeSupporter.getData(Optional.empty(), var, getName()) != null;
     }
 
     @Override
     public Map<String, Object> getVariables() {
         return Collections
-                .unmodifiableMap(scopeHandler.getAllOwnedData(Optional.empty(), getName()));
+                .unmodifiableMap(scopeSupporter.getAllOwnedData(Optional.empty(), getName()));
     }
 }

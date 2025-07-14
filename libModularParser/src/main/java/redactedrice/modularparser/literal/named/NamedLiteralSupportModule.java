@@ -6,27 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.Module;
+import redactedrice.modularparser.core.BaseSupporter;
 
-public class NamedLiteralSupportModule extends BaseModule implements NamedLiteralSupporter {
-    private final List<NamedLiteralHandler> handlers = new ArrayList<>();
+public class NamedLiteralSupportModule extends BaseSupporter<NamedLiteralParser> implements NamedLiteralSupporter {
+    private final List<NamedLiteralParser> handlers = new ArrayList<>();
 
     public NamedLiteralSupportModule() {
-        super("VariableSupportModule");
-    }
-
-    @Override
-    public void addVariableParser(NamedLiteralHandler handler) {
-    	handlers.add(handler);
-        if (handler instanceof Module) {
-            parser.addModule((Module) handler);
-        }
+        super("VariableSupportModule", NamedLiteralParser.class);
     }
 
     @Override
     public boolean isVariableDefined(String var) {
-        for (NamedLiteralHandler variableModule : handlers) {
+        for (NamedLiteralParser variableModule : handlers) {
             if (variableModule.isVariable(var)) {
                 return true;
             }
@@ -37,7 +28,7 @@ public class NamedLiteralSupportModule extends BaseModule implements NamedLitera
     @Override
     public Map<String, Object> getAllVariables() {
         Map<String, Object> all = new HashMap<>();
-        for (NamedLiteralHandler variables : handlers) {
+        for (NamedLiteralParser variables : handlers) {
             all.putAll(variables.getVariables());
         }
         return all;

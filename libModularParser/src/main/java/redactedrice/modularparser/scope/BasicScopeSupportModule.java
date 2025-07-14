@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseSupporter;
+import redactedrice.modularparser.lineparser.LineParser;
 
-public class BasicScopeModule extends BaseModule implements ScopeSupporter {
+public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> implements ScopeSupporter, LineParser {
     private record OwnedObject(String owner, Object obj) {}
 
-    protected final Set<String> modules = new HashSet<>();
     // Scope -> var -> owner + data
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
     // Owner -> scope -> vars
@@ -23,23 +23,26 @@ public class BasicScopeModule extends BaseModule implements ScopeSupporter {
     protected final Deque<String> scopeOrder = new ArrayDeque<>();
     protected final boolean allowImplicit;
 
-    public BasicScopeModule(String name, boolean allowImplicit) {
-        super(name);
+    public BasicScopeSupportModule(String name, boolean allowImplicit) {
+        super(name, ScopedParser.class);
         this.allowImplicit = allowImplicit;
     }
-    
-    @Override
-    public void addScopedModule(String module) {
-    	modules.add(module);
-    	Map<String, Set<String>> ownerScopeMap = new HashMap<>();
-    	scopeOrder.stream().forEach(scope -> ownerScopeMap.put(scope, new HashSet<>()));
-        ownerMap.put(module, ownerScopeMap);
-    }
 
+	
     @Override
-    public boolean handlesModule(String module) {
-        return modules.contains(module);
-    }
+    public boolean tryParseLine(String logicalLine) {
+        String[] split = splitScope(logicalLine);
+        if (split == null || split.length <= 0) {
+            return false;
+        }
+        
+        for (ScopedParser scoped : submodules) {
+        	if (scoped.tryParseScoped(split[0], split[1], currentScope())) {
+        		return true;
+        	}
+        }
+        return false;
+	}
 
     @Override
     public void pushScope(String scope) {

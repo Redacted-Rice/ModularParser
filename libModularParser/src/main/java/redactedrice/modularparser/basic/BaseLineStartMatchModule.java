@@ -1,19 +1,19 @@
 package redactedrice.modularparser.basic;
 
 
-import redactedrice.modularparser.LineHandler;
+import redactedrice.modularparser.lineparser.LineParser;
+import redactedrice.modularparser.reserved.BaseReservedWordModule;
 
-public abstract class LineStartMatchModule extends ReservedWordModule implements LineHandler {
+public abstract class BaseLineStartMatchModule extends BaseReservedWordModule implements LineParser {
     protected final String keyword;
 
-    protected LineStartMatchModule(String name, String keyword) {
+    protected BaseLineStartMatchModule(String name, String keyword) {
         super(name);
 
         this.keyword = keyword;
         reservedWords.put(keyword, ReservedType.EXCLUSIVE);
     }
-
-    @Override
+    
     public boolean matches(String logicalLine) {
         if (logicalLine == null || logicalLine.isBlank()) {
             return false;

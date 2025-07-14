@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseModule;
 
-public abstract class ChainableParametersModule extends BaseModule implements ChainableLiteralHandler {
+public abstract class ChainableParametersModule extends BaseModule implements ChainableLiteralParser {
     protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
@@ -88,7 +88,7 @@ public abstract class ChainableParametersModule extends BaseModule implements Ch
     }
 
     @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
+    public Optional<Object> tryParseLiteral(String literal) {
         Map<String, Object> parsedArgs = new HashMap<>();
         if(!handleObjectLiteral(literal, parsedArgs)) {
         	return Optional.empty();

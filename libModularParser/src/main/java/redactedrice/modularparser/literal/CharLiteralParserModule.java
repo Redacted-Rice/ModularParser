@@ -3,15 +3,15 @@ package redactedrice.modularparser.literal;
 
 import java.util.Optional;
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseModule;
 
-public class BasicCharLiteralModule extends BaseModule implements LiteralHandler {
-    public BasicCharLiteralModule() {
+public class CharLiteralParserModule extends BaseModule implements LiteralParser {
+    public CharLiteralParserModule() {
         super("BasicCharParser");
     }
 
     @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
+    public Optional<Object> tryParseLiteral(String literal) {
         if (literal == null || literal.trim().isEmpty()) {
             return Optional.empty();
         }

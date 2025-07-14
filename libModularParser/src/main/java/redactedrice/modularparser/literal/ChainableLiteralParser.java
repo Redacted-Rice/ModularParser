@@ -3,6 +3,6 @@ package redactedrice.modularparser.literal;
 
 import java.util.Optional;
 
-public interface ChainableLiteralHandler extends LiteralHandler {
+public interface ChainableLiteralParser extends LiteralParser {
     Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal);
 }

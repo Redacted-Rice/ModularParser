@@ -11,23 +11,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.ModularParser;
-import redactedrice.modularparser.WordReserver;
-import redactedrice.modularparser.alias.BasicScopedAliasModule;
+import redactedrice.modularparser.alias.ScopedAliasParserModule;
 import redactedrice.modularparser.comment.BasicMutliLineCommentModule;
 import redactedrice.modularparser.comment.BasicSingleLineCommentModule;
-import redactedrice.modularparser.lineformer.BasicBufferedReaderModule;
-import redactedrice.modularparser.lineformer.BasicGroupingConstructModule;
-import redactedrice.modularparser.lineformer.BasicLineContinuerModule;
-import redactedrice.modularparser.literal.BasicBoolLiteralModule;
-import redactedrice.modularparser.literal.BasicChainingLiteralModule;
-import redactedrice.modularparser.literal.BasicCharLiteralModule;
-import redactedrice.modularparser.literal.BasicNumberLiteralModule;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.lineformer.LineFormerSupportModule;
+import redactedrice.modularparser.lineparser.LineParserSupportModule;
+import redactedrice.modularparser.lineformer.GroupingConstructLineModifierModule;
+import redactedrice.modularparser.lineformer.LineContinuerLineModifierModule;
+import redactedrice.modularparser.literal.BoolLiteralParserModule;
+import redactedrice.modularparser.literal.ChainingLiteralParserModule;
+import redactedrice.modularparser.literal.CharLiteralParserModule;
+import redactedrice.modularparser.literal.NumberLiteralParserModule;
 import redactedrice.modularparser.literal.LiteralSupportModule;
 import redactedrice.modularparser.literal.SimpleObjectLiteralModule;
-import redactedrice.modularparser.literal.named.BasicScopedNamedLiteralModule;
-import redactedrice.modularparser.scope.BasicScopeModule;
+import redactedrice.modularparser.literal.named.ScopedNamedLiteralParserModule;
+import redactedrice.modularparser.reserved.WordReserver;
+import redactedrice.modularparser.scope.BasicScopeSupportModule;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -68,39 +69,41 @@ public class Test {
     public static void main(String[] args) throws IOException {
         ModularParser parser = new ModularParser();
 
-        BasicBufferedReaderModule reader = new BasicBufferedReaderModule();
+        LineFormerSupportModule reader = new LineFormerSupportModule();
         parser.addModule(reader);
-        reader.addLineModifier(
-                new BasicSingleLineCommentModule("BasicCSingleLineCommentModule", "//"));
-        reader.addLineModifier(
-                new BasicSingleLineCommentModule("BasicPythonSingleLineCommentModule", "#"));
-        reader.addLineModifier(
-                new BasicMutliLineCommentModule("BasicMutliLineCommentModule", "/*", "*/"));
-        reader.addLineModifier(
-                new BasicGroupingConstructModule("BasicParenthesisModule", "(", ")", false));
-        reader.addLineModifier(
-                new BasicLineContinuerModule("BasicLineContinuerModule", "\\", true));
+        parser.addModule(new LineParserSupportModule());
+        parser.addModule(new LiteralSupportModule());
 
-        LiteralSupportModule literal = new LiteralSupportModule();
-        parser.addModule(literal);
-        literal.addLiteralParser(new BasicChainingLiteralModule("->", reader));
-        literal.addLiteralParser(new BasicNumberLiteralModule());
-        literal.addLiteralParser(new BasicCharLiteralModule());
-        literal.addLiteralParser(new BasicBoolLiteralModule());
-        literal.addLiteralParser(new SimpleObjectLiteralModule());
-
-        BasicScopeModule scope = new BasicScopeModule("BasicScopeHandler", true);
+        BasicScopeSupportModule scope = new BasicScopeSupportModule("BasicScopeHandler", true);
         scope.pushScope("global");
         scope.pushScope("file");
+        parser.addModule(scope);        
+        
+        parser.addModule(
+                new BasicSingleLineCommentModule("BasicCSingleLineCommentModule", "//"));
+        parser.addModule(
+                new BasicSingleLineCommentModule("BasicPythonSingleLineCommentModule", "#"));
+        parser.addModule(
+                new BasicMutliLineCommentModule("BasicMutliLineCommentModule", "/*", "*/"));
+        parser.addModule(
+                new GroupingConstructLineModifierModule("BasicParenthesisModule", "(", ")", false));
+        parser.addModule(
+                new LineContinuerLineModifierModule("BasicLineContinuerModule", "\\", true));
 
-        literal.addLiteralParser(
-                new BasicScopedNamedLiteralModule("BasicVarHandler", true, "variable", scope));
-        literal.addLiteralParser(
-                new BasicScopedNamedLiteralModule("BasicConstHandler", false, "constant", scope));
-        reader.addLineModifier(new BasicScopedAliasModule(scope));
-        parser.addModule(scope);
+        parser.addModule(new ChainingLiteralParserModule("->", parser));
+        parser.addModule(new NumberLiteralParserModule());
+        parser.addModule(new CharLiteralParserModule());
+        parser.addModule(new BoolLiteralParserModule());
+        parser.addModule(new SimpleObjectLiteralModule());
 
-        parser.addModule(new BasicLambdaModule("TestPrintHandler",
+
+        parser.addModule(
+                new ScopedNamedLiteralParserModule("BasicVarHandler", true, "variable"));
+        parser.addModule(
+                new ScopedNamedLiteralParserModule("BasicConstHandler", false, "constant"));
+        parser.addModule(new ScopedAliasParserModule());
+
+        parser.addModule(new LambdaParserModule("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
         parser.configureModules();
 

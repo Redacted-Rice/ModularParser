@@ -1,9 +1,9 @@
 package redactedrice.modularparser.lineformer;
 
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseModule;
 
-public class BasicGroupingConstructModule extends BaseModule implements LineModifier {
+public class GroupingConstructLineModifierModule extends BaseModule implements LineModifier {
     protected static final String NEWLINE_REGEX = "\\s*\\R\\s*";
 
     protected final String startToken;
@@ -12,7 +12,7 @@ public class BasicGroupingConstructModule extends BaseModule implements LineModi
     protected final String startTokenRegex;
     protected final String endTokenRegex;
 
-    public BasicGroupingConstructModule(String name, String startToken, String endToken,
+    public GroupingConstructLineModifierModule(String name, String startToken, String endToken,
             boolean removeTokens) {
         super(name);
         this.startToken = startToken;

@@ -10,21 +10,22 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.LineHandler;
-import redactedrice.modularparser.scope.ScopeSupporter;
-import redactedrice.modularparser.scope.ScopedModule;
+import redactedrice.modularparser.lineformer.LineModifier;
+import redactedrice.modularparser.reserved.WordReserver;
+import redactedrice.modularparser.scope.BaseScopedModule;
 
-public class BasicScopedAliasModule extends ScopedModule implements LineHandler, AliasHandler {
+public class ScopedAliasParserModule extends BaseScopedModule implements LineModifier, WordReserver, AliasParser {
     private final Pattern aliasDef;
 
     protected final String keyword;
+    
 
-    public BasicScopedAliasModule(ScopeSupporter scopeHandler) {
-        super("BasicAliasHandler", scopeHandler);
+    public ScopedAliasParserModule() {
+        super("BasicAliasHandler");
         keyword = "alias";
         aliasDef = Pattern.compile("^\\s*" + keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
     }
-
+    
     @Override
     public boolean hasOpenModifier(String line) {
         return false;
@@ -33,7 +34,7 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
     @Override
     public String modifyLine(String line) {
         String out = line;
-        for (Map.Entry<String, Object> e : scopeHandler.getAllOwnedData(Optional.empty(), getName())
+        for (Map.Entry<String, Object> e : scopeSupporter.getAllOwnedData(Optional.empty(), getName())
                 .entrySet()) {
             out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
                     Matcher.quoteReplacement((String) e.getValue()));
@@ -42,26 +43,20 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
     }
 
     @Override
-    public boolean scopedMatches(String scope, String logicalLine) {
-        Matcher m = aliasDef.matcher(logicalLine);
-        return m.find();
-    }
-
-    @Override
-    public void scopedHandle(String scope, String logicalLine, String defaultScope) {
+    public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
         if (scope.isEmpty()) {
             scope = defaultScope;
         }
 
         Matcher m = aliasDef.matcher(logicalLine);
         if (!m.find()) {
-            return;
+            return false;
         }
 
         String key = m.group(1);
         if (!isValidName(key)) {
             System.err.println("Invalid alias name: " + key);
-            return;
+            return true;
         }
 
         String val = m.group(2).trim();
@@ -72,28 +67,30 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
         }
 
         // Check for collisions with reserved words
-        if (parser.getAllReservedWords().containsKey(key)) {
-            System.err.println(
-                    "Warning: alias '" + key + "' conflicts reserved word and will be ignored!");
-            return;
-        }
+//        if (parser.getAllReservedWords().containsKey(key)) {
+//            System.err.println(
+//                    "Warning: alias '" + key + "' conflicts reserved word and will be ignored!");
+//            return true;
+//        }
 
-        if (scopeHandler.setData(scope, key, getName(), val)) {
+        if (scopeSupporter.setData(scope, key, getName(), val)) {
             System.out.println("Alias: Added alias " + key + " with value: " + val);
         }
+        return true;
     }
 
     @Override
     public boolean isReservedWord(String word, Optional<ReservedType> type) {
         if (type.isEmpty() || type.get() == ReservedType.EXCLUSIVE) {
-            return super.isReservedWord(word) || isAlias(word);
+            return word.equals(type) || isAlias(word);
         }
         return false;
     }
 
     @Override
     public Map<String, ReservedType> getAllReservedWords() {
-        HashMap<String, ReservedType> all = new HashMap<>(super.getAllReservedWords());
+        HashMap<String, ReservedType> all = new HashMap<>();
+        all.put(keyword, ReservedType.EXCLUSIVE);
         getAliases().stream().forEach(alias -> all.put(alias, ReservedType.EXCLUSIVE));
         return Collections.unmodifiableMap(all);
     }
@@ -101,7 +98,8 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
     @Override
     public Set<String> getReservedWords(ReservedType type) {
         if (type == ReservedType.EXCLUSIVE) {
-            Set<String> all = new HashSet<>(super.getReservedWords(type));
+            Set<String> all = new HashSet<>();
+            all.add(keyword);
             all.addAll(getAliases());
             return Collections.unmodifiableSet(all);
         }
@@ -115,12 +113,12 @@ public class BasicScopedAliasModule extends ScopedModule implements LineHandler,
 
     @Override
     public boolean isAlias(String alias) {
-        return scopeHandler.getData(Optional.empty(), alias, getName()) != null;
+        return scopeSupporter.getData(Optional.empty(), alias, getName()) != null;
     }
 
     @Override
     public Set<String> getAliases() {
         return Collections
-                .unmodifiableSet(scopeHandler.getAllOwnedNames(Optional.empty(), getName()));
+                .unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), getName()));
     }
 }

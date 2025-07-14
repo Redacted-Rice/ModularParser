@@ -1,7 +1,9 @@
 package redactedrice.modularparser.lineformer;
 
 
-public interface LineModifier {
+import redactedrice.modularparser.core.Module;
+
+public interface LineModifier extends Module {
     public boolean hasOpenModifier(String line);
 
     public String modifyLine(String line);

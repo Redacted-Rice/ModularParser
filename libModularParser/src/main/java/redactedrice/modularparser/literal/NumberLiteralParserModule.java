@@ -3,10 +3,10 @@ package redactedrice.modularparser.literal;
 
 import java.util.Optional;
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseModule;
 
-public class BasicNumberLiteralModule extends BaseModule implements LiteralHandler {
-    public BasicNumberLiteralModule() {
+public class NumberLiteralParserModule extends BaseModule implements LiteralParser {
+    public NumberLiteralParserModule() {
         super("BasicNumberParser");
     }
 
@@ -15,7 +15,7 @@ public class BasicNumberLiteralModule extends BaseModule implements LiteralHandl
     }
 
     @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
+    public Optional<Object> tryParseLiteral(String literal) {
         if (literal == null || literal.trim().isEmpty())
             return Optional.empty();
         String trimmed = literal.trim();
