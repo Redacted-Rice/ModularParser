@@ -1,32 +1,19 @@
 package redactedrice.modularparser.alias;
 
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.Module;
+import redactedrice.modularparser.core.BaseSupporter;
 
-public class AliasSupportModule extends BaseModule implements AliasSupporter {
-    private final List<AliasHandler> handlers = new ArrayList<>();
-
+public class AliasSupportModule extends BaseSupporter<AliasParser> implements AliasSupporter {
     public AliasSupportModule() {
-        super("VariableSupportModule");
-    }
-
-    @Override
-    public void addAliasHandler(AliasHandler handler) {
-    	handlers.add(handler);
-        if (handler instanceof Module) {
-            parser.addModule((Module) handler);
-        }
+        super("VariableSupportModule", AliasParser.class);
     }
 
     @Override
     public boolean isAliasDefined(String alias) {
-        for (AliasHandler aliasModule : handlers) {
+        for (AliasParser aliasModule : submodules) {
             if (aliasModule.isAlias(alias)) {
                 return true;
             }
@@ -37,7 +24,7 @@ public class AliasSupportModule extends BaseModule implements AliasSupporter {
     @Override
     public Set<String> getAllAliases() {
         Set<String> all = new HashSet<>();
-        for (AliasHandler aliaser : handlers) {
+        for (AliasParser aliaser : submodules) {
             all.addAll(aliaser.getAliases());
         }
         return all;

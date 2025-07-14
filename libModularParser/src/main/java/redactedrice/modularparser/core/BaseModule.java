@@ -1,4 +1,4 @@
-package redactedrice.modularparser;
+package redactedrice.modularparser.core;
 
 
 /** A named DSL‐line handler carrying a back‐pointer to its parser. */

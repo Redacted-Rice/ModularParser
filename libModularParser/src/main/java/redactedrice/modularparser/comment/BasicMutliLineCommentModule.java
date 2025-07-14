@@ -1,7 +1,7 @@
 package redactedrice.modularparser.comment;
 
 
-import redactedrice.modularparser.BaseModule;
+import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.lineformer.LineModifier;
 
 public class BasicMutliLineCommentModule extends BaseModule implements LineModifier {

@@ -3,19 +3,19 @@ package redactedrice.modularparser.literal;
 
 import java.util.Optional;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.lineformer.BasicLineContinuerModule;
-import redactedrice.modularparser.lineformer.LineFormerSupporter;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.lineformer.LineContinuerLineModifierModule;
 
-public class BasicChainingLiteralModule extends BaseModule implements ChainableLiteralHandler {
+public class ChainingLiteralParserModule extends BaseModule implements ChainableLiteralParser {
     protected final String chainingToken;
 
     protected LiteralSupporter literalHandler;
 
-    public BasicChainingLiteralModule(String chainingToken, LineFormerSupporter former) {
+    public ChainingLiteralParserModule(String chainingToken, ModularParser parser) {
         super("BasicChainingParser");
         this.chainingToken = chainingToken;
-        former.addLineModifier(new BasicLineContinuerModule("ChainingLiteralContinuerModule",
+        parser.addModule(new LineContinuerLineModifierModule("ChainingLiteralContinuerModule",
                 chainingToken, false));
     }
 
@@ -25,7 +25,7 @@ public class BasicChainingLiteralModule extends BaseModule implements ChainableL
     }
 
     @Override
-    public Optional<Object> tryEvaluateLiteral(String literal) {
+    public Optional<Object> tryParseLiteral(String literal) {
         int chainIdx = literal.indexOf(chainingToken);
         if (chainIdx < 0) {
             return Optional.empty();

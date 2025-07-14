@@ -3,9 +3,9 @@ package redactedrice.modularparser.literal.named;
 
 import java.util.Map;
 
-import redactedrice.modularparser.literal.LiteralHandler;
+import redactedrice.modularparser.literal.LiteralParser;
 
-public interface NamedLiteralHandler extends LiteralHandler {
+public interface NamedLiteralParser extends LiteralParser {
     boolean isVariable(String var);
 
     Map<String, Object> getVariables();

@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.reserved;
 
 
 import java.util.Collections;
@@ -7,13 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.WordReserver;
+import redactedrice.modularparser.core.BaseModule;
 
-public class ReservedWordModule extends BaseModule implements WordReserver {
+public class BaseReservedWordModule extends BaseModule implements WordReserver {
     protected final Map<String, ReservedType> reservedWords = new HashMap<>();
 
-    protected ReservedWordModule(String name) {
+    protected BaseReservedWordModule(String name) {
         super(name);
     }
 

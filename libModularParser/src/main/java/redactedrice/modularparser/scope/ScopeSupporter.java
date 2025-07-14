@@ -4,11 +4,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public interface ScopeSupporter {	
-    void addScopedModule(String module);
+import redactedrice.modularparser.core.Supporter;
 
-    boolean handlesModule(String module);
-
+public interface ScopeSupporter extends Supporter {
     void pushScope(String scope);
 
     void popScope();

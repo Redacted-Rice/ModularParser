@@ -1,11 +1,13 @@
-package redactedrice.modularparser;
+package redactedrice.modularparser.reserved;
 
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public interface WordReserver {
+import redactedrice.modularparser.core.Module;
+
+public interface WordReserver extends Module {
     public enum ReservedType {
         EXCLUSIVE, SHAREABLE
     }
@@ -13,7 +15,7 @@ public interface WordReserver {
     default boolean isReservedWord(String word) {
         return isReservedWord(word, Optional.empty());
     }
-
+    
     boolean isReservedWord(String word, Optional<ReservedType> type);
 
     Map<String, ReservedType> getAllReservedWords();

@@ -3,31 +3,19 @@ package redactedrice.modularparser.lineformer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import redactedrice.modularparser.BaseModule;
-import redactedrice.modularparser.Module;
+import redactedrice.modularparser.core.BaseSupporter;
+import redactedrice.modularparser.core.LineFormerSupporter;
 
-public class BasicBufferedReaderModule extends BaseModule implements LineFormerSupporter {
-    protected final List<LineModifier> modifiers = new ArrayList<>();
-
+public class LineFormerSupportModule extends BaseSupporter<LineModifier> implements LineFormerSupporter {
     protected BufferedReader reader;
 
-    public BasicBufferedReaderModule() {
-        super("VariableSupportModule");
+    public LineFormerSupportModule() {
+        super("LineFormerSupportModule", LineModifier.class);
     }
 
     public void setReader(BufferedReader reader) {
         this.reader = reader;
-    }
-
-    @Override
-    public void addLineModifier(LineModifier modifier) {
-        modifiers.add(modifier);
-        if (modifier instanceof Module) {
-            parser.addModule((Module) modifier);
-        }
     }
 
     @Override
@@ -39,8 +27,8 @@ public class BasicBufferedReaderModule extends BaseModule implements LineFormerS
         String logical = raw;
 
         // For each modifier, get lines until it closes
-        for (int modifierIdx = 0; modifierIdx < modifiers.size(); modifierIdx++) {
-            LineModifier modifier = modifiers.get(modifierIdx);
+        for (int modifierIdx = 0; modifierIdx < submodules.size(); modifierIdx++) {
+            LineModifier modifier = submodules.get(modifierIdx);
             boolean addedLine = false;
             while (modifier.hasOpenModifier(logical)) {
                 raw = getNextLine();
