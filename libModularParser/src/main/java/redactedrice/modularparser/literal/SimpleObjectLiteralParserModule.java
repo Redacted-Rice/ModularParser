@@ -6,11 +6,11 @@ import java.util.Optional;
 
 import redactedrice.modularparser.basic.SimpleObject;
 
-public class SimpleObjectLiteralModule extends ChainableParametersModule {
+public class SimpleObjectLiteralParserModule extends ChainableParametersModule {
     private final static String[] argsOrdered = new String[] {"intVal", "boolVal", "strVal", "so"
     };
 
-    public SimpleObjectLiteralModule() {
+    public SimpleObjectLiteralParserModule() {
         super("SimpleObjectParser", "SimpleObject", argsOrdered[3], new String[] { argsOrdered[0]
         }, new String[] { argsOrdered[1], argsOrdered[2], argsOrdered[3]
         }, new Object[] { false, "", null

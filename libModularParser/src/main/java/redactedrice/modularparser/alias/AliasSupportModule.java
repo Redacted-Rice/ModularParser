@@ -8,7 +8,7 @@ import redactedrice.modularparser.core.BaseSupporter;
 
 public class AliasSupportModule extends BaseSupporter<AliasParser> implements AliasSupporter {
     public AliasSupportModule() {
-        super("VariableSupportModule", AliasParser.class);
+        super("AliasSupportModule", AliasParser.class);
     }
 
     @Override

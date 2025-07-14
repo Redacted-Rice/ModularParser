@@ -7,7 +7,7 @@ import redactedrice.modularparser.core.BaseModule;
 
 public class NumberLiteralParserModule extends BaseModule implements LiteralParser {
     public NumberLiteralParserModule() {
-        super("BasicNumberParser");
+        super("NumberParser");
     }
 
     private enum PRIMITIVE_TYPE {

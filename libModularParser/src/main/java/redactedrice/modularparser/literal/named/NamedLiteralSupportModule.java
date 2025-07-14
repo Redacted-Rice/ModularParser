@@ -12,7 +12,7 @@ public class NamedLiteralSupportModule extends BaseSupporter<NamedLiteralParser>
     private final List<NamedLiteralParser> handlers = new ArrayList<>();
 
     public NamedLiteralSupportModule() {
-        super("VariableSupportModule", NamedLiteralParser.class);
+        super("NamedLiteralSupportModule", NamedLiteralParser.class);
     }
 
     @Override

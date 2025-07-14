@@ -19,7 +19,6 @@ public class ScopedAliasParserModule extends BaseScopedModule implements LineMod
 
     protected final String keyword;
     
-
     public ScopedAliasParserModule() {
         super("BasicAliasHandler");
         keyword = "alias";
