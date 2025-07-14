@@ -28,7 +28,6 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
         this.allowImplicit = allowImplicit;
     }
 
-	
     @Override
     public boolean tryParseLine(String logicalLine) {
         String[] split = splitScope(logicalLine);

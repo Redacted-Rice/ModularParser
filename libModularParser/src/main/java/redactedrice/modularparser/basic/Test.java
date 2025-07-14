@@ -25,7 +25,7 @@ import redactedrice.modularparser.literal.ChainingLiteralParserModule;
 import redactedrice.modularparser.literal.CharLiteralParserModule;
 import redactedrice.modularparser.literal.NumberLiteralParserModule;
 import redactedrice.modularparser.literal.LiteralSupportModule;
-import redactedrice.modularparser.literal.SimpleObjectLiteralModule;
+import redactedrice.modularparser.literal.SimpleObjectLiteralParserModule;
 import redactedrice.modularparser.literal.named.ScopedNamedLiteralParserModule;
 import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.BasicScopeSupportModule;
@@ -94,7 +94,7 @@ public class Test {
         parser.addModule(new NumberLiteralParserModule());
         parser.addModule(new CharLiteralParserModule());
         parser.addModule(new BoolLiteralParserModule());
-        parser.addModule(new SimpleObjectLiteralModule());
+        parser.addModule(new SimpleObjectLiteralParserModule());
 
 
         parser.addModule(

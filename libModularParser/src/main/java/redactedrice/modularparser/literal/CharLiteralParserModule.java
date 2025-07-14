@@ -7,7 +7,7 @@ import redactedrice.modularparser.core.BaseModule;
 
 public class CharLiteralParserModule extends BaseModule implements LiteralParser {
     public CharLiteralParserModule() {
-        super("BasicCharParser");
+        super("CharParser");
     }
 
     @Override
