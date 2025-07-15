@@ -3,9 +3,9 @@ package redactedrice.modularparser.lineparser;
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineParserSupporter;
 
-public class LineParserSupportModule extends BaseSupporter<LineParser> implements LineParserSupporter {
+public class DefaultLineParserSupport extends BaseSupporter<LineParser> implements LineParserSupporter {
 
-	public LineParserSupportModule() {
+	public DefaultLineParserSupport() {
 		super("LineParserSupportModule", LineParser.class);
 	}
 

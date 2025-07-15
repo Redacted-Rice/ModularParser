@@ -1,6 +1,6 @@
 package redactedrice.modularparser.core;
 
 
-public interface LineFormerSupporter extends Module {
+public interface LineFormerSupporter extends Supporter {
     public String getNextLogicalLine();
 }

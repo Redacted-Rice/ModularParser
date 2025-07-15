@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
 
-public class NumberLiteralParserModule extends BaseModule implements LiteralParser {
-    public NumberLiteralParserModule() {
+public class DefaultNumberLiteralParser extends BaseModule implements LiteralParser {
+    public DefaultNumberLiteralParser() {
         super("NumberParser");
     }
 

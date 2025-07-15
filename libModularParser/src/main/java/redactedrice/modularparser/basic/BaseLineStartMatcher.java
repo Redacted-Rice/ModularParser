@@ -2,12 +2,12 @@ package redactedrice.modularparser.basic;
 
 
 import redactedrice.modularparser.lineparser.LineParser;
-import redactedrice.modularparser.reserved.BaseReservedWordModule;
+import redactedrice.modularparser.reserved.BaseWordReserver;
 
-public abstract class BaseLineStartMatchModule extends BaseReservedWordModule implements LineParser {
+public abstract class BaseLineStartMatcher extends BaseWordReserver implements LineParser {
     protected final String keyword;
 
-    protected BaseLineStartMatchModule(String name, String keyword) {
+    protected BaseLineStartMatcher(String name, String keyword) {
         super(name);
 
         this.keyword = keyword;

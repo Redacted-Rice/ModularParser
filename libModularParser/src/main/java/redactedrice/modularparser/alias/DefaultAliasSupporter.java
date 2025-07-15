@@ -6,8 +6,8 @@ import java.util.Set;
 
 import redactedrice.modularparser.core.BaseSupporter;
 
-public class AliasSupportModule extends BaseSupporter<AliasParser> implements AliasSupporter {
-    public AliasSupportModule() {
+public class DefaultAliasSupporter extends BaseSupporter<AliasParser> implements AliasSupporter {
+    public DefaultAliasSupporter() {
         super("AliasSupportModule", AliasParser.class);
     }
 

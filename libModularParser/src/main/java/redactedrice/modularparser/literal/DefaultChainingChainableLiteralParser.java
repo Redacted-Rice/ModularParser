@@ -5,17 +5,17 @@ import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.ModularParser;
-import redactedrice.modularparser.lineformer.LineContinuerLineModifierModule;
+import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 
-public class ChainingLiteralParserModule extends BaseModule implements ChainableLiteralParser {
+public class DefaultChainingChainableLiteralParser extends BaseModule implements ChainableLiteralParser {
     protected final String chainingToken;
 
     protected LiteralSupporter literalHandler;
 
-    public ChainingLiteralParserModule(String chainingToken, ModularParser parser) {
+    public DefaultChainingChainableLiteralParser(String chainingToken, ModularParser parser) {
         super("BasicChainingParser");
         this.chainingToken = chainingToken;
-        parser.addModule(new LineContinuerLineModifierModule("ChainingLiteralContinuerModule",
+        parser.addModule(new DefaultContinuerLineModifier("ChainingLiteralContinuerModule",
                 chainingToken, false));
     }
 

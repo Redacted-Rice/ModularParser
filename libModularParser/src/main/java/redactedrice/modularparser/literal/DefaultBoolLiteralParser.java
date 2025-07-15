@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
 
-public class BoolLiteralParserModule extends BaseModule implements LiteralParser {
-    public BoolLiteralParserModule() {
+public class DefaultBoolLiteralParser extends BaseModule implements LiteralParser {
+    public DefaultBoolLiteralParser() {
         super("BoolParser");
     }
 

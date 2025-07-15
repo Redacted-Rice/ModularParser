@@ -4,10 +4,10 @@ package redactedrice.modularparser.comment;
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.lineformer.LineModifier;
 
-public class BasicSingleLineCommentModule extends BaseModule implements LineModifier {
+public class DefaultSingleLineCommentLineModifier extends BaseModule implements LineModifier {
     protected final String token;
 
-    public BasicSingleLineCommentModule(String name, String token) {
+    public DefaultSingleLineCommentLineModifier(String name, String token) {
         super(name);
         this.token = token;
     }

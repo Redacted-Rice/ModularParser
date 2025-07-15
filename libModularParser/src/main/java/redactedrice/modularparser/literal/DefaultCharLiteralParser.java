@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
 
-public class CharLiteralParserModule extends BaseModule implements LiteralParser {
-    public CharLiteralParserModule() {
+public class DefaultCharLiteralParser extends BaseModule implements LiteralParser {
+    public DefaultCharLiteralParser() {
         super("CharParser");
     }
 
