@@ -1,9 +1,9 @@
 package redactedrice.modularparser.basic;
 
-public class LambdaParserModule extends BaseLineStartMatchModule {
-    private final ModuleLambdaFn handler;
+public class DefaultLambdaParser extends BaseLineStartMatcher {
+    private final DefaultLambdaParserFn handler;
 
-    public LambdaParserModule(String name, ModuleLambdaFn handler, String keyword) {
+    public DefaultLambdaParser(String name, DefaultLambdaParserFn handler, String keyword) {
         super(name, keyword);
         this.handler = handler;
     }

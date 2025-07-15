@@ -6,16 +6,20 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.core.BaseSupporter;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.lineparser.LineParser;
 
-public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> implements ScopeSupporter, LineParser {
+public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter, LineParser {
     private record OwnedObject(String owner, Object obj) {}
 
+    protected final List<ScopedParser> parsers = new LinkedList<>();
     // Scope -> var -> owner + data
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
     // Owner -> scope -> vars
@@ -23,9 +27,20 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
     protected final Deque<String> scopeOrder = new ArrayDeque<>();
     protected final boolean allowImplicit;
 
-    public BasicScopeSupportModule(String name, boolean allowImplicit) {
-        super(name, ScopedParser.class);
+    public DefaultScopeSupporter(String name, boolean allowImplicit) {
+        super(name);
         this.allowImplicit = allowImplicit;
+    }
+
+    @Override
+    public boolean handleModule(Module module) {
+        if (module instanceof ScopedParser) {
+            parsers.add((ScopedParser) module);
+            Map<String, Set<String>> ownerScopeMap = new HashMap<>();
+            scopeOrder.stream().forEach(scope -> ownerScopeMap.put(scope, new HashSet<>()));
+            ownerMap.put(module.getName(), ownerScopeMap);
+        }
+        return true;
     }
 
     @Override
@@ -34,14 +49,14 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
         if (split == null || split.length <= 0) {
             return false;
         }
-        
-        for (ScopedParser scoped : submodules) {
-        	if (scoped.tryParseScoped(split[0], split[1], currentScope())) {
-        		return true;
-        	}
+
+        for (ScopedParser scoped : parsers) {
+            if (scoped.tryParseScoped(split[0], split[1], currentScope())) {
+                return true;
+            }
         }
         return false;
-	}
+    }
 
     @Override
     public void pushScope(String scope) {
@@ -92,7 +107,7 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
         }
         return null;
     }
-    
+
     private OwnedObject getDataForScopeOrLowestScope(Optional<String> scope, String name) {
         if (!scope.isEmpty() && !scope.get().isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
@@ -134,17 +149,17 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
     }
 
     @Override
-    public Object getData(Optional<String> scope, String name, String module) {
+    public Object getData(Optional<String> scope, String name, Module owner) {
         OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
-        if (obj != null) {
+        if (obj != null && obj.owner().equals(owner.getName())) {
             return obj.obj();
-        }  
+        }
         return null;
     }
 
     @Override
-    public Set<String> getAllOwnedNames(Optional<String> scope, String owner) {
-        Map<String, Set<String>> owned = ownerMap.get(owner);
+    public Set<String> getAllOwnedNames(Optional<String> scope, Module owner) {
+        Map<String, Set<String>> owned = ownerMap.get(owner.getName());
         if (owned == null) {
             return Collections.emptySet();
         }
@@ -157,31 +172,33 @@ public class BasicScopeSupportModule extends BaseSupporter<ScopedParser> impleme
         }
         return vars;
     }
-    
+
     @Override
-    public Map<String, Object> getAllOwnedData(Optional<String> scope, String owner) {
+    public Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner) {
         Set<String> names = getAllOwnedNames(scope, owner);
         Map<String, Object> data = new HashMap<>();
-        names.stream().forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
+        names.stream()
+                .forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
         return data;
     }
 
     @Override
-    public boolean setData(String scope, String name, String owner, Object data) {
+    public boolean setData(String scope, String name, Module owner, Object data) {
         Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
         if (scopeMap == null) {
             return false;
         }
-        
+
         OwnedObject obj = scopeMap.get(name);
         if (obj != null) {
-            if (!obj.owner().equals(owner)) {
-                System.err.println(owner + " attempted to set value for " + name + " in scope " + scope + " that is owned by " + obj.owner());
+            if (!obj.owner().equals(owner.getName())) {
+                System.err.println(owner.getName() + " attempted to set value for " + name
+                        + " in scope " + scope + " that is owned by " + obj.owner());
                 return false;
             }
         }
-        scopeMap.put(name, new OwnedObject(owner, data));
-        ownerMap.get(owner).get(scope).add(name);
+        scopeMap.put(name, new OwnedObject(owner.getName(), data));
+        ownerMap.get(owner.getName()).get(scope).add(name);
         return true;
     }
 }

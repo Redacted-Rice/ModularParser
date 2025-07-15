@@ -36,7 +36,7 @@ public class ModularParser {
 
         // Pass all to existing supporters
         for (Supporter supporter : supporters.values()) {
-        	supporter.handleModule(module);
+            supporter.handleModule(module);
         }
 
         // See if its one of our required supporters
@@ -52,23 +52,32 @@ public class ModularParser {
             }
             lineParser = (LineParserSupporter) module;
         }
-        
+
         // If its a supporter, keep track of it and pass it any existing modules
         if (module instanceof Supporter) {
-        	Supporter asSupporter = (Supporter) module;
-            if (supporters.putIfAbsent(module.getClass().getCanonicalName(),
-            		asSupporter) != null) {
+            Supporter asSupporter = (Supporter) module;
+            String supporterName = getSupporterInterfaceName(asSupporter);
+            if (supporters.putIfAbsent(supporterName, asSupporter) != null) {
                 throw new RuntimeException("Attempted to add a second supporter for: "
                         + module.getClass().getCanonicalName());
             }
             for (Module existing : modulesOrdered) {
-            	asSupporter.handleModule(existing);
+                asSupporter.handleModule(existing);
             }
         }
-        
+
         // Add this module finally
         index.put(module.getName(), module);
         modulesOrdered.add(module);
+    }
+
+    protected static String getSupporterInterfaceName(Supporter supporter) {
+        for (Class<?> iface : supporter.getClass().getInterfaces()) {
+            if (Supporter.class.isAssignableFrom(iface) && !iface.equals(Supporter.class)) {
+                return iface.getSimpleName(); // e.g. "AliasSupporter"
+            }
+        }
+        throw new IllegalArgumentException("No Sub Supporter interface of Supporter found");
     }
 
     public void configureModules() {

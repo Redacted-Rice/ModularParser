@@ -11,24 +11,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.alias.ScopedAliasParserModule;
-import redactedrice.modularparser.comment.BasicMutliLineCommentModule;
-import redactedrice.modularparser.comment.BasicSingleLineCommentModule;
+import redactedrice.modularparser.alias.DefaultAliasSupporter;
+import redactedrice.modularparser.alias.DefaultScopedAliasParser;
+import redactedrice.modularparser.comment.DefaultMutliLineCommentLineModifier;
+import redactedrice.modularparser.comment.DefaultSingleLineCommentLineModifier;
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.ModularParser;
-import redactedrice.modularparser.lineformer.LineFormerSupportModule;
-import redactedrice.modularparser.lineparser.LineParserSupportModule;
-import redactedrice.modularparser.lineformer.GroupingConstructLineModifierModule;
-import redactedrice.modularparser.lineformer.LineContinuerLineModifierModule;
-import redactedrice.modularparser.literal.BoolLiteralParserModule;
-import redactedrice.modularparser.literal.ChainingLiteralParserModule;
-import redactedrice.modularparser.literal.CharLiteralParserModule;
-import redactedrice.modularparser.literal.NumberLiteralParserModule;
-import redactedrice.modularparser.literal.LiteralSupportModule;
-import redactedrice.modularparser.literal.SimpleObjectLiteralParserModule;
-import redactedrice.modularparser.literal.named.ScopedNamedLiteralParserModule;
+import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
+import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
+import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
+import redactedrice.modularparser.lineparser.DefaultLineParserSupport;
+import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
+import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;
+import redactedrice.modularparser.literal.DefaultCharLiteralParser;
+import redactedrice.modularparser.literal.DefaultLiteralSupporter;
+import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
+import redactedrice.modularparser.literal.SimpleObjectLiteralParser;
+import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
+import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
+import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.reserved.WordReserver;
-import redactedrice.modularparser.scope.BasicScopeSupportModule;
+import redactedrice.modularparser.scope.DefaultScopeSupporter;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -69,41 +72,41 @@ public class Test {
     public static void main(String[] args) throws IOException {
         ModularParser parser = new ModularParser();
 
-        LineFormerSupportModule reader = new LineFormerSupportModule();
+        DefaultLineFormerSupporter reader = new DefaultLineFormerSupporter();
         parser.addModule(reader);
-        parser.addModule(new LineParserSupportModule());
-        parser.addModule(new LiteralSupportModule());
+        parser.addModule(new DefaultLineParserSupport());
+        parser.addModule(new DefaultLiteralSupporter());
+        parser.addModule(new DefaultNamedLiteralSupporter());
+        parser.addModule(new DefaultAliasSupporter());
+        parser.addModule(new DefaultReservedWordSupporter());
 
-        BasicScopeSupportModule scope = new BasicScopeSupportModule("BasicScopeHandler", true);
+        DefaultScopeSupporter scope = new DefaultScopeSupporter("BasicScopeHandler", true);
         scope.pushScope("global");
         scope.pushScope("file");
-        parser.addModule(scope);        
-        
-        parser.addModule(
-                new BasicSingleLineCommentModule("BasicCSingleLineCommentModule", "//"));
-        parser.addModule(
-                new BasicSingleLineCommentModule("BasicPythonSingleLineCommentModule", "#"));
-        parser.addModule(
-                new BasicMutliLineCommentModule("BasicMutliLineCommentModule", "/*", "*/"));
-        parser.addModule(
-                new GroupingConstructLineModifierModule("BasicParenthesisModule", "(", ")", false));
-        parser.addModule(
-                new LineContinuerLineModifierModule("BasicLineContinuerModule", "\\", true));
-
-        parser.addModule(new ChainingLiteralParserModule("->", parser));
-        parser.addModule(new NumberLiteralParserModule());
-        parser.addModule(new CharLiteralParserModule());
-        parser.addModule(new BoolLiteralParserModule());
-        parser.addModule(new SimpleObjectLiteralParserModule());
-
+        parser.addModule(scope);
 
         parser.addModule(
-                new ScopedNamedLiteralParserModule("BasicVarHandler", true, "variable"));
+                new DefaultSingleLineCommentLineModifier("BasicCSingleLineCommentModule", "//"));
+        parser.addModule(new DefaultSingleLineCommentLineModifier(
+                "BasicPythonSingleLineCommentModule", "#"));
         parser.addModule(
-                new ScopedNamedLiteralParserModule("BasicConstHandler", false, "constant"));
-        parser.addModule(new ScopedAliasParserModule());
+                new DefaultMutliLineCommentLineModifier("BasicMutliLineCommentModule", "/*", "*/"));
+        parser.addModule(
+                new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
+        parser.addModule(new DefaultContinuerLineModifier("BasicLineContinuerModule", "\\", true));
 
-        parser.addModule(new LambdaParserModule("TestPrintHandler",
+        parser.addModule(new DefaultChainingChainableLiteralParser("->", parser));
+        parser.addModule(new DefaultNumberLiteralParser());
+        parser.addModule(new DefaultCharLiteralParser());
+        parser.addModule(new DefaultBoolLiteralParser());
+        parser.addModule(new SimpleObjectLiteralParser());
+
+        parser.addModule(new DefaultScopedNamedLiteralParser("BasicVarHandler", true, "variable"));
+        parser.addModule(
+                new DefaultScopedNamedLiteralParser("BasicConstHandler", false, "constant"));
+        parser.addModule(new DefaultScopedAliasParser());
+
+        parser.addModule(new DefaultLambdaParser("TestPrintHandler",
                 line -> System.out.println("Print: " + line.substring(8)), "println"));
         parser.configureModules();
 

@@ -9,10 +9,10 @@ import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
 
-public class BaseReservedWordModule extends BaseModule implements WordReserver {
+public class BaseWordReserver extends BaseModule implements WordReserver {
     protected final Map<String, ReservedType> reservedWords = new HashMap<>();
 
-    protected BaseReservedWordModule(String name) {
+    protected BaseWordReserver(String name) {
         super(name);
     }
 

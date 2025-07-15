@@ -8,10 +8,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.literal.LiteralSupporter;
-import redactedrice.modularparser.scope.BaseScopedModule;
+import redactedrice.modularparser.scope.BaseScopedParser;
 import redactedrice.modularparser.scope.ScopeSupporter;
 
-public class ScopedNamedLiteralParserModule extends BaseScopedModule
+public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         implements NamedLiteralParser {
     protected final boolean reassignmentAllowed;
     protected final String keyword;
@@ -19,16 +19,18 @@ public class ScopedNamedLiteralParserModule extends BaseScopedModule
 
     protected LiteralSupporter literalHandler;
 
-    public ScopedNamedLiteralParserModule(String moduleName, boolean reassignmentAllowed, String keyword) {
+    public DefaultScopedNamedLiteralParser(String moduleName, boolean reassignmentAllowed,
+            String keyword) {
         super(moduleName);
         this.keyword = keyword.toLowerCase();
-//        this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
+        // this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
         matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
     @Override
     public void configure() {
+        super.configure();
         literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
@@ -91,7 +93,7 @@ public class ScopedNamedLiteralParserModule extends BaseScopedModule
             boolean assignment) {
         Object obj = literalHandler.evaluateLiteral(literal);
         if (obj != null) {
-            if (scope.setData(scopeName, name, getName(), obj)) {
+            if (scope.setData(scopeName, name, this, obj)) {
                 System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
                         + " " + name + " in scope " + scopeName + " with value: " + obj);
             }
@@ -103,17 +105,16 @@ public class ScopedNamedLiteralParserModule extends BaseScopedModule
 
     @Override
     public Optional<Object> tryParseLiteral(String literal) {
-        return Optional.ofNullable(scopeSupporter.getData(Optional.empty(), literal, getName()));
+        return Optional.ofNullable(scopeSupporter.getData(Optional.empty(), literal, this));
     }
 
     @Override
     public boolean isVariable(String var) {
-        return scopeSupporter.getData(Optional.empty(), var, getName()) != null;
+        return scopeSupporter.getData(Optional.empty(), var, this) != null;
     }
 
     @Override
     public Map<String, Object> getVariables() {
-        return Collections
-                .unmodifiableMap(scopeSupporter.getAllOwnedData(Optional.empty(), getName()));
+        return Collections.unmodifiableMap(scopeSupporter.getAllOwnedData(Optional.empty(), this));
     }
 }

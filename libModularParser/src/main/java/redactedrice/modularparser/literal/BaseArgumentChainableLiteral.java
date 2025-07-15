@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
 
-public abstract class ChainableParametersModule extends BaseModule implements ChainableLiteralParser {
+public abstract class BaseArgumentChainableLiteral extends BaseModule implements ChainableLiteralParser {
     protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
@@ -25,7 +25,7 @@ public abstract class ChainableParametersModule extends BaseModule implements Ch
 
     protected LiteralSupporter literalHandler;
 
-    protected ChainableParametersModule(String name, String keyword, String chainedArg, String[] requiredArgs,
+    protected BaseArgumentChainableLiteral(String name, String keyword, String chainedArg, String[] requiredArgs,
             String[] optionalArgs, Object[] optionalDefaults) {
         super(name);
         this.keyword = keyword.toLowerCase();

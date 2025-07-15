@@ -7,10 +7,10 @@ import java.io.IOException;
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineFormerSupporter;
 
-public class LineFormerSupportModule extends BaseSupporter<LineModifier> implements LineFormerSupporter {
+public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier> implements LineFormerSupporter {
     protected BufferedReader reader;
 
-    public LineFormerSupportModule() {
+    public DefaultLineFormerSupporter() {
         super("LineFormerSupportModule", LineModifier.class);
     }
 

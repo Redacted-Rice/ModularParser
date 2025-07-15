@@ -8,10 +8,10 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.BaseSupporter;
 
-public class NamedLiteralSupportModule extends BaseSupporter<NamedLiteralParser> implements NamedLiteralSupporter {
+public class DefaultNamedLiteralSupporter extends BaseSupporter<NamedLiteralParser> implements NamedLiteralSupporter {
     private final List<NamedLiteralParser> handlers = new ArrayList<>();
 
-    public NamedLiteralSupportModule() {
+    public DefaultNamedLiteralSupporter() {
         super("NamedLiteralSupportModule", NamedLiteralParser.class);
     }
 
