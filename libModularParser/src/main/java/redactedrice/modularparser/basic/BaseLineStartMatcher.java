@@ -3,6 +3,7 @@ package redactedrice.modularparser.basic;
 
 import redactedrice.modularparser.lineparser.LineParser;
 import redactedrice.modularparser.reserved.BaseWordReserver;
+import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 
 public abstract class BaseLineStartMatcher extends BaseWordReserver implements LineParser {
     protected final String keyword;
@@ -13,7 +14,7 @@ public abstract class BaseLineStartMatcher extends BaseWordReserver implements L
         this.keyword = keyword;
         reservedWords.put(keyword, ReservedType.EXCLUSIVE);
     }
-    
+
     public boolean matches(String logicalLine) {
         if (logicalLine == null || logicalLine.isBlank()) {
             return false;

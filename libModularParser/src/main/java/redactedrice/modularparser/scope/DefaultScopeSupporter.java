@@ -33,14 +33,13 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     }
 
     @Override
-    public boolean handleModule(Module module) {
+    public void handleModule(Module module) {
         if (module instanceof ScopedParser) {
             parsers.add((ScopedParser) module);
             Map<String, Set<String>> ownerScopeMap = new HashMap<>();
             scopeOrder.stream().forEach(scope -> ownerScopeMap.put(scope, new HashSet<>()));
             ownerMap.put(module.getName(), ownerScopeMap);
         }
-        return true;
     }
 
     @Override

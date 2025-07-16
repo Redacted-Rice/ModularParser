@@ -7,7 +7,8 @@ import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 
-public class DefaultChainingChainableLiteralParser extends BaseModule implements ChainableLiteralParser {
+public class DefaultChainingChainableLiteralParser extends BaseModule
+        implements ChainableLiteralParser {
     protected final String chainingToken;
 
     protected LiteralSupporter literalHandler;
@@ -20,7 +21,7 @@ public class DefaultChainingChainableLiteralParser extends BaseModule implements
     }
 
     @Override
-    public void configure() {
+    public void setModuleRefs() {
         literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
     }
 

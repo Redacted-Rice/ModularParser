@@ -81,7 +81,15 @@ public class ModularParser {
     }
 
     public void configureModules() {
-        modulesOrdered.forEach(module -> module.configure());
+        modulesOrdered.forEach(module -> module.setModuleRefs());
+        List<String> failed = modulesOrdered.stream()
+                .filter(module -> !module.checkModulesCompatibility()).map(Module::getName)
+                .toList();
+        if (failed.size() > 0) {
+            throw new IllegalArgumentException(
+                    "The following modules are incompatibile with at least one other module. Check previous errors for details: "
+                            + String.join(", ", failed));
+        }
     }
 
     // --------------- Main Parser Fns -----------------

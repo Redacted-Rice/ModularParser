@@ -29,8 +29,8 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
     }
 
     @Override
-    public void configure() {
-        super.configure();
+    public void setModuleRefs() {
+        super.setModuleRefs();
         literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
