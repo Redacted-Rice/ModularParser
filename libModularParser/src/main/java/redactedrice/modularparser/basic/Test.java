@@ -30,6 +30,7 @@ import redactedrice.modularparser.literal.SimpleObjectLiteralParser;
 import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
 import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
+import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
 

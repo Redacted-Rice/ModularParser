@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.Module;
-import redactedrice.modularparser.reserved.WordReserver.ReservedType;
 
 public class DefaultReservedWordSupporter extends BaseModule implements ReservedWordSupporter {
     private final List<WordReserver> reservers = new ArrayList<>();
@@ -20,30 +20,38 @@ public class DefaultReservedWordSupporter extends BaseModule implements Reserved
     }
 
     @Override
-    public boolean handleModule(Module module) {
+    public void handleModule(Module module) {
         if (module instanceof WordReserver) {
-            WordReserver asReserver = (WordReserver) module;
+            reservers.add((WordReserver) module);
+        }
+    }
+
+    @Override
+    public boolean checkModulesCompatibility() {
+        for (WordReserver beingChecked : reservers) {
             // Check for exclusive reserved-word conflicts
-            Set<String> exclusive = asReserver.getReservedWords(ReservedType.EXCLUSIVE);
-            for (WordReserver existing : reservers) {
-                Map<String, ReservedType> common = new HashMap<>(existing.getAllReservedWords());
+            Set<String> exclusive = beingChecked.getReservedWords(ReservedType.EXCLUSIVE);
+            for (WordReserver other : reservers) {
+                if (other == beingChecked) {
+                    continue;
+                }
+                Map<String, ReservedType> common = new HashMap<>(other.getAllReservedWords());
                 common.keySet().retainAll(exclusive);
                 if (!common.isEmpty()) {
-                    System.err.println("Module '" + asReserver.getName()
+                    System.err.println("Module '" + beingChecked.getName()
                             + "' exclusively reserves the following keys already reserved by '"
-                            + existing.getName() + "': " + common);
+                            + other.getName() + "': " + common);
                     return false;
                 }
             }
-            reservers.add(asReserver);
         }
         return true;
     }
 
     @Override
-    public boolean isReservedWord(String word) {
+    public boolean isReservedWord(String word, Optional<ReservedType> type) {
         for (WordReserver reserver : reservers) {
-            if (reserver.isReservedWord(word)) {
+            if (reserver.isReservedWord(word, type)) {
                 return true;
             }
         }
@@ -51,9 +59,16 @@ public class DefaultReservedWordSupporter extends BaseModule implements Reserved
     }
 
     @Override
-    public Set<String> getReservedWords() {
+    public Set<String> getReservedWords(ReservedType type) {
         Set<String> all = new HashSet<>();
-        // reservers.stream().forEach(reserver -> all.add(reserver.getAllReservedWords()));
+        reservers.stream().forEach(reserver -> all.addAll(reserver.getReservedWords(type)));
+        return all;
+    }
+
+    @Override
+    public Map<String, ReservedType> getAllReservedWords() {
+        Map<String, ReservedType> all = new HashMap<>();
+        reservers.stream().forEach(reserver -> all.putAll(reserver.getAllReservedWords()));
         return all;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 
 public class BaseWordReserver extends BaseModule implements WordReserver {
     protected final Map<String, ReservedType> reservedWords = new HashMap<>();

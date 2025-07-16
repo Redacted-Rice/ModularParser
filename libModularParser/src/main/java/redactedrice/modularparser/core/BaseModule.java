@@ -21,7 +21,12 @@ public abstract class BaseModule implements Module {
     }
 
     @Override
-    public void configure() {}
+    public void setModuleRefs() {}
+
+    @Override
+    public boolean checkModulesCompatibility() {
+        return true;
+    }
 
     // TODO: Move to a variable support module
     protected boolean isValidName(String name) {

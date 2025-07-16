@@ -14,11 +14,10 @@ public class BaseSupporter<T> extends BaseModule implements Supporter {
     }
 
     @Override
-    public boolean handleModule(Module module) {
+    public void handleModule(Module module) {
         if (tClass.isInstance(module)) {
             submodules.add(tClass.cast(module));
         }
-        return true;
     }
 
 }
