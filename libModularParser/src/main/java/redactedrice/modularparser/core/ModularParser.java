@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import redactedrice.modularparser.core.LineFormerSupporter.LogicalLine;
+
 /**
  * A flexible Parser that can be configured to your needs and customized
  * with modules for specific syntax. This includes:
@@ -95,9 +97,9 @@ public class ModularParser {
     // --------------- Main Parser Fns -----------------
 
     public void parse() {
-        String line;
-        while ((line = lineFormer.getNextLogicalLine()) != null) {
-            lineParser.parseLine(line);
+        LogicalLine logicalLine;
+        while ((logicalLine = lineFormer.getNextLogicalLine()) != null) {
+            lineParser.parseLine(logicalLine.line());
         }
     }
 

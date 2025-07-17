@@ -7,8 +7,10 @@ import java.io.IOException;
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineFormerSupporter;
 
-public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier> implements LineFormerSupporter {
+public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
+        implements LineFormerSupporter {
     protected BufferedReader reader;
+    protected int lineNumber = 0;
 
     public DefaultLineFormerSupporter() {
         super("LineFormerSupportModule", LineModifier.class);
@@ -16,10 +18,21 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier> impl
 
     public void setReader(BufferedReader reader) {
         this.reader = reader;
+        lineNumber = 0;
+    }
+
+    public void resetReader() {
+        try {
+            reader.reset();
+            lineNumber = 0;
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public String getNextLogicalLine() {
+    public LogicalLine getNextLogicalLine() {
         String raw = getNextLine();
         if (raw == null) {
             return null;
@@ -50,7 +63,7 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier> impl
                 continue;
             }
         }
-        return logical;
+        return new LogicalLine(logical, lineNumber++);
 
     }
 
