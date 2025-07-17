@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.scope.BaseScopedParser;
-import redactedrice.modularparser.scope.ScopeSupporter;
 
 public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         implements NamedLiteralParser {
@@ -59,7 +58,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
 
             if (!scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
                 if (reassignmentAllowed) {
-                    addLiteral(scopeSupporter, m.group(3), scope, m.group(2), false);
+                    addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
                     System.err.println(getName() + ": Attempted to reassign " + keyword + " "
                             + m.group(2) + " in scope " + scope + " with " + m.group(3));
@@ -80,7 +79,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             }
 
             if (scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
-                addLiteral(scopeSupporter, m.group(3), scope, m.group(2), true);
+                addLiteral(m.group(3), scope, m.group(2), true);
             } else {
                 System.err.println(getName() + ": Attempted to redefine existing " + keyword + " "
                         + m.group(2) + " in scope " + scope + " with " + m.group(3));
@@ -89,11 +88,10 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         return true;
     }
 
-    private void addLiteral(ScopeSupporter scope, String literal, String scopeName, String name,
-            boolean assignment) {
+    private void addLiteral(String literal, String scopeName, String name, boolean assignment) {
         Object obj = literalHandler.evaluateLiteral(literal);
         if (obj != null) {
-            if (scope.setData(scopeName, name, this, obj)) {
+            if (scopeSupporter.setData(scopeName, name, this, obj)) {
                 System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
                         + " " + name + " in scope " + scopeName + " with value: " + obj);
             }
@@ -106,6 +104,10 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
     @Override
     public Optional<Object> tryParseLiteral(String literal) {
         return Optional.ofNullable(scopeSupporter.getData(Optional.empty(), literal, this));
+    }
+
+    public boolean setVariable(String scopeName, String var, Object val) {
+        return scopeSupporter.setData(scopeName, var, this, val);
     }
 
     @Override
