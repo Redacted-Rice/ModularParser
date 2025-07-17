@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.test;
 
 public class SimpleObject {
 	public int intField;
