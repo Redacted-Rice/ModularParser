@@ -83,7 +83,7 @@ public class DefaultScopedAliasParser extends BaseScopedParser
     @Override
     public boolean isReservedWord(String word, Optional<ReservedType> type) {
         if (type.isEmpty() || type.get() == ReservedType.EXCLUSIVE) {
-            return word.equals(type) || isAlias(word);
+            return word.equals(keyword) || isAlias(word);
         }
         return false;
     }
@@ -110,6 +110,10 @@ public class DefaultScopedAliasParser extends BaseScopedParser
     @Override
     public String replaceAliases(String line) {
         return modifyLine(line);
+    }
+
+    public boolean setAlias(String scopeName, String alias, String val) {
+        return scopeSupporter.setData(scopeName, alias, this, val);
     }
 
     @Override
