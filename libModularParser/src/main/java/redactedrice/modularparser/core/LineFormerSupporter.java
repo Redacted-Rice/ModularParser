@@ -2,7 +2,9 @@ package redactedrice.modularparser.core;
 
 
 public interface LineFormerSupporter extends Supporter {
-    public record LogicalLine(String line, int number) {}
+    public record LineRange(int first, int last) {}
 
-    public LogicalLine getNextLogicalLine();
+    public String getNextLogicalLine();
+
+    public LineRange getCurrentLineRange();
 }

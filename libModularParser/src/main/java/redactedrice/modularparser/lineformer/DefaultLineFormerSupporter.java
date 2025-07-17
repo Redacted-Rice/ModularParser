@@ -10,7 +10,8 @@ import redactedrice.modularparser.core.LineFormerSupporter;
 public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
         implements LineFormerSupporter {
     protected BufferedReader reader;
-    protected int lineNumber = 0;
+    protected int lineNumberStart = 0;
+    protected int lineNumberEnd = 0;
 
     public DefaultLineFormerSupporter() {
         super("LineFormerSupportModule", LineModifier.class);
@@ -18,13 +19,15 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
 
     public void setReader(BufferedReader reader) {
         this.reader = reader;
-        lineNumber = 0;
+        lineNumberStart = 0;
+        lineNumberEnd = 0;
     }
 
     public void resetReader() {
         try {
             reader.reset();
-            lineNumber = 0;
+            lineNumberStart = 0;
+            lineNumberEnd = 0;
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -32,7 +35,8 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
     }
 
     @Override
-    public LogicalLine getNextLogicalLine() {
+    public String getNextLogicalLine() {
+        lineNumberStart = lineNumberEnd + 1;
         String raw = getNextLine();
         if (raw == null) {
             return null;
@@ -63,15 +67,21 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
                 continue;
             }
         }
-        return new LogicalLine(logical, lineNumber++);
+        return logical;
 
     }
 
     public String getNextLine() {
         try {
+            lineNumberEnd++;
             return reader.readLine();
         } catch (IOException e) {
             return null;
         }
+    }
+
+    @Override
+    public LineRange getCurrentLineRange() {
+        return new LineRange(lineNumberStart, lineNumberEnd);
     }
 }
