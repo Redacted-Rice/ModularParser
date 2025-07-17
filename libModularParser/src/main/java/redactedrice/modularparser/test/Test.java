@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.test;
 
 
 import java.io.BufferedReader;
@@ -20,6 +20,7 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
+import redactedrice.modularparser.lineparser.DefaultLambdaParser;
 import redactedrice.modularparser.lineparser.DefaultLineParserSupport;
 import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;

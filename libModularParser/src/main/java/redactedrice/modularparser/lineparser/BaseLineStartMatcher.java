@@ -1,7 +1,6 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.lineparser;
 
 
-import redactedrice.modularparser.lineparser.LineParser;
 import redactedrice.modularparser.reserved.BaseWordReserver;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 

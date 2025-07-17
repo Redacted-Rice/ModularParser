@@ -4,7 +4,7 @@ package redactedrice.modularparser.literal;
 import java.util.Map;
 import java.util.Optional;
 
-import redactedrice.modularparser.basic.SimpleObject;
+import redactedrice.modularparser.test.SimpleObject;
 
 public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
     private final static String[] argsOrdered = new String[] {"intVal", "boolVal", "strVal", "so"

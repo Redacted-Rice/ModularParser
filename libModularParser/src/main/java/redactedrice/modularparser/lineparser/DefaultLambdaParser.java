@@ -1,4 +1,4 @@
-package redactedrice.modularparser.basic;
+package redactedrice.modularparser.lineparser;
 
 public class DefaultLambdaParser extends BaseLineStartMatcher {
     private final DefaultLambdaParserFn handler;
