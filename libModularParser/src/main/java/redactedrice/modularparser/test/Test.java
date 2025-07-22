@@ -30,6 +30,8 @@ import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
 import redactedrice.modularparser.literal.SimpleObjectLiteralParser;
 import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
 import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
+import redactedrice.modularparser.log.DefaultConsoleLogHandler;
+import redactedrice.modularparser.log.DefaultLogSupporter;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
@@ -78,9 +80,12 @@ public class Test {
         parser.addModule(reader);
         parser.addModule(new DefaultLineParserSupport());
         parser.addModule(new DefaultLiteralSupporter());
+        parser.addModule(new DefaultLogSupporter());
         parser.addModule(new DefaultNamedLiteralSupporter());
         parser.addModule(new DefaultAliasSupporter());
         parser.addModule(new DefaultReservedWordSupporter());
+
+        parser.addModule(new DefaultConsoleLogHandler());
 
         DefaultScopeSupporter scope = new DefaultScopeSupporter("BasicScopeHandler", true);
         scope.pushScope("global");

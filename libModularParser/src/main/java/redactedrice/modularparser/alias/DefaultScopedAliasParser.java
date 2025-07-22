@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.lineformer.LineModifier;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.BaseScopedParser;
@@ -75,7 +76,7 @@ public class DefaultScopedAliasParser extends BaseScopedParser
         // }
 
         if (scopeSupporter.setData(scope, key, this, val)) {
-            System.out.println("Alias: Added alias " + key + " with value: " + val);
+            logger.log(LogLevel.DEBUG, "Alias: Added alias " + key + " with value: " + val);
         }
         return true;
     }

@@ -1,9 +1,9 @@
 package redactedrice.modularparser.scope;
 
 
-import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.log.BaseLoggingModule;
 
-public abstract class BaseScopedParser extends BaseModule implements ScopedParser {
+public abstract class BaseScopedParser extends BaseLoggingModule implements ScopedParser {
     protected ScopeSupporter scopeSupporter;
 
     protected BaseScopedParser(String name) {
@@ -12,6 +12,7 @@ public abstract class BaseScopedParser extends BaseModule implements ScopedParse
 
     @Override
     public void setModuleRefs() {
+        super.setModuleRefs();
         scopeSupporter = parser.getSupporterOfType(ScopeSupporter.class);
     }
 }
