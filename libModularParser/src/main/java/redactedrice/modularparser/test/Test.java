@@ -32,6 +32,7 @@ import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
 import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.log.DefaultConsoleLogHandler;
 import redactedrice.modularparser.log.DefaultLogSupporter;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
@@ -80,11 +81,11 @@ public class Test {
         parser.addModule(reader);
         parser.addModule(new DefaultLineParserSupport());
         parser.addModule(new DefaultLiteralSupporter());
-        parser.addModule(new DefaultLogSupporter());
+        DefaultLogSupporter logger = new DefaultLogSupporter();
+        parser.addModule(logger);
         parser.addModule(new DefaultNamedLiteralSupporter());
         parser.addModule(new DefaultAliasSupporter());
         parser.addModule(new DefaultReservedWordSupporter());
-
         parser.addModule(new DefaultConsoleLogHandler());
 
         DefaultScopeSupporter scope = new DefaultScopeSupporter("BasicScopeHandler", true);
@@ -114,7 +115,7 @@ public class Test {
         parser.addModule(new DefaultScopedAliasParser());
 
         parser.addModule(new DefaultLambdaParser("TestPrintHandler",
-                line -> System.out.println("Print: " + line.substring(8)), "println"));
+                line -> logger.log(LogLevel.INFO, "Print: %s", line.substring(8)), "println"));
         parser.configureModules();
 
         // Test script as a multiline string

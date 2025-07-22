@@ -1,10 +1,11 @@
 package redactedrice.modularparser.comment;
 
 
-import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.lineformer.LineModifier;
+import redactedrice.modularparser.log.BaseLoggingModule;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultMutliLineCommentLineModifier extends BaseModule implements LineModifier {
+public class DefaultMutliLineCommentLineModifier extends BaseLoggingModule implements LineModifier {
     protected final String startToken;
     protected final String endToken;
 
@@ -31,9 +32,10 @@ public class DefaultMutliLineCommentLineModifier extends BaseModule implements L
         // We have a comment and should have a end too
         int endIdx = line.indexOf(endToken);
         if (endIdx < 0) {
-            // TODO: revisit how to handle exceptions
-            throw new RuntimeException(
-                    "ModularParser logic errror detected: Passed a line with a start token and not an end token!");
+            logger.log(LogLevel.ERROR,
+                    "ModularParser logic errror detected: Passed a line with a start token and not an end token!\n%s",
+                    line);
+            return line;
         }
 
         // Build a string with the comment replaced by a space

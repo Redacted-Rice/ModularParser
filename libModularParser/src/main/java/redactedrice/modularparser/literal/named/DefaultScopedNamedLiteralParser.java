@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.literal.LiteralSupporter;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 import redactedrice.modularparser.scope.BaseScopedParser;
 
 public class DefaultScopedNamedLiteralParser extends BaseScopedParser
@@ -45,14 +46,14 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             if (scope.isEmpty()) { // scope was not specified
                 scope = scopeSupporter.getScope(m.group(2));
                 if (scope == null) {
-                    System.err.println(getName() + ": Attempted to reassign undefined " + keyword
-                            + " " + m.group(2) + " with " + m.group(3));
+                    logger.log(LogLevel.ERROR, "%s: Attempted to reassign undefined %s %s with %s",
+                            getName(), keyword, m.group(2), m.group(3));
                     return true;
                 }
             }
 
             if (!isValidName(m.group(2))) {
-                System.err.println("Invalid variable name: " + m.group(2));
+                logger.log(LogLevel.ERROR, "%s: Invalid variable name: %s", getName(), m.group(2));
                 return true;
             }
 
@@ -60,12 +61,14 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
                 if (reassignmentAllowed) {
                     addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
-                    System.err.println(getName() + ": Attempted to reassign " + keyword + " "
-                            + m.group(2) + " in scope " + scope + " with " + m.group(3));
+                    logger.log(LogLevel.ERROR,
+                            "%s: Attempted to reassign %s %s in scope %s with %s", getName(),
+                            keyword, m.group(2), scope, m.group(3));
                 }
             } else {
-                System.err.println(getName() + ": Attempted to reassign non-existing " + keyword
-                        + " " + m.group(2) + " in scope " + scope + " with " + m.group(3));
+                logger.log(LogLevel.ERROR,
+                        "%s: Attempted to reassign non-existing %s %s in scope %s with %s",
+                        getName(), keyword, m.group(2), scope, m.group(3));
             }
         } else {
             // Assignment
@@ -74,15 +77,16 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             }
 
             if (!isValidName(m.group(2))) {
-                System.err.println("Invalid variable name: " + m.group(2));
+                logger.log(LogLevel.ERROR, "%s: Invalid variable name: %s", getName(), m.group(2));
                 return true;
             }
 
             if (scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
-                System.err.println(getName() + ": Attempted to redefine existing " + keyword + " "
-                        + m.group(2) + " in scope " + scope + " with " + m.group(3));
+                logger.log(LogLevel.ERROR,
+                        "%s: Attempted to redefine existing %s %s in scope %s with %s", getName(),
+                        keyword, m.group(2), scope, m.group(3));
             }
         }
         return true;
@@ -92,12 +96,12 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         Object obj = literalHandler.evaluateLiteral(literal);
         if (obj != null) {
             if (scopeSupporter.setData(scopeName, name, this, obj)) {
-                System.out.println(getName() + ": " + (assignment ? "Added " : "Changed ") + keyword
-                        + " " + name + " in scope " + scopeName + " with value: " + obj);
+                logger.log(LogLevel.DEBUG, "%s: %s %s %s in scope %s with %s", getName(),
+                        (assignment ? "Added " : "Changed "), keyword, name, scopeName, obj);
             }
         } else {
-            throw new IllegalArgumentException("VariableHandler: For " + keyword + " " + name
-                    + "\" + cannot parse value: " + literal);
+            logger.log(LogLevel.ERROR, "%s: For %s %s cannot parse value: %s", getName(), keyword,
+                    name, literal);
         }
     }
 
