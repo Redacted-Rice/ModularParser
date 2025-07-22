@@ -10,9 +10,10 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.log.BaseLoggingModule;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public abstract class BaseArgumentChainableLiteral extends BaseModule
+public abstract class BaseArgumentChainableLiteral extends BaseLoggingModule
         implements ChainableLiteralParser {
     protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
@@ -75,7 +76,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
 
         for (String required : requiredArgs) {
             if (!parsedArgs.containsKey(required)) {
-                System.err.println("Missing required arguement: " + required);
+                logger.log(LogLevel.ERROR, "Missing required arguement: %s", required);
                 return false;
             }
         }
@@ -118,7 +119,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             String[] argSplit = arg.split(ARG_NAME_DELIMITER, 2);
             if (argSplit.length == 1 || arg.startsWith("\"") && arg.endsWith("\"")) {
                 if (hasFoundNamed) {
-                    System.err.println("Found positional arg after a named arg was used");
+                    logger.log(LogLevel.ERROR, "Found positional arg after a named arg was used");
                     return false;
                 }
                 positionalParams.add(arg);
@@ -142,7 +143,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             } else if (optionalIdx < optionalArgs.length) {
                 parsedArgs.put(optionalArgs[optionalIdx++], parsed);
             } else {
-                System.err.println("Too many args were found");
+                logger.log(LogLevel.ERROR, "Too many args were found");
                 return false;
             }
         }

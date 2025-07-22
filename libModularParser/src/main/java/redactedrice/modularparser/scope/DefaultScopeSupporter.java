@@ -12,11 +12,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.lineparser.LineParser;
+import redactedrice.modularparser.log.BaseLoggingModule;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter, LineParser {
+public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSupporter, LineParser {
     private record OwnedObject(String owner, Object obj) {}
 
     protected final List<ScopedParser> parsers = new LinkedList<>();
@@ -60,7 +61,8 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     @Override
     public void pushScope(String scope) {
         if (scopedVals.containsKey(scope)) {
-            System.err.println("Adding already exising scope, moving to last defined: " + scope);
+            logger.log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s",
+                    scope);
             scopeOrder.remove(scope);
         } else {
             scopedVals.put(scope, new HashMap<>());
@@ -86,7 +88,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
                 scopeMap.remove(scope);
             }
         } else {
-            System.err.println("Attempting to remove undefined scope: " + scope);
+            logger.log(LogLevel.ERROR, "Attempting to remove undefined scope: %s", scope);
         }
     }
 
@@ -191,8 +193,9 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         OwnedObject obj = scopeMap.get(name);
         if (obj != null) {
             if (!obj.owner().equals(owner.getName())) {
-                System.err.println(owner.getName() + " attempted to set value for " + name
-                        + " in scope " + scope + " that is owned by " + obj.owner());
+                logger.log(LogLevel.ERROR,
+                        "%s attempted to set value for %s in scope %s that is owned by %s",
+                        owner.getName(), name, scope, obj.owner());
                 return false;
             }
         }

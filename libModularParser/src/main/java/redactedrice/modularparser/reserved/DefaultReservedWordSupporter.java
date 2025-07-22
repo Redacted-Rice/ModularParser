@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.log.BaseLoggingModule;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultReservedWordSupporter extends BaseModule implements ReservedWordSupporter {
+public class DefaultReservedWordSupporter extends BaseLoggingModule
+        implements ReservedWordSupporter {
     private final List<WordReserver> reservers = new ArrayList<>();
 
     public DefaultReservedWordSupporter() {
@@ -38,9 +40,9 @@ public class DefaultReservedWordSupporter extends BaseModule implements Reserved
                 Map<String, ReservedType> common = new HashMap<>(other.getAllReservedWords());
                 common.keySet().retainAll(exclusive);
                 if (!common.isEmpty()) {
-                    System.err.println("Module '" + beingChecked.getName()
-                            + "' exclusively reserves the following keys already reserved by '"
-                            + other.getName() + "': " + common);
+                    logger.log(LogLevel.ERROR,
+                            "Module '%s' exclusively reserves the following keys already reserved by '%s': %s",
+                            beingChecked.getName(), other.getName(), common);
                     return false;
                 }
             }
