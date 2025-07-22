@@ -4,45 +4,45 @@ package redactedrice.modularparser.log;
 import java.util.EnumSet;
 import java.util.Set;
 
-import redactedrice.modularparser.core.BaseSupporter;
-import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultConsoleLogHandler extends BaseSupporter<LogHandler> implements LogSupporter {
+public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     protected final Set<LogLevel> enabledLevels;
 
+    public DefaultConsoleLogHandler() {
+        super("DefaultConsoleLogSupporter");
+        this.enabledLevels = EnumSet.allOf(LogLevel.class);
+    }
+
     public DefaultConsoleLogHandler(Set<LogLevel> enabledLevels) {
-        super("DefaultConsoleLogSupporter", LogHandler.class);
+        super("DefaultConsoleLogSupporter");
         this.enabledLevels = EnumSet.copyOf(enabledLevels);
     }
 
     @Override
-    public void handleModule(Module module) {}
-
-    @Override
-    public void log(LogLevel level, String message) {
-        if (isEnabled(level)) {
-            System.out.println(format(level, message));
+    public void add(LogLevel level, String log) {
+        if (enabled(level)) {
+            if (level == LogLevel.ERROR) {
+                System.err.println(format(level, log));
+            } else {
+                System.out.println(format(level, log));
+            }
         }
     }
 
     @Override
-    public void log(LogLevel level, String format, Object... args) {
-        if (isEnabled(level)) {
-            String msg = String.format(format, args);
-            System.out.println(format(level, msg));
-        }
-    }
-
-    @Override
-    public void log(LogLevel level, String message, Throwable throwable) {
-        if (isEnabled(level)) {
-            System.out.println(format(level, message));
-            throwable.printStackTrace(System.out);
-        }
-    }
-
-    public boolean isEnabled(LogLevel level) {
+    public boolean enabled(LogLevel level) {
         return enabledLevels.contains(level);
+    }
+
+    @Override
+    public void enable(LogLevel level, boolean enabled) {
+        if (enabled) {
+            enabledLevels.add(level);
+        } else {
+            enabledLevels.remove(level);
+        }
     }
 
     private String format(LogLevel level, String message) {

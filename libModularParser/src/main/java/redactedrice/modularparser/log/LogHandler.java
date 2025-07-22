@@ -2,7 +2,12 @@ package redactedrice.modularparser.log;
 
 
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
 public interface LogHandler extends Module {
-    void add(String log);
+    void add(LogLevel level, String log);
+
+    boolean enabled(LogLevel level);
+
+    void enable(LogLevel level, boolean enabled);
 }
