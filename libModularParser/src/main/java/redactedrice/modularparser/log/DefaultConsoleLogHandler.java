@@ -46,6 +46,6 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     }
 
     private String format(LogLevel level, String message) {
-        return "[" + level.name() + "] " + message;
+        return "[" + String.format("%-5s", level.name()) + "] " + message;
     }
 }
