@@ -102,8 +102,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         if (scopeOrder.contains(words[0])) {
             return words;
         } else if (allowImplicit) {
-            return new String[] { "", logicalLine
-            };
+            return new String[] {"", logicalLine};
         }
         return null;
     }
