@@ -28,6 +28,10 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
+    public static boolean isValidName(String name) {
+        return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
+    }
+
     @Override
     public void setModuleRefs() {
         super.setModuleRefs();

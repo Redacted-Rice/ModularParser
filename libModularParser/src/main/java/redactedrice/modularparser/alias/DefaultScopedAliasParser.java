@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
+import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.BaseScopedParser;
@@ -26,6 +27,10 @@ public class DefaultScopedAliasParser extends BaseScopedParser
         super("BasicAliasHandler");
         keyword = "alias";
         aliasDef = Pattern.compile("^\\s*" + keyword + "\\s+(\\w+)\\s*=\\s*(.+)$");
+    }
+
+    public static boolean isValidName(String name) {
+        return DefaultScopedNamedLiteralParser.isValidName(name);
     }
 
     @Override

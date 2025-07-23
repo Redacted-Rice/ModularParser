@@ -68,9 +68,4 @@ public abstract class BaseModule implements Module {
             log(level, notifyOnError, parser.getLogger().appendStackTrace(message, error));
         }
     }
-
-    // TODO: Move to a variable support module
-    protected boolean isValidName(String name) {
-        return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
-    }
 }
