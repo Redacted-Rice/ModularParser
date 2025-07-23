@@ -6,10 +6,9 @@ import java.io.IOException;
 
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineFormerSupporter;
-import redactedrice.modularparser.log.BaseLoggingSupporter;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultLineFormerSupporter extends BaseLoggingSupporter<LineModifier>
+public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
         implements LineFormerSupporter {
     protected BufferedReader reader;
     protected int lineNumberStart = 0;
@@ -30,6 +29,7 @@ public class DefaultLineFormerSupporter extends BaseLoggingSupporter<LineModifie
             reader.reset();
             lineNumberStart = 0;
             lineNumberEnd = 0;
+            parser.resetStatus();
         } catch (IOException e) {
             log(LogLevel.ERROR, "Failed to reset reader");
         }
@@ -77,6 +77,7 @@ public class DefaultLineFormerSupporter extends BaseLoggingSupporter<LineModifie
             lineNumberEnd++;
             return reader.readLine();
         } catch (IOException e) {
+        	// TODO: Separate out expected case from failures?
             return null;
         }
     }

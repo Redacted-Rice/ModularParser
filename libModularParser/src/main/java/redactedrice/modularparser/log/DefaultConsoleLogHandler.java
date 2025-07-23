@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     protected final Set<LogLevel> enabledLevels;

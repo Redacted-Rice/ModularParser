@@ -1,9 +1,9 @@
 package redactedrice.modularparser.scope;
 
 
-import redactedrice.modularparser.log.BaseLoggingModule;
+import redactedrice.modularparser.core.BaseModule;
 
-public abstract class BaseScopedParser extends BaseLoggingModule implements ScopedParser {
+public abstract class BaseScopedParser extends BaseModule implements ScopedParser {
     protected ScopeSupporter scopeSupporter;
 
     protected BaseScopedParser(String name) {

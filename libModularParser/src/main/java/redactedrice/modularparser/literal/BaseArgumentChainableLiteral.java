@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.log.BaseLoggingModule;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public abstract class BaseArgumentChainableLiteral extends BaseLoggingModule
+public abstract class BaseArgumentChainableLiteral extends BaseModule
         implements ChainableLiteralParser {
     protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
+
 /**
  * A flexible Parser that can be configured to your needs and customized
  * with modules for specific syntax. This includes:
@@ -16,13 +18,17 @@ import java.util.Map;
  * Modules for parsing instructions
  */
 public class ModularParser {
-    private LineFormerSupporter lineFormer = null;
-    private LineParserSupporter lineParser = null;
+	public enum Status { OK, ERROR, ABORT};
+	
+	protected Status status = Status.OK;
+	
+	protected LineFormerSupporter lineFormer = null;
+	protected LineParserSupporter lineParser = null;
+	protected LogSupporter logger = null;
 
-    private final List<Module> modulesOrdered = new ArrayList<>();
-    private final Map<String, Module> index = new HashMap<>();
-    // TODO: Need to work on how to store/access these
-    private final Map<String, Supporter> supporters = new HashMap<>();
+    protected final List<Module> modulesOrdered = new ArrayList<>();
+    protected final Map<String, Module> index = new HashMap<>();
+    protected final Map<String, Supporter> supporters = new HashMap<>();
 
     // --------------- Configure parser Fns -----------------
 
@@ -33,6 +39,14 @@ public class ModularParser {
         }
 
         module.setParser(this);
+        
+        // See if its the log supporter
+        if (module instanceof LogSupporter) {
+            if (logger != null) {
+                throw new RuntimeException("Attempted to add a second line former!");
+            }
+            logger = (LogSupporter) module;
+        }
 
         // Pass all to existing supporters
         for (Supporter supporter : supporters.values()) {
@@ -96,12 +110,51 @@ public class ModularParser {
 
     public void parse() {
         String line;
-        while ((line = lineFormer.getNextLogicalLine()) != null) {
+        while (!aborted() && (line = lineFormer.getNextLogicalLine()) != null) {
             lineParser.parseLine(line);
         }
+    	if (logger != null) {
+	        if (aborted()) {
+	        	logger.log(LogLevel.ERROR, "ModularParser: Aborted! See previous logs for details");
+	        } else if (getStatus() == Status.ERROR) {
+	        	logger.log(LogLevel.ERROR, "ModularParser: Failed to parser some lines! See previous logs for details");
+	        }
+    	}
     }
 
-    // ------------------ Getters ----------------------
+    // ------------------ Status Fns -------------------
+    
+    public void notifyError() {
+    	if (status.compareTo(Status.ERROR) < 0) {
+    		if (logger != null) {
+    			logger.log(LogLevel.ERROR, "ModularParser: First Error Signaled");
+    		}
+    		status = Status.ERROR;
+    	}
+    }
+    
+    public void notifyAbort() {
+    	if (status.compareTo(Status.ABORT) < 0) {
+    		if (logger != null) {
+    			logger.log(LogLevel.ERROR, "ModularParser: First Abort Signaled");
+    		}
+    		status = Status.ABORT;
+    	}
+    }
+    
+    public void resetStatus() {
+    	status = Status.OK;
+    }
+    
+    public Status getStatus() {
+    	return status;
+    }
+    
+    public boolean aborted() {
+    	return status == Status.ABORT;
+    }
+
+    // ------------------ Module Getters ----------------------
     public Module getModule(String name) {
         return index.get(name);
     }
@@ -113,5 +166,9 @@ public class ModularParser {
     public <T> T getSupporterOfType(Class<T> clazz) {
         // Should be only one
         return modulesOrdered.stream().filter(clazz::isInstance).findFirst().map(clazz::cast).get();
+    }
+    
+    public LogSupporter getLogger() {
+		return logger;
     }
 }

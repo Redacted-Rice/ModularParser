@@ -1,11 +1,11 @@
 package redactedrice.modularparser.comment;
 
 
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
-import redactedrice.modularparser.log.BaseLoggingModule;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultMutliLineCommentLineModifier extends BaseLoggingModule implements LineModifier {
+public class DefaultMutliLineCommentLineModifier extends BaseModule implements LineModifier {
     protected final String startToken;
     protected final String endToken;
 
