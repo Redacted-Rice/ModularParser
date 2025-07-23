@@ -1,10 +1,10 @@
 package redactedrice.modularparser.lineparser;
 
+import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineParserSupporter;
-import redactedrice.modularparser.log.BaseLoggingSupporter;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultLineParserSupport extends BaseLoggingSupporter<LineParser> implements LineParserSupporter {
+public class DefaultLineParserSupport extends BaseSupporter<LineParser> implements LineParserSupporter {
 
 	public DefaultLineParserSupport() {
 		super("LineParserSupportModule", LineParser.class);
@@ -12,12 +12,13 @@ public class DefaultLineParserSupport extends BaseLoggingSupporter<LineParser> i
 
 	@Override
 	public void parseLine(String logicalLine) {
-		// Now route to the first matching Module
+		// Route to the first matching Module
 		for (LineParser handler : submodules) {
 			if (handler.tryParseLine(logicalLine)) {
                 return;
             }
         }
+		// Log an error if we failed to find one
 		log(LogLevel.ERROR, "Unhandled Line: %s", logicalLine);
 	}
 }

@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.Module;
-import redactedrice.modularparser.log.BaseLoggingModule;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultReservedWordSupporter extends BaseLoggingModule
+public class DefaultReservedWordSupporter extends BaseModule
         implements ReservedWordSupporter {
     private final List<WordReserver> reservers = new ArrayList<>();
 

@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.literal.LiteralSupporter;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
 import redactedrice.modularparser.scope.BaseScopedParser;
 
 public class DefaultScopedNamedLiteralParser extends BaseScopedParser

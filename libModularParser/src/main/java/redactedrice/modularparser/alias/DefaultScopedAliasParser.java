@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.BaseScopedParser;

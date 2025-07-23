@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter;
 import redactedrice.modularparser.core.Module;
 
 public class DefaultLogSupporter extends BaseModule implements LogSupporter {

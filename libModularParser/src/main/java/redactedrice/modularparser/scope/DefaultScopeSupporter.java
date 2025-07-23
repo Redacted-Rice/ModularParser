@@ -13,11 +13,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineparser.LineParser;
-import redactedrice.modularparser.log.BaseLoggingModule;
-import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSupporter, LineParser {
+public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter, LineParser {
     private record OwnedObject(String owner, Object obj) {}
 
     protected final List<ScopedParser> parsers = new LinkedList<>();
