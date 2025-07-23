@@ -108,7 +108,7 @@ public class ModularParser {
 
     // --------------- Main Parser Fns -----------------
 
-    public void parse() {
+    public boolean parse() {
         String line;
         while (!aborted() && (line = lineFormer.getNextLogicalLine()) != null) {
             lineParser.parseLine(line);
@@ -120,6 +120,7 @@ public class ModularParser {
 	        	logger.log(LogLevel.ERROR, "ModularParser: Failed to parser some lines! See previous logs for details");
 	        }
     	}
+    	return status == Status.OK;
     }
 
     // ------------------ Status Fns -------------------
