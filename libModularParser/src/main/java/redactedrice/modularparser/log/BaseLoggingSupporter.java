@@ -1,15 +1,14 @@
 package redactedrice.modularparser.log;
 
-
-import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class BaseLoggingModule extends BaseModule {
+public class BaseLoggingSupporter<T> extends BaseSupporter<T> {
     protected LogSupporter logger;
 
-    protected BaseLoggingModule(String name) {
-        super(name);
-    }
+	protected BaseLoggingSupporter(String name, Class<T> tClass) {
+		super(name, tClass);
+	}
 
     @Override
     public void setModuleRefs() {

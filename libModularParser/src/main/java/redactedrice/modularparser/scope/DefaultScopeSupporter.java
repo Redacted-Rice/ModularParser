@@ -61,7 +61,7 @@ public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSup
     @Override
     public void pushScope(String scope) {
         if (scopedVals.containsKey(scope)) {
-            logger.log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s",
+            log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s",
                     scope);
             scopeOrder.remove(scope);
         } else {
@@ -74,7 +74,7 @@ public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSup
     @Override
     public void popScope() {
         if (scopeOrder.isEmpty()) {
-            System.err.println("No scope to pop!");
+        	log(LogLevel.ERROR, "No scope to pop");
         }
         removeScope(scopeOrder.peek());
     }
@@ -88,7 +88,7 @@ public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSup
                 scopeMap.remove(scope);
             }
         } else {
-            logger.log(LogLevel.ERROR, "Attempting to remove undefined scope: %s", scope);
+            log(LogLevel.ERROR, "Attempting to remove undefined scope: %s", scope);
         }
     }
 
@@ -193,7 +193,7 @@ public class DefaultScopeSupporter extends BaseLoggingModule implements ScopeSup
         OwnedObject obj = scopeMap.get(name);
         if (obj != null) {
             if (!obj.owner().equals(owner.getName())) {
-                logger.log(LogLevel.ERROR,
+                log(LogLevel.ERROR,
                         "%s attempted to set value for %s in scope %s that is owned by %s",
                         owner.getName(), name, scope, obj.owner());
                 return false;

@@ -1,9 +1,10 @@
 package redactedrice.modularparser.lineparser;
 
-import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineParserSupporter;
+import redactedrice.modularparser.log.BaseLoggingSupporter;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultLineParserSupport extends BaseSupporter<LineParser> implements LineParserSupporter {
+public class DefaultLineParserSupport extends BaseLoggingSupporter<LineParser> implements LineParserSupporter {
 
 	public DefaultLineParserSupport() {
 		super("LineParserSupportModule", LineParser.class);
@@ -17,6 +18,6 @@ public class DefaultLineParserSupport extends BaseSupporter<LineParser> implemen
                 return;
             }
         }
-        System.err.println("UNHANDLED → " + logicalLine);
+		log(LogLevel.ERROR, "Unhandled Line: %s", logicalLine);
 	}
 }

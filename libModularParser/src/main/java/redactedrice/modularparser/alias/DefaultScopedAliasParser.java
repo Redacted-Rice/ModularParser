@@ -57,7 +57,7 @@ public class DefaultScopedAliasParser extends BaseScopedParser
 
         String key = m.group(1);
         if (!isValidName(key)) {
-            logger.log(LogLevel.ERROR, "Invalid alias name: %s", key);
+            log(LogLevel.ERROR, "Invalid alias name: %s", key);
             return true;
         }
 
@@ -76,7 +76,7 @@ public class DefaultScopedAliasParser extends BaseScopedParser
         // }
 
         if (scopeSupporter.setData(scope, key, this, val)) {
-            logger.log(LogLevel.DEBUG, "Alias: Added alias %s with value: %s", key, val);
+            log(LogLevel.DEBUG, "Added alias %s with value: %s", key, val);
         }
         return true;
     }

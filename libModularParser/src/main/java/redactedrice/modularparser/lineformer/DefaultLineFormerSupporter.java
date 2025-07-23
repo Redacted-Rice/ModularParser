@@ -6,8 +6,10 @@ import java.io.IOException;
 
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineFormerSupporter;
+import redactedrice.modularparser.log.BaseLoggingSupporter;
+import redactedrice.modularparser.log.LogSupporter.LogLevel;
 
-public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
+public class DefaultLineFormerSupporter extends BaseLoggingSupporter<LineModifier>
         implements LineFormerSupporter {
     protected BufferedReader reader;
     protected int lineNumberStart = 0;
@@ -29,8 +31,7 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
             lineNumberStart = 0;
             lineNumberEnd = 0;
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log(LogLevel.ERROR, "Failed to reset reader");
         }
     }
 
