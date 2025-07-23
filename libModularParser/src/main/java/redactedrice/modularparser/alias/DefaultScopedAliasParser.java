@@ -63,8 +63,8 @@ public class DefaultScopedAliasParser extends BaseScopedParser
 
         String val = m.group(2).trim();
         // strip quotes
-        if ((val.startsWith("\"") && val.endsWith("\""))
-                || (val.startsWith("'") && val.endsWith("'"))) {
+        if ((val.startsWith("\"") && val.endsWith("\"")) ||
+                (val.startsWith("'") && val.endsWith("'"))) {
             val = val.substring(1, val.length() - 1);
         }
 
