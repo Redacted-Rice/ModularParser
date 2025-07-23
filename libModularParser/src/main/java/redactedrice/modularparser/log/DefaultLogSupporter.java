@@ -32,16 +32,16 @@ public class DefaultLogSupporter extends BaseModule implements LogSupporter {
         }
     }
 
-	@Override
-	public String format(String format, Object... args) {
-		return String.format(format, args);
-	}
+    @Override
+    public String format(String format, Object... args) {
+        return String.format(format, args);
+    }
 
-	@Override
-	public String appendStackTrace(String message, Throwable error) {
-	    StringWriter sw = new StringWriter();
-	    PrintWriter pw = new PrintWriter(sw);
-	    error.printStackTrace(pw);
-	    return message + "\nStack Trace:\n" + sw.toString();
-	}
+    @Override
+    public String appendStackTrace(String message, Throwable error) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        error.printStackTrace(pw);
+        return message + "\nStack Trace:\n" + sw.toString();
+    }
 }

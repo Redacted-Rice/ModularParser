@@ -46,8 +46,8 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             if (scope.isEmpty()) { // scope was not specified
                 scope = scopeSupporter.getScope(m.group(2));
                 if (scope == null) {
-                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s",
-                            keyword, m.group(2), m.group(3));
+                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", keyword,
+                            m.group(2), m.group(3));
                     return true;
                 }
             }
@@ -61,13 +61,11 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
                 if (reassignmentAllowed) {
                     addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
-                    log(LogLevel.ERROR,
-                            "Attempted to reassign %s %s in scope %s with %s",
-                            keyword, m.group(2), scope, m.group(3));
+                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s", keyword,
+                            m.group(2), scope, m.group(3));
                 }
             } else {
-                log(LogLevel.ERROR,
-                        "Attempted to reassign non-existing %s %s in scope %s with %s",
+                log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
                         keyword, m.group(2), scope, m.group(3));
             }
         } else {
@@ -84,8 +82,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             if (scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
-                log(LogLevel.ERROR,
-                        "Attempted to redefine existing %s %s in scope %s with %s", 
+                log(LogLevel.ERROR, "Attempted to redefine existing %s %s in scope %s with %s",
                         keyword, m.group(2), scope, m.group(3));
             }
         }
@@ -96,12 +93,11 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         Object obj = literalHandler.evaluateLiteral(literal);
         if (obj != null) {
             if (scopeSupporter.setData(scopeName, name, this, obj)) {
-                log(LogLevel.DEBUG, "%s %s %s in scope %s with %s", 
+                log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
                         (assignment ? "Added " : "Changed "), keyword, name, scopeName, obj);
             }
         } else {
-            log(LogLevel.ERROR, "For %s %s cannot parse value: %s", keyword,
-                    name, literal);
+            log(LogLevel.ERROR, "For %s %s cannot parse value: %s", keyword, name, literal);
         }
     }
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import redactedrice.modularparser.test.SimpleObject;
 
 public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
-    private final static String[] argsOrdered = new String[] {"intVal", "boolVal", "strVal", "so"
+    private final static String[] argsOrdered = new String[] { "intVal", "boolVal", "strVal", "so"
     };
 
     public SimpleObjectLiteralParser() {

@@ -1,5 +1,6 @@
 package redactedrice.modularparser.lineparser;
 
+
 public class DefaultLambdaParser extends BaseLineStartMatcher {
     private final DefaultLambdaParserFn handler;
 
@@ -10,9 +11,9 @@ public class DefaultLambdaParser extends BaseLineStartMatcher {
 
     @Override
     public boolean tryParseLine(String logicalLine) {
-    	if (!matches(logicalLine)) {
-    		return false;
-    	}
+        if (!matches(logicalLine)) {
+            return false;
+        }
         handler.handle(logicalLine);
         return true;
     }
