@@ -1,6 +1,8 @@
 package redactedrice.modularparser.log;
 
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +31,16 @@ public class DefaultLogSupporter extends BaseModule implements LogSupporter {
         }
     }
 
-    @Override
-    public void log(LogLevel level, String format, Object... args) {
-        String msg = String.format(format, args);
-        log(level, msg);
-    }
+	@Override
+	public String format(String format, Object... args) {
+		return String.format(format, args);
+	}
+
+	@Override
+	public String appendStackTrace(String message, Throwable error) {
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
+	    error.printStackTrace(pw);
+	    return message + "\nStack Trace:\n" + sw.toString();
+	}
 }

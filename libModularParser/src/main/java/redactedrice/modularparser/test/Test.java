@@ -115,7 +115,7 @@ public class Test {
         parser.addModule(new DefaultScopedAliasParser());
 
         parser.addModule(new DefaultLambdaParser("TestPrintHandler",
-                line -> logger.log(LogLevel.INFO, "DefaultLambdaParser: Print: %s", line.substring(8)), "println"));
+                line -> logger.log(LogLevel.INFO, "DefaultLambdaParser: Print: " + line.substring(8)), "println"));
         parser.configureModules();
 
         // Test script as a multiline string

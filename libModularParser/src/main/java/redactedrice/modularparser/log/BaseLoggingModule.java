@@ -18,14 +18,15 @@ public class BaseLoggingModule extends BaseModule {
     }
 
     public void log(LogLevel level, String message) {
-    	logger.log(level, "%s: %s", getName(), message);
+    	logger.log(level, logger.format("%s: %s", getName(), message));
     }
 
     public void log(LogLevel level, String format, Object... args) {
-        Object[] fullArgs = new Object[args.length + 1];
-        fullArgs[0] = getName();
-        System.arraycopy(args, 0, fullArgs, 1, args.length);
-
-    	logger.log(level, "%s: " + format, fullArgs);
+    	String message = logger.format(format, args);
+    	log(level, message);
+    }
+    
+    public void log(LogLevel level, String message, Throwable error) {
+    	logger.log(level, logger.appendStackTrace(message, error));
     }
 }
