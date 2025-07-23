@@ -76,7 +76,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseLoggingModule
 
         for (String required : requiredArgs) {
             if (!parsedArgs.containsKey(required)) {
-                logger.log(LogLevel.ERROR, "Missing required arguement: %s", required);
+                log(LogLevel.ERROR, "Missing required arguement: %s", required);
                 return false;
             }
         }
@@ -119,7 +119,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseLoggingModule
             String[] argSplit = arg.split(ARG_NAME_DELIMITER, 2);
             if (argSplit.length == 1 || arg.startsWith("\"") && arg.endsWith("\"")) {
                 if (hasFoundNamed) {
-                    logger.log(LogLevel.ERROR, "Found positional arg after a named arg was used");
+                    log(LogLevel.ERROR, "Found positional arg after a named arg was used");
                     return false;
                 }
                 positionalParams.add(arg);
@@ -143,7 +143,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseLoggingModule
             } else if (optionalIdx < optionalArgs.length) {
                 parsedArgs.put(optionalArgs[optionalIdx++], parsed);
             } else {
-                logger.log(LogLevel.ERROR, "Too many args were found");
+                log(LogLevel.ERROR, "Too many args were found");
                 return false;
             }
         }

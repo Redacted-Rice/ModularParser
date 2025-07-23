@@ -32,8 +32,8 @@ public class DefaultMutliLineCommentLineModifier extends BaseLoggingModule imple
         // We have a comment and should have a end too
         int endIdx = line.indexOf(endToken);
         if (endIdx < 0) {
-            logger.log(LogLevel.ERROR,
-                    "ModularParser logic errror detected: Passed a line with a start token and not an end token!\n%s",
+            log(LogLevel.ERROR,
+                    "Lineformer logic errror detected: Passed a line with a start token and not an end token!\n%s",
                     line);
             return line;
         }

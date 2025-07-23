@@ -40,7 +40,7 @@ public class DefaultReservedWordSupporter extends BaseLoggingModule
                 Map<String, ReservedType> common = new HashMap<>(other.getAllReservedWords());
                 common.keySet().retainAll(exclusive);
                 if (!common.isEmpty()) {
-                    logger.log(LogLevel.ERROR,
+                    log(LogLevel.ERROR,
                             "Module '%s' exclusively reserves the following keys already reserved by '%s': %s",
                             beingChecked.getName(), other.getName(), common);
                     return false;
