@@ -18,13 +18,15 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
  * Modules for parsing instructions
  */
 public class ModularParser {
-	public enum Status { OK, ERROR, ABORT};
-	
-	protected Status status = Status.OK;
-	
-	protected LineFormerSupporter lineFormer = null;
-	protected LineParserSupporter lineParser = null;
-	protected LogSupporter logger = null;
+    public enum Status {
+        OK, ERROR, ABORT
+    };
+
+    protected Status status = Status.OK;
+
+    protected LineFormerSupporter lineFormer = null;
+    protected LineParserSupporter lineParser = null;
+    protected LogSupporter logger = null;
 
     protected final List<Module> modulesOrdered = new ArrayList<>();
     protected final Map<String, Module> index = new HashMap<>();
@@ -39,7 +41,7 @@ public class ModularParser {
         }
 
         module.setParser(this);
-        
+
         // See if its the log supporter
         if (module instanceof LogSupporter) {
             if (logger != null) {
@@ -113,46 +115,47 @@ public class ModularParser {
         while (!aborted() && (line = lineFormer.getNextLogicalLine()) != null) {
             lineParser.parseLine(line);
         }
-    	if (logger != null) {
-	        if (aborted()) {
-	        	logger.log(LogLevel.ERROR, "ModularParser: Aborted! See previous logs for details");
-	        } else if (getStatus() == Status.ERROR) {
-	        	logger.log(LogLevel.ERROR, "ModularParser: Failed to parser some lines! See previous logs for details");
-	        }
-    	}
-    	return status == Status.OK;
+        if (logger != null) {
+            if (aborted()) {
+                logger.log(LogLevel.ERROR, "ModularParser: Aborted! See previous logs for details");
+            } else if (getStatus() == Status.ERROR) {
+                logger.log(LogLevel.ERROR,
+                        "ModularParser: Failed to parser some lines! See previous logs for details");
+            }
+        }
+        return status == Status.OK;
     }
 
     // ------------------ Status Fns -------------------
-    
+
     public void notifyError() {
-    	if (status.compareTo(Status.ERROR) < 0) {
-    		if (logger != null) {
-    			logger.log(LogLevel.ERROR, "ModularParser: First Error Signaled");
-    		}
-    		status = Status.ERROR;
-    	}
+        if (status.compareTo(Status.ERROR) < 0) {
+            if (logger != null) {
+                logger.log(LogLevel.ERROR, "ModularParser: First Error Signaled");
+            }
+            status = Status.ERROR;
+        }
     }
-    
+
     public void notifyAbort() {
-    	if (status.compareTo(Status.ABORT) < 0) {
-    		if (logger != null) {
-    			logger.log(LogLevel.ERROR, "ModularParser: First Abort Signaled");
-    		}
-    		status = Status.ABORT;
-    	}
+        if (status.compareTo(Status.ABORT) < 0) {
+            if (logger != null) {
+                logger.log(LogLevel.ERROR, "ModularParser: First Abort Signaled");
+            }
+            status = Status.ABORT;
+        }
     }
-    
+
     public void resetStatus() {
-    	status = Status.OK;
+        status = Status.OK;
     }
-    
+
     public Status getStatus() {
-    	return status;
+        return status;
     }
-    
+
     public boolean aborted() {
-    	return status == Status.ABORT;
+        return status == Status.ABORT;
     }
 
     // ------------------ Module Getters ----------------------
@@ -168,8 +171,8 @@ public class ModularParser {
         // Should be only one
         return modulesOrdered.stream().filter(clazz::isInstance).findFirst().map(clazz::cast).get();
     }
-    
+
     public LogSupporter getLogger() {
-		return logger;
+        return logger;
     }
 }

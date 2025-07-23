@@ -77,7 +77,7 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
             lineNumberEnd++;
             return reader.readLine();
         } catch (IOException e) {
-        	// TODO: Separate out expected case from failures?
+            // TODO: Separate out expected case from failures?
             return null;
         }
     }

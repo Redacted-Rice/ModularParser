@@ -61,8 +61,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     @Override
     public void pushScope(String scope) {
         if (scopedVals.containsKey(scope)) {
-            log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s",
-                    scope);
+            log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s", scope);
             scopeOrder.remove(scope);
         } else {
             scopedVals.put(scope, new HashMap<>());
@@ -74,7 +73,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     @Override
     public void popScope() {
         if (scopeOrder.isEmpty()) {
-        	log(LogLevel.ERROR, "No scope to pop");
+            log(LogLevel.ERROR, "No scope to pop");
         }
         removeScope(scopeOrder.peek());
     }

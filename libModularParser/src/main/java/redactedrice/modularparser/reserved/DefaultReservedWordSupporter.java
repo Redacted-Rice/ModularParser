@@ -13,8 +13,7 @@ import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultReservedWordSupporter extends BaseModule
-        implements ReservedWordSupporter {
+public class DefaultReservedWordSupporter extends BaseModule implements ReservedWordSupporter {
     private final List<WordReserver> reservers = new ArrayList<>();
 
     public DefaultReservedWordSupporter() {

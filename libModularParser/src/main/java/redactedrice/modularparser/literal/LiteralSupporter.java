@@ -1,5 +1,6 @@
 package redactedrice.modularparser.literal;
 
+
 import redactedrice.modularparser.core.Supporter;
 
 public interface LiteralSupporter extends Supporter {
