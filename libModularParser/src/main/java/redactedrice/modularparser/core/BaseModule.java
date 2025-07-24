@@ -5,7 +5,7 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 /** A named DSL‐line handler carrying a back‐pointer to its parser. */
 public abstract class BaseModule implements Module {
-    private final String name;
+    protected final String name;
     protected ModularParser parser;
     protected LogSupporter logger;
 
