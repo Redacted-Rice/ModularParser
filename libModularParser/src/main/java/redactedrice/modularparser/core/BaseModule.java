@@ -7,17 +7,19 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 public abstract class BaseModule implements Module {
     protected final String name;
     protected ModularParser parser;
-    protected LogSupporter logger;
 
+    // TODO Change to take parser as arg and auto register?
     protected BaseModule(String name) {
         this.name = name;
     }
 
     /** The unique name you gave this handler. */
+    @Override
     public String getName() {
         return name;
     }
 
+    // TODO Change to take parser as arg and auto register?
     @Override
     public void setParser(ModularParser parser) {
         this.parser = parser;
@@ -37,7 +39,8 @@ public abstract class BaseModule implements Module {
 
     public void log(LogLevel level, boolean notifyOnError, String message) {
         if (parser.getLogger() != null) {
-            parser.getLogger().log(level, parser.getLogger().format("%s: %s", getName(), message));
+            String formatted = parser.getLogger().format("%s: %s", getName(), message);
+            parser.getLogger().log(level, formatted);
         }
         if (notifyOnError) {
             if (level == LogLevel.ERROR) {
