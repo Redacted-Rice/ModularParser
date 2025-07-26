@@ -4,10 +4,11 @@ package redactedrice.modularparser.literal;
 import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultCharLiteralParser extends BaseModule implements LiteralParser {
-    public DefaultCharLiteralParser() {
-        super("CharParser");
+    public DefaultCharLiteralParser(ModularParser parser) {
+        super(parser, "CharParser");
     }
 
     @Override

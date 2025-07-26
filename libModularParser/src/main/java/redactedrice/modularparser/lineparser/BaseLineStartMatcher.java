@@ -1,14 +1,15 @@
 package redactedrice.modularparser.lineparser;
 
 
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.reserved.BaseWordReserver;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 
 public abstract class BaseLineStartMatcher extends BaseWordReserver implements LineParser {
     protected final String keyword;
 
-    protected BaseLineStartMatcher(String name, String keyword) {
-        super(name);
+    protected BaseLineStartMatcher(ModularParser parser, String name, String keyword) {
+        super(parser, name);
 
         this.keyword = keyword;
         reservedWords.put(keyword, ReservedType.EXCLUSIVE);

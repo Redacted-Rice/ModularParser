@@ -8,13 +8,14 @@ import java.util.List;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 
 public class DefaultLogSupporter extends BaseModule implements LogSupporter {
     protected final List<LogHandler> handlers = new ArrayList<>();
 
-    public DefaultLogSupporter() {
-        super("DefaultLogSupporter");
+    public DefaultLogSupporter(ModularParser parser) {
+        super(parser, "DefaultLogSupporter");
     }
 
     @Override

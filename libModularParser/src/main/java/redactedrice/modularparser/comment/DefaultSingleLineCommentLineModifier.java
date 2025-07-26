@@ -2,13 +2,14 @@ package redactedrice.modularparser.comment;
 
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.LineModifier;
 
 public class DefaultSingleLineCommentLineModifier extends BaseModule implements LineModifier {
     protected final String token;
 
-    public DefaultSingleLineCommentLineModifier(String name, String token) {
-        super(name);
+    public DefaultSingleLineCommentLineModifier(ModularParser parser, String name, String token) {
+        super(parser, name);
         this.token = token;
     }
 

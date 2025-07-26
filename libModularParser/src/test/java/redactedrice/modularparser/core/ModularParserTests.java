@@ -18,46 +18,13 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-class BaseModuleTests {
+class ModularParserTests {
     final String OBJ_NAME = "Test name";
 
     @Test
-    void constructorSetterTest() {
-        ModularParser parser = mock(ModularParser.class);
-        BaseModuleTester testee = new BaseModuleTester(OBJ_NAME, parser);
-        assertEquals(testee.getName(), OBJ_NAME);
-        assertEquals(testee.parser, parser);
-        
-        testee.setModuleRefs();
-    }
-
-    @Test
-    void checkModulesCompatibilityTest() {
-        ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
-        assertTrue(testee.checkModulesCompatibility());
-    }
-
-    @Test
-    void basicLogMessageTest() {
-        final String TEST_LOG = "Test log";
-        final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
-
-        ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
-
-        assertDoesNotThrow(() -> {
-            testee.log(LogLevel.INFO, TEST_LOG);
-        });
-
+    void modularParser() {
+        ModularParser testee = new ModularParser();
         LogSupporter logger = mock(LogSupporter.class);
-        when(parser.getLogger()).thenReturn(logger);
-        when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);
-
-        testee.log(LogLevel.INFO, TEST_LOG);
-
-        verify(logger).format(eq("%s: %s"), eq(OBJ_NAME), eq(TEST_LOG));
-        verify(logger).log(eq(LogLevel.INFO), eq(EXPECTED_LOG));
     }
 
     @Test
@@ -67,8 +34,8 @@ class BaseModuleTests {
         final String TEST_FORMATTED_LOG = "Test " + INT_VAL + " log";
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_FORMATTED_LOG;
 
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
 
         assertDoesNotThrow(() -> {
             testee.log(LogLevel.INFO, TEST_LOG, INT_VAL);
@@ -93,8 +60,9 @@ class BaseModuleTests {
         final String LOG_WITH_TRACE = TEST_LOG + ". Trace:\n" + TEST_STACK_TRACE;
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        testee.setParser(parser);
         Throwable error = mock(Throwable.class);
 
         assertDoesNotThrow(() -> {
@@ -118,8 +86,9 @@ class BaseModuleTests {
         final String TEST_LOG = "Test log";
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        testee.setParser(parser);
         
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);

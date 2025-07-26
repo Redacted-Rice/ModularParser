@@ -8,13 +8,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 
 public class BaseWordReserver extends BaseModule implements WordReserver {
     protected final Map<String, ReservedType> reservedWords = new HashMap<>();
 
-    protected BaseWordReserver(String name) {
-        super(name);
+    protected BaseWordReserver(ModularParser parser, String name) {
+        super(parser, name);
     }
 
     @Override

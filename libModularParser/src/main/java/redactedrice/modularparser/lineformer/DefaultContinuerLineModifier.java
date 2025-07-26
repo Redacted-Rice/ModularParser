@@ -2,14 +2,15 @@ package redactedrice.modularparser.lineformer;
 
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultContinuerLineModifier extends BaseModule implements LineModifier {
     protected final String token;
     protected final String tokenRegex;
     protected final String replaceStr;
 
-    public DefaultContinuerLineModifier(String name, String token, boolean removeToken) {
-        super(name);
+    public DefaultContinuerLineModifier(ModularParser parser, String name, String token, boolean removeToken) {
+        super(parser, name);
         this.token = token;
         tokenRegex = "\\s*" + token + "\\s*";
         if (removeToken) {

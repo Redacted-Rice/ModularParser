@@ -4,10 +4,11 @@ package redactedrice.modularparser.literal;
 import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultNumberLiteralParser extends BaseModule implements LiteralParser {
-    public DefaultNumberLiteralParser() {
-        super("NumberParser");
+    public DefaultNumberLiteralParser(ModularParser parser) {
+        super(parser, "NumberParser");
     }
 
     private enum PRIMITIVE_TYPE {

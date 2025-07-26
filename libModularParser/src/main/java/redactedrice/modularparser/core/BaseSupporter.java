@@ -8,8 +8,8 @@ public class BaseSupporter<T> extends BaseModule implements Supporter {
     protected final List<T> submodules = new ArrayList<>();
     protected final Class<T> tClass;
 
-    protected BaseSupporter(String name, Class<T> tClass) {
-        super(name);
+    protected BaseSupporter(ModularParser parser, String name, Class<T> tClass) {
+        super(parser, name);
         this.tClass = tClass;
     }
 
@@ -19,5 +19,4 @@ public class BaseSupporter<T> extends BaseModule implements Supporter {
             submodules.add(tClass.cast(module));
         }
     }
-
 }

@@ -43,8 +43,8 @@ public class Test {
     static private class ShareableReservedTest extends BaseModule implements WordReserver {
         Set<String> sharedWords = new HashSet<>();
 
-        protected ShareableReservedTest(String name, String... shareables) {
-            super(name);
+        protected ShareableReservedTest(ModularParser parser, String name, String... shareables) {
+            super(parser, name);
             for (String shareable : shareables) {
                 sharedWords.add(shareable);
             }
@@ -77,46 +77,42 @@ public class Test {
     public static void main(String[] args) throws IOException {
         ModularParser parser = new ModularParser();
 
-        DefaultLineFormerSupporter reader = new DefaultLineFormerSupporter();
-        parser.addModule(reader);
-        parser.addModule(new DefaultLineParserSupport());
-        parser.addModule(new DefaultLiteralSupporter());
-        DefaultLogSupporter logger = new DefaultLogSupporter();
-        parser.addModule(logger);
-        parser.addModule(new DefaultNamedLiteralSupporter());
-        parser.addModule(new DefaultAliasSupporter());
-        parser.addModule(new DefaultReservedWordSupporter());
-        parser.addModule(new DefaultConsoleLogHandler());
+        DefaultLineFormerSupporter lfS = new DefaultLineFormerSupporter(parser);
+        DefaultLineParserSupport lpS = new DefaultLineParserSupport(parser);
+        DefaultLiteralSupporter lS = new DefaultLiteralSupporter(parser);
+        DefaultLogSupporter logger = new DefaultLogSupporter(parser);
+        DefaultNamedLiteralSupporter nlS = new DefaultNamedLiteralSupporter(parser);
+        DefaultAliasSupporter aS = new DefaultAliasSupporter(parser);
+        DefaultReservedWordSupporter rwS = new DefaultReservedWordSupporter(parser);
+        DefaultConsoleLogHandler clH = new DefaultConsoleLogHandler(parser);
 
-        DefaultScopeSupporter scope = new DefaultScopeSupporter("BasicScopeHandler", true);
+        DefaultScopeSupporter scope = new DefaultScopeSupporter(parser, "BasicScopeHandler", true);
         scope.pushScope("global");
         scope.pushScope("file");
-        parser.addModule(scope);
 
-        parser.addModule(
-                new DefaultSingleLineCommentLineModifier("BasicCSingleLineCommentModule", "//"));
-        parser.addModule(new DefaultSingleLineCommentLineModifier(
-                "BasicPythonSingleLineCommentModule", "#"));
-        parser.addModule(
-                new DefaultMutliLineCommentLineModifier("BasicMutliLineCommentModule", "/*", "*/"));
-        parser.addModule(
-                new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
-        parser.addModule(new DefaultContinuerLineModifier("BasicLineContinuerModule", "\\", true));
+        DefaultSingleLineCommentLineModifier slcCLm =
+                new DefaultSingleLineCommentLineModifier(parser, "BasicCSingleLineCommentModule", "//");
+        DefaultSingleLineCommentLineModifier slcPyLm = new DefaultSingleLineCommentLineModifier(parser, 
+                "BasicPythonSingleLineCommentModule", "#");
+        DefaultMutliLineCommentLineModifier mlcLm = 
+                new DefaultMutliLineCommentLineModifier(parser, "BasicMutliLineCommentModule", "/*", "*/");
+        DefaultGroupingLineModifier gLm = 
+                new DefaultGroupingLineModifier(parser, "BasicParenthesisModule", "(", ")", false);
+        DefaultContinuerLineModifier cLm = new DefaultContinuerLineModifier(parser, "BasicLineContinuerModule", "\\", true);
 
-        parser.addModule(new DefaultChainingChainableLiteralParser("->", parser));
-        parser.addModule(new DefaultNumberLiteralParser());
-        parser.addModule(new DefaultCharLiteralParser());
-        parser.addModule(new DefaultBoolLiteralParser());
-        parser.addModule(new SimpleObjectLiteralParser());
+        DefaultChainingChainableLiteralParser ccLp = new DefaultChainingChainableLiteralParser(parser, "->");
+        DefaultNumberLiteralParser nLp = new DefaultNumberLiteralParser(parser);
+        DefaultCharLiteralParser cLp = new DefaultCharLiteralParser(parser);
+        DefaultBoolLiteralParser bLp = new DefaultBoolLiteralParser(parser);
 
-        parser.addModule(new DefaultScopedNamedLiteralParser("BasicVarHandler", true, "variable"));
-        parser.addModule(
-                new DefaultScopedNamedLiteralParser("BasicConstHandler", false, "constant"));
-        parser.addModule(new DefaultScopedAliasParser());
+        DefaultScopedNamedLiteralParser varLp = new DefaultScopedNamedLiteralParser(parser, "BasicVarHandler", true, "variable");
+        DefaultScopedNamedLiteralParser constLp = 
+                new DefaultScopedNamedLiteralParser(parser, "BasicConstHandler", false, "constant");
+        DefaultScopedAliasParser aLp = new DefaultScopedAliasParser(parser);
 
-        parser.addModule(
-                new DefaultLambdaParser("TestPrintHandler", line -> logger.log(LogLevel.INFO,
-                        "DefaultLambdaParser: Print: " + line.substring(8)), "println"));
+        DefaultLambdaParser printP = 
+                new DefaultLambdaParser(parser, "TestPrintHandler", line -> logger.log(LogLevel.INFO,
+                        "DefaultLambdaParser: Print: " + line.substring(8)), "println");
         parser.configureModules();
 
         // Test script as a multiline string
@@ -186,11 +182,11 @@ public class Test {
                 """;
 
         // Run parser
-        reader.setReader(new BufferedReader(new StringReader(script)));
+        BufferedReader reader = new BufferedReader(new StringReader(script));
         parser.parse();
 
-        parser.addModule(new ShareableReservedTest("shareable1", "commonWord", "anotherOne"));
-        parser.addModule(new ShareableReservedTest("shareable2", "commonWord", "anotherOne"));
+        ShareableReservedTest srt1 = new ShareableReservedTest(parser, "shareable1", "commonWord", "anotherOne");
+        ShareableReservedTest srt2 = new ShareableReservedTest(parser, "shareable2", "commonWord", "anotherOne");
 
         // Unhappy test cases
         // parser.addModule(new BasicLambdaModule("definitions",
