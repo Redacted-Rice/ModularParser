@@ -5,18 +5,19 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     protected final Set<LogLevel> enabledLevels;
 
-    public DefaultConsoleLogHandler() {
-        super("DefaultConsoleLogSupporter");
+    public DefaultConsoleLogHandler(ModularParser parser) {
+        super(parser, "DefaultConsoleLogSupporter");
         this.enabledLevels = EnumSet.allOf(LogLevel.class);
     }
 
-    public DefaultConsoleLogHandler(Set<LogLevel> enabledLevels) {
-        super("DefaultConsoleLogSupporter");
+    public DefaultConsoleLogHandler(ModularParser parser, Set<LogLevel> enabledLevels) {
+        super(parser, "DefaultConsoleLogSupporter");
         this.enabledLevels = EnumSet.copyOf(enabledLevels);
     }
 

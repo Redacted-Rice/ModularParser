@@ -14,6 +14,7 @@ import java.util.Set;
 
 import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineparser.LineParser;
 
@@ -28,8 +29,8 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     protected final Deque<String> scopeOrder = new ArrayDeque<>();
     protected final boolean allowImplicit;
 
-    public DefaultScopeSupporter(String name, boolean allowImplicit) {
-        super(name);
+    public DefaultScopeSupporter(ModularParser parser, String name, boolean allowImplicit) {
+        super(parser, name);
         this.allowImplicit = allowImplicit;
     }
 

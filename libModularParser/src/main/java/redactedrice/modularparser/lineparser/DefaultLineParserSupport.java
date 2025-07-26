@@ -3,13 +3,14 @@ package redactedrice.modularparser.lineparser;
 
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineParserSupporter;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public class DefaultLineParserSupport extends BaseSupporter<LineParser>
         implements LineParserSupporter {
 
-    public DefaultLineParserSupport() {
-        super("LineParserSupportModule", LineParser.class);
+    public DefaultLineParserSupport(ModularParser parser) {
+        super(parser, "LineParserSupportModule", LineParser.class);
     }
 
     @Override
