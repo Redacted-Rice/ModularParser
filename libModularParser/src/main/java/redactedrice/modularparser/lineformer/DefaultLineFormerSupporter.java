@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LineFormerSupporter;
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
@@ -15,8 +14,8 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
     protected int lineNumberStart = 0;
     protected int lineNumberEnd = 0;
 
-    public DefaultLineFormerSupporter(ModularParser parser) {
-        super(parser, "LineFormerSupportModule", LineModifier.class);
+    public DefaultLineFormerSupporter() {
+        super("LineFormerSupportModule", LineModifier.class);
     }
 
     public void setReader(BufferedReader reader) {

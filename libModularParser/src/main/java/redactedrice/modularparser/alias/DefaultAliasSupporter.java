@@ -5,11 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseSupporter;
-import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultAliasSupporter extends BaseSupporter<AliasParser> implements AliasSupporter {
-    public DefaultAliasSupporter(ModularParser parser) {
-        super(parser, "AliasSupportModule", AliasParser.class);
+    public DefaultAliasSupporter() {
+        super("AliasSupportModule", AliasParser.class);
     }
 
     @Override

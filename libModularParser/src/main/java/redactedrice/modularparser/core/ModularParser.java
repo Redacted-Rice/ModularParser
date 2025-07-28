@@ -40,6 +40,8 @@ public class ModularParser {
             throw new IllegalArgumentException("Module '" + module.getName() + "' already exists");
         }
 
+        module.setParser(this);
+
         // See if its the log supporter
         if (module instanceof LogSupporter) {
             if (logger != null) {

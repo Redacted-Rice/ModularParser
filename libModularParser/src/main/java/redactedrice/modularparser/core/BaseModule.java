@@ -8,16 +8,21 @@ public abstract class BaseModule implements Module {
     protected final String name;
     protected ModularParser parser;
 
-    protected BaseModule(ModularParser parser, String name) {
+    // TODO Change to take parser as arg and auto register?
+    protected BaseModule(String name) {
         this.name = name;
-        this.parser = parser;
-        parser.addModule(this);
     }
 
     /** The unique name you gave this handler. */
     @Override
     public String getName() {
         return name;
+    }
+
+    // TODO Change to take parser as arg and auto register?
+    @Override
+    public void setParser(ModularParser parser) {
+        this.parser = parser;
     }
 
     @Override

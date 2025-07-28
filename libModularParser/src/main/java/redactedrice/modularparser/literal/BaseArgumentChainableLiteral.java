@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
@@ -28,9 +27,9 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
 
     protected LiteralSupporter literalHandler;
 
-    protected BaseArgumentChainableLiteral(ModularParser parser, String name, String keyword, String chainedArg,
+    protected BaseArgumentChainableLiteral(String name, String keyword, String chainedArg,
             String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
-        super(parser, name);
+        super(name);
         this.keyword = keyword.toLowerCase();
         this.chainedArg = chainedArg;
         this.requiredArgs = requiredArgs;
