@@ -7,14 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import redactedrice.modularparser.core.BaseSupporter;
-import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultNamedLiteralSupporter extends BaseSupporter<NamedLiteralParser>
         implements NamedLiteralSupporter {
     private final List<NamedLiteralParser> handlers = new ArrayList<>();
 
-    public DefaultNamedLiteralSupporter(ModularParser parser) {
-        super(parser, "NamedLiteralSupportModule", NamedLiteralParser.class);
+    public DefaultNamedLiteralSupporter() {
+        super("NamedLiteralSupportModule", NamedLiteralParser.class);
     }
 
     @Override

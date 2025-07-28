@@ -2,7 +2,6 @@ package redactedrice.modularparser.comment;
 
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
 
@@ -10,8 +9,8 @@ public class DefaultMutliLineCommentLineModifier extends BaseModule implements L
     protected final String startToken;
     protected final String endToken;
 
-    public DefaultMutliLineCommentLineModifier(ModularParser parser, String name, String startToken, String endToken) {
-        super(parser, name);
+    public DefaultMutliLineCommentLineModifier(String name, String startToken, String endToken) {
+        super(name);
         this.startToken = startToken;
         this.endToken = endToken;
     }

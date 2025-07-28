@@ -23,18 +23,20 @@ class BaseModuleTests {
 
     @Test
     void constructorSetterTest() {
-        ModularParser parser = mock(ModularParser.class);
-        BaseModuleTester testee = new BaseModuleTester(OBJ_NAME, parser);
+        BaseModuleTester testee = new BaseModuleTester(OBJ_NAME);
         assertEquals(testee.getName(), OBJ_NAME);
+        assertNull(testee.parser);
+
+        ModularParser parser = mock(ModularParser.class);
+        testee.setParser(parser);
         assertEquals(testee.parser, parser);
-        
+
         testee.setModuleRefs();
     }
 
     @Test
     void checkModulesCompatibilityTest() {
-        ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
         assertTrue(testee.checkModulesCompatibility());
     }
 
@@ -44,7 +46,8 @@ class BaseModuleTests {
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
+        testee.setParser(parser);
 
         assertDoesNotThrow(() -> {
             testee.log(LogLevel.INFO, TEST_LOG);
@@ -68,7 +71,8 @@ class BaseModuleTests {
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_FORMATTED_LOG;
 
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
+        testee.setParser(parser);
 
         assertDoesNotThrow(() -> {
             testee.log(LogLevel.INFO, TEST_LOG, INT_VAL);
@@ -94,7 +98,8 @@ class BaseModuleTests {
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
+        testee.setParser(parser);
         Throwable error = mock(Throwable.class);
 
         assertDoesNotThrow(() -> {
@@ -112,15 +117,16 @@ class BaseModuleTests {
         verify(logger).format(eq("%s: %s"), eq(OBJ_NAME), eq(LOG_WITH_TRACE));
         verify(logger).log(eq(LogLevel.INFO), eq(EXPECTED_LOG));
     }
-    
+
     @Test
     void logNotifyTest() {
         final String TEST_LOG = "Test log";
         final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
         ModularParser parser = mock(ModularParser.class);
-        BaseModule testee = new BaseModuleTester(OBJ_NAME, parser);
-        
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
+        testee.setParser(parser);
+
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
         when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);

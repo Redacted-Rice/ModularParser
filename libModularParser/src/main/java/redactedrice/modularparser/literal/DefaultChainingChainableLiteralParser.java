@@ -13,10 +13,10 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
 
     protected LiteralSupporter literalHandler;
 
-    public DefaultChainingChainableLiteralParser(ModularParser parser, String chainingToken) {
-        super(parser, "BasicChainingParser");
+    public DefaultChainingChainableLiteralParser(String chainingToken, ModularParser parser) {
+        super("BasicChainingParser");
         this.chainingToken = chainingToken;
-        parser.addModule(new DefaultContinuerLineModifier(parser, "ChainingLiteralContinuerModule",
+        parser.addModule(new DefaultContinuerLineModifier("ChainingLiteralContinuerModule",
                 chainingToken, false));
     }
 

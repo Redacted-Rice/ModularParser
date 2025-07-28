@@ -4,11 +4,10 @@ package redactedrice.modularparser.literal;
 import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultBoolLiteralParser extends BaseModule implements LiteralParser {
-    public DefaultBoolLiteralParser(ModularParser parser) {
-        super(parser, "BoolParser");
+    public DefaultBoolLiteralParser() {
+        super("BoolParser");
     }
 
     @Override

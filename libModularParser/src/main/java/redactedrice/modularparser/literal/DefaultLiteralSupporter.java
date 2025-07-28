@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 
 public class DefaultLiteralSupporter extends BaseModule implements LiteralSupporter {
     private final List<LiteralParser> handlers = new ArrayList<>();
     private final List<ChainableLiteralParser> chainedHandlers = new ArrayList<>();
 
-    public DefaultLiteralSupporter(ModularParser parser) {
-        super(parser, "LiteralSupportModule");
+    public DefaultLiteralSupporter() {
+        super("LiteralSupportModule");
     }
 
     @Override

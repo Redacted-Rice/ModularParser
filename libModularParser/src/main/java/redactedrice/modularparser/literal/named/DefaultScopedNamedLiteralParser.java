@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.scope.BaseScopedParser;
@@ -20,9 +19,9 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
 
     protected LiteralSupporter literalHandler;
 
-    public DefaultScopedNamedLiteralParser(ModularParser parser, String moduleName, boolean reassignmentAllowed,
+    public DefaultScopedNamedLiteralParser(String moduleName, boolean reassignmentAllowed,
             String keyword) {
-        super(parser, moduleName);
+        super(moduleName);
         this.keyword = keyword.toLowerCase();
         // this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
         matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
