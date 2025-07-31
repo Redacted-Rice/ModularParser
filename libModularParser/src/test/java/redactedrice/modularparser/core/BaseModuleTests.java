@@ -30,12 +30,12 @@ class BaseModuleTests {
     @Test
     void constructorSetterTest() {
         BaseModuleTester testee = new BaseModuleTester(OBJ_NAME);
-        assertEquals(testee.getName(), OBJ_NAME);
+        assertEquals(OBJ_NAME, testee.getName());
         assertNull(testee.parser);
 
         ModularParser parser = mock(ModularParser.class);
         testee.setParser(parser);
-        assertEquals(testee.parser, parser);
+        assertEquals(parser, testee.parser);
 
         testee.setModuleRefs();
     }
