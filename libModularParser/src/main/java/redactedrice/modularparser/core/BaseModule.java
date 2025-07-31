@@ -19,7 +19,6 @@ public abstract class BaseModule implements Module {
         return name;
     }
 
-    // TODO Change to take parser as arg and auto register?
     @Override
     public void setParser(ModularParser parser) {
         this.parser = parser;
