@@ -73,11 +73,15 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
     }
 
     public String getNextLine() {
+        if (reader == null) {
+            return null;
+        }
         try {
             lineNumberEnd++;
             return reader.readLine();
         } catch (IOException e) {
             // TODO: Separate out expected case from failures?
+            lineNumberEnd--;
             return null;
         }
     }
