@@ -17,7 +17,7 @@ class BaseSupporterTests {
     @Test
     void constructorSetterTest() {
         BaseSupporterTester testee = new BaseSupporterTester(OBJ_NAME, TestModule.class);
-        assertEquals(testee.getName(), OBJ_NAME);
+        assertEquals(OBJ_NAME, testee.getName());
     }
 
     @Test
@@ -29,7 +29,7 @@ class BaseSupporterTests {
         testee.handleModule(module);
         testee.handleModule(module2);
 
-        assertEquals(testee.submodules.size(), 1);
-        assertEquals(testee.submodules.get(0), module);
+        assertEquals(1, testee.submodules.size());
+        assertEquals(module, testee.submodules.get(0));
     }
 }

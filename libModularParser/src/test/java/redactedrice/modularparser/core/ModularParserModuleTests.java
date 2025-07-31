@@ -52,17 +52,17 @@ class ModularParserModuleTests {
         assertTrue(testee.addModule(logger));
         assertEquals(testee.getLogger(), logger);
 
-        assertEquals(testee.index.size(), 1);
+        assertEquals(1, testee.index.size());
         assertTrue(testee.index.containsKey(LOGGER_NAME));
-        assertEquals(testee.index.get(LOGGER_NAME), logger);
-        assertEquals(testee.modulesOrdered.size(), 1);
-        assertEquals(testee.modulesOrdered.get(0), logger);
+        assertEquals(logger, testee.index.get(LOGGER_NAME));
+        assertEquals(1, testee.modulesOrdered.size());
+        assertEquals(logger, testee.modulesOrdered.get(0));
 
         // Test readding
         when(logger.getName()).thenReturn(LOGGER_NAME + "2");
         assertFalse(testee.addModule(logger));
-        assertEquals(testee.index.size(), 1);
-        assertEquals(testee.modulesOrdered.size(), 1);
+        assertEquals(1, testee.index.size());
+        assertEquals(1, testee.modulesOrdered.size());
     }
 
     @Test
@@ -74,15 +74,15 @@ class ModularParserModuleTests {
         assertTrue(testee.addModule(module));
         verify(logger).handleModule(eq(module));
 
-        assertEquals(testee.index.size(), 2);
-        assertEquals(testee.modulesOrdered.size(), 2);
-        assertEquals(testee.modulesOrdered.get(0), logger);
-        assertEquals(testee.modulesOrdered.get(1), module);
+        assertEquals(2, testee.index.size());
+        assertEquals(2, testee.modulesOrdered.size());
+        assertEquals(logger, testee.modulesOrdered.get(0));
+        assertEquals(module, testee.modulesOrdered.get(1));
 
         // Readd the module with the same name
         assertFalse(testee.addModule(module));
-        assertEquals(testee.index.size(), 2);
-        assertEquals(testee.modulesOrdered.size(), 2);
+        assertEquals(2, testee.index.size());
+        assertEquals(2, testee.modulesOrdered.size());
     }
 
     @Test
@@ -94,16 +94,16 @@ class ModularParserModuleTests {
         assertTrue(testee.addModule(supporter));
         verify(logger).handleModule(eq(supporter));
 
-        assertEquals(testee.index.size(), 2);
-        assertEquals(testee.modulesOrdered.size(), 2);
-        assertEquals(testee.modulesOrdered.get(0), logger);
-        assertEquals(testee.modulesOrdered.get(1), supporter);
+        assertEquals(2, testee.index.size());
+        assertEquals(2, testee.modulesOrdered.size());
+        assertEquals(logger, testee.modulesOrdered.get(0));
+        assertEquals(supporter, testee.modulesOrdered.get(1));
 
         // Readd the module with the same name
         when(supporter.getName()).thenReturn(PLAIN_SUPPORTER_2_NAME);
         assertFalse(testee.addModule(supporter));
-        assertEquals(testee.index.size(), 2);
-        assertEquals(testee.modulesOrdered.size(), 2);
+        assertEquals(2, testee.index.size());
+        assertEquals(2, testee.modulesOrdered.size());
     }
 
     @Test
@@ -123,19 +123,19 @@ class ModularParserModuleTests {
         verify(lps).handleModule(eq(lfs));
         verify(lfs).handleModule(eq(logger));
 
-        assertEquals(testee.index.size(), 3);
-        assertEquals(testee.modulesOrdered.size(), 3);
-        assertEquals(testee.modulesOrdered.get(0), logger);
-        assertEquals(testee.modulesOrdered.get(1), lps);
-        assertEquals(testee.modulesOrdered.get(2), lfs);
+        assertEquals(3, testee.index.size());
+        assertEquals(3, testee.modulesOrdered.size());
+        assertEquals(logger, testee.modulesOrdered.get(0));
+        assertEquals(lps, testee.modulesOrdered.get(1));
+        assertEquals(lfs, testee.modulesOrdered.get(2));
 
         when(lps.getName()).thenReturn(LPS_NAME + "2");
         assertFalse(testee.addModule(lps));
         when(lfs.getName()).thenReturn(LFS_NAME + "2");
         assertFalse(testee.addModule(lfs));
 
-        assertEquals(testee.index.size(), 3);
-        assertEquals(testee.modulesOrdered.size(), 3);
+        assertEquals(3, testee.index.size());
+        assertEquals(3, testee.modulesOrdered.size());
     }
 
     @Test
@@ -151,7 +151,7 @@ class ModularParserModuleTests {
         when(logger.format(contains("Aborted"))).thenReturn(ABORTED);
 
         assertFalse(testee.parse());
-        assertEquals(testee.status, ModularParser.Status.ABORT);
+        assertEquals(ModularParser.Status.ABORT, testee.status);
         verify(logger).log(LogLevel.ABORT, NO_FORMER);
         verify(logger).log(LogLevel.ABORT, NO_PARSER);
         verify(logger).log(LogLevel.ERROR, ABORTED);
@@ -188,19 +188,19 @@ class ModularParserModuleTests {
         assertEquals(testee.getSupporterInterfaceName(logger), LogSupporter.class.getSimpleName());
 
         LineParserSupporter lps = mock(LineParserSupporter.class);
-        assertEquals(testee.getSupporterInterfaceName(lps),
-                LineParserSupporter.class.getSimpleName());
+        assertEquals(LineParserSupporter.class.getSimpleName(),
+                testee.getSupporterInterfaceName(lps));
 
         Supporter supporter = mock(Supporter.class);
-        assertEquals(testee.getSupporterInterfaceName(supporter), "");
+        assertEquals("", testee.getSupporterInterfaceName(supporter));
 
         NonCriticalSupporter anotherSupporter = mock(NonCriticalSupporter.class);
-        assertEquals(testee.getSupporterInterfaceName(anotherSupporter),
-                NonCriticalSupporter.class.getSimpleName());
+        assertEquals(NonCriticalSupporter.class.getSimpleName(),
+                testee.getSupporterInterfaceName(anotherSupporter));
 
         NonCriticalSupporterExt aNestedSupporter = mock(NonCriticalSupporterExt.class);
-        assertEquals(testee.getSupporterInterfaceName(aNestedSupporter),
-                NonCriticalSupporterExt.class.getSimpleName());
+        assertEquals(NonCriticalSupporterExt.class.getSimpleName(),
+                testee.getSupporterInterfaceName(aNestedSupporter));
     }
 
     @Test
@@ -263,16 +263,16 @@ class ModularParserModuleTests {
         testee.index.put(module3.getName(), module3);
 
         Module mod = testee.getModule(PLAIN_MODULE_NAME);
-        assertEquals(mod, module1);
+        assertEquals(module1, mod);
         mod = testee.getModule(PLAIN_MODULE_2_NAME);
-        assertEquals(mod, module2);
+        assertEquals(module2, mod);
 
         List<Module> mods = testee.getModulesOfType(Module.class);
         assertEquals(mods.size(), 3);
 
         List<TestModule> testMods = testee.getModulesOfType(TestModule.class);
-        assertEquals(testMods.size(), 1);
-        assertEquals(testMods.get(0), module3);
+        assertEquals(1, testMods.size());
+        assertEquals(module3, testMods.get(0));
     }
 
     @Test
@@ -285,7 +285,7 @@ class ModularParserModuleTests {
         testee.addModule(supporter1);
         testee.addModule(supporter2);
 
-        assertEquals(testee.getSupporterOfType(NonCriticalSupporter.class), supporter1);
-        assertEquals(testee.getSupporterOfType(NonCriticalSupporterExt.class), supporter2);
+        assertEquals(supporter1, testee.getSupporterOfType(NonCriticalSupporter.class));
+        assertEquals(supporter2, testee.getSupporterOfType(NonCriticalSupporterExt.class));
     }
 }
