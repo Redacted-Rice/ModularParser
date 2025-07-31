@@ -37,7 +37,7 @@ public class ModularParser {
     public boolean addModule(Module module) {
         // Check for name conflicts
         if (index.containsKey(module.getName())) {
-            logOrErr("Module '" + module.getName() + "' already exists");
+            logOrStdErr("Module '" + module.getName() + "' already exists");
             return false;
         }
 
@@ -47,7 +47,7 @@ public class ModularParser {
         if (module instanceof LogSupporter) {
             if (logger != null) {
                 // Unnecessary but seems cleaner to keep the pattern
-                logOrErr("Attempted to add a second log supporter!");
+                logOrStdErr("Attempted to add a second log supporter!");
                 return false;
             }
             logger = (LogSupporter) module;
@@ -61,14 +61,14 @@ public class ModularParser {
         // See if its one of our required supporters
         if (module instanceof LineFormerSupporter) {
             if (lineFormer != null) {
-                logOrErr("Attempted to add a second line former!");
+                logOrStdErr("Attempted to add a second line former!");
                 return false;
             }
             lineFormer = (LineFormerSupporter) module;
         }
         if (module instanceof LineParserSupporter) {
             if (lineParser != null) {
-                logOrErr("Attempted to add a second line parser!");
+                logOrStdErr("Attempted to add a second line parser!");
                 return false;
             }
             lineParser = (LineParserSupporter) module;
@@ -79,7 +79,7 @@ public class ModularParser {
             Supporter asSupporter = (Supporter) module;
             String supporterName = getSupporterInterfaceName(asSupporter);
             if (supporters.putIfAbsent(supporterName, asSupporter) != null) {
-                logOrErr("Attempted to add a second supporter for: "
+                logOrStdErr("Attempted to add a second supporter for: "
                         + module.getClass().getCanonicalName());
                 return false;
             }
@@ -100,7 +100,7 @@ public class ModularParser {
                 return iface.getSimpleName(); // e.g. "AliasSupporter"
             }
         }
-        logOrErr("No Sub Supporter interface of Supporter found");
+        logOrStdErr("No Sub Supporter interface of Supporter found");
         return "";
     }
 
@@ -110,7 +110,7 @@ public class ModularParser {
                 .filter(module -> !module.checkModulesCompatibility()).map(Module::getName)
                 .toList();
         if (failed.size() > 0) {
-            logOrErr("The following modules are incompatibile with at least one other module. "
+            logOrStdErr("The following modules are incompatibile with at least one other module. "
                     + "Check previous errors for details: " + String.join(", ", failed));
             return false;
         }
@@ -121,13 +121,13 @@ public class ModularParser {
 
     public boolean parse() {
         if (lineFormer == null) {
-            logger.log(LogLevel.ABORT, "ModularParser: No Line Former was added");
-            return false;
+            logOrStdErr(LogLevel.ABORT, "ModularParser: No Line Former was added");
+            notifyAbort();
         }
 
         if (lineParser == null) {
-            logger.log(LogLevel.ABORT, "ModularParser: No Line Parser was added");
-            return false;
+            logOrStdErr(LogLevel.ABORT, "ModularParser: No Line Parser was added");
+            notifyAbort();
         }
 
         String line;
@@ -136,9 +136,9 @@ public class ModularParser {
         }
         if (logger != null) {
             if (aborted()) {
-                logger.log(LogLevel.ERROR, "ModularParser: Aborted! See previous logs for details");
+                logOrStdErr("ModularParser: Aborted! See previous logs for details");
             } else if (getStatus() == Status.ERROR) {
-                logger.log(LogLevel.ERROR,
+                logOrStdErr(
                         "ModularParser: Failed to parser some lines! See previous logs for details");
             }
         }
@@ -147,9 +147,13 @@ public class ModularParser {
 
     // ------------------ Logging/Status Fns -------------------
 
-    protected void logOrErr(String format, Object... args) {
+    protected void logOrStdErr(String format, Object... args) {
+        logOrStdErr(LogLevel.ERROR, format, args);
+    }
+
+    protected void logOrStdErr(LogLevel level, String format, Object... args) {
         if (logger != null) {
-            logger.log(LogLevel.ERROR, logger.format(format, args));
+            logger.log(level, logger.format(format, args));
         } else {
             System.out.println(String.format(format, args));
         }
@@ -157,18 +161,14 @@ public class ModularParser {
 
     public void notifyError() {
         if (status.compareTo(Status.ERROR) < 0) {
-            if (logger != null) {
-                logger.log(LogLevel.ERROR, "ModularParser: First Error Signaled");
-            }
+            logOrStdErr("ModularParser: First Error Signaled");
             status = Status.ERROR;
         }
     }
 
     public void notifyAbort() {
         if (status.compareTo(Status.ABORT) < 0) {
-            if (logger != null) {
-                logger.log(LogLevel.ERROR, "ModularParser: First Abort Signaled");
-            }
+            logOrStdErr(LogLevel.ERROR, "ModularParser: First Abort Signaled");
             status = Status.ABORT;
         }
     }

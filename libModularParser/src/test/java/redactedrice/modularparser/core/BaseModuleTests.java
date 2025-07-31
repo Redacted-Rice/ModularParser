@@ -21,6 +21,12 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 class BaseModuleTests {
     final String OBJ_NAME = "Test name";
 
+    private class BaseModuleTester extends BaseModule {
+        public BaseModuleTester(String name) {
+            super(name);
+        }
+    }
+
     @Test
     void constructorSetterTest() {
         BaseModuleTester testee = new BaseModuleTester(OBJ_NAME);

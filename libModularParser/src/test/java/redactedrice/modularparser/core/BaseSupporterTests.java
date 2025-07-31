@@ -6,6 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 class BaseSupporterTests {
+    private class BaseSupporterTester extends BaseSupporter<TestModule> {
+        protected BaseSupporterTester(String name, Class<TestModule> tClass) {
+            super(name, tClass);
+        }
+    }
+
     final String OBJ_NAME = "Test name";
 
     @Test
