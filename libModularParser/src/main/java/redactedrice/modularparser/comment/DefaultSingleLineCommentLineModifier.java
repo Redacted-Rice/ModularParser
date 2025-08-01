@@ -13,7 +13,12 @@ public class DefaultSingleLineCommentLineModifier extends BaseModule implements 
     }
 
     @Override
-    public boolean hasOpenModifier(String line) {
+    public boolean lineContinuersValid(String line, boolean isComplete) {
+        return true;
+    }
+
+    @Override
+    public boolean lineHasOpenModifier(String line) {
         return false;
     }
 

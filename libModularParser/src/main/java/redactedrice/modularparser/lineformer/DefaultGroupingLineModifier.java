@@ -1,16 +1,18 @@
 package redactedrice.modularparser.lineformer;
 
 
+import java.util.regex.Pattern;
+
 import redactedrice.modularparser.core.BaseModule;
 
 public class DefaultGroupingLineModifier extends BaseModule implements LineModifier {
-    protected static final String NEWLINE_REGEX = "\\s*\\R\\s*";
+    protected static final Pattern NEWLINE_PATTERN = Pattern.compile("\\s*\\R\\s*");
 
     protected final String startToken;
     protected final String endToken;
     protected final boolean removeTokens;
-    protected final String startTokenRegex;
-    protected final String endTokenRegex;
+    protected final Pattern startTokenRegex;
+    protected final Pattern endTokenRegex;
 
     public DefaultGroupingLineModifier(String name, String startToken, String endToken,
             boolean removeTokens) {
@@ -18,22 +20,32 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
         this.startToken = startToken;
         this.endToken = endToken;
         this.removeTokens = removeTokens;
-        startTokenRegex = "\\s*" + startToken + "\\s*";
-        endTokenRegex = "\\s*" + endToken + "\\s*";
+        startTokenRegex = Pattern.compile("\\s*" + Pattern.quote(startToken) + "\\s*");
+        endTokenRegex = Pattern.compile("\\s*" + Pattern.quote(endToken) + "\\s*");
     }
 
     @Override
-    public boolean hasOpenModifier(String line) {
-        return countOccurrences(line, startToken) != countOccurrences(line, endToken);
+    public boolean lineContinuersValid(String line, boolean isComplete) {
+        return LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+    }
+
+    @Override
+    public boolean lineHasOpenModifier(String line) {
+        return countOccurrences(line, startToken) > countOccurrences(line, endToken);
     }
 
     @Override
     public String modifyLine(String line) {
         // We only need to test for one because it will have both
-        if (line.contains(startTokenRegex)) {
-            line = line.replaceAll(NEWLINE_REGEX, " ");
+        if (line.contains(startToken)) {
+            line = NEWLINE_PATTERN.matcher(line).replaceAll(" ");
             if (removeTokens) {
-                line = line.replaceAll(startTokenRegex, " ").replaceAll(endTokenRegex, " ");
+                line = endTokenRegex.matcher(startTokenRegex.matcher(line).replaceAll(" "))
+                        .replaceAll(" ");
+            } else {
+                line = endTokenRegex
+                        .matcher(startTokenRegex.matcher(line).replaceAll(" " + startToken))
+                        .replaceAll(endToken + " ");
             }
         }
         return line;

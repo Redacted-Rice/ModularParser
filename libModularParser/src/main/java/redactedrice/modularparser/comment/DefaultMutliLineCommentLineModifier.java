@@ -16,7 +16,12 @@ public class DefaultMutliLineCommentLineModifier extends BaseModule implements L
     }
 
     @Override
-    public boolean hasOpenModifier(String line) {
+    public boolean lineContinuersValid(String line, boolean isComplete) {
+        return LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+    }
+
+    @Override
+    public boolean lineHasOpenModifier(String line) {
         return line.contains(startToken) && !line.contains(endToken);
     }
 

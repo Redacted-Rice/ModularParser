@@ -48,7 +48,9 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
         for (int modifierIdx = 0; modifierIdx < submodules.size(); modifierIdx++) {
             LineModifier modifier = submodules.get(modifierIdx);
             boolean addedLine = false;
-            while (modifier.hasOpenModifier(logical)) {
+            boolean isValid = true;
+            while ((isValid = modifier.lineContinuersValid(logical, false)) &&
+                    modifier.lineHasOpenModifier(logical)) {
                 raw = getNextLine();
                 addedLine = true;
                 if (raw == null) {
@@ -56,6 +58,10 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
                 }
                 logical += raw;
             }
+            if (!isValid) {
+                return null;
+            }
+
             // Modify the line and restart if needed
             logical = modifier.modifyLine(logical);
             // if the line is blank, move to the next one

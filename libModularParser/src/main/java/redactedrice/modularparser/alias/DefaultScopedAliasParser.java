@@ -34,7 +34,12 @@ public class DefaultScopedAliasParser extends BaseScopedParser
     }
 
     @Override
-    public boolean hasOpenModifier(String line) {
+    public boolean lineContinuersValid(String line, boolean isComplete) {
+        return true;
+    }
+
+    @Override
+    public boolean lineHasOpenModifier(String line) {
         return false;
     }
 
