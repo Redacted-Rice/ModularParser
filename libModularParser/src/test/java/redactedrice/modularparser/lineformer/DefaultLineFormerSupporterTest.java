@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -113,8 +114,10 @@ public class DefaultLineFormerSupporterTest {
         testee.handleModule(modifier2);
 
         when(reader.readLine()).thenReturn(LINE_1);
-        when(modifier1.hasOpenModifier(any())).thenReturn(false);
-        when(modifier2.hasOpenModifier(any())).thenReturn(false);
+        when(modifier1.lineContinuersValid(any(), anyBoolean())).thenReturn(true);
+        when(modifier2.lineContinuersValid(any(), anyBoolean())).thenReturn(true);
+        when(modifier1.lineHasOpenModifier(any())).thenReturn(false);
+        when(modifier2.lineHasOpenModifier(any())).thenReturn(false);
         when(modifier1.modifyLine(LINE_1)).thenReturn(LINE_1_MODIFIED_1);
         when(modifier2.modifyLine(LINE_1_MODIFIED_1)).thenReturn(LINE_1_MODIFIED_2);
 
@@ -145,25 +148,43 @@ public class DefaultLineFormerSupporterTest {
         // but we should expect it to reset and pass it to the first one
         // as well once it finishes its modifier
         when(reader.readLine()).thenReturn(LINE_1, LINE_2, LINE_3, null);
-        when(modifier1.hasOpenModifier(any())).thenReturn(false);
-        when(modifier2.hasOpenModifier(any())).thenReturn(true, true, false);
+        when(modifier1.lineContinuersValid(any(), anyBoolean())).thenReturn(true);
+        when(modifier2.lineContinuersValid(any(), anyBoolean())).thenReturn(true);
+        when(modifier1.lineHasOpenModifier(any())).thenReturn(false);
+        when(modifier2.lineHasOpenModifier(any())).thenReturn(true, true, false);
 
         when(modifier1.modifyLine(LINE_1)).thenReturn(LINE_1);
         when(modifier1.modifyLine(COMBINED_ALL)).thenReturn(COMBINED_ALL);
         when(modifier2.modifyLine(COMBINED_ALL)).thenReturn(COMBINED_ALL);
 
         assertEquals(COMBINED_ALL, testee.getNextLogicalLine());
-        verify(modifier1).hasOpenModifier(LINE_1);
+        verify(modifier1).lineHasOpenModifier(LINE_1);
         // Ensure it reset the loop and called the original modifier
-        verify(modifier1).hasOpenModifier(COMBINED_ALL);
+        verify(modifier1).lineHasOpenModifier(COMBINED_ALL);
         assertEquals(1, testee.lineNumberStart);
         assertEquals(3, testee.lineNumberEnd);
 
         // Now test an unended extension
         when(reader.readLine()).thenReturn(LINE_1, LINE_2, null);
-        when(modifier2.hasOpenModifier(any())).thenReturn(true);
+        when(modifier2.lineHasOpenModifier(any())).thenReturn(true);
         when(modifier1.modifyLine(any())).thenReturn(LINE_1);
         when(modifier2.modifyLine(any())).thenReturn(LINE_1);
+        assertNull(testee.getNextLogicalLine());
+    }
+
+    @Test
+    void getNextLogicalLineInvalidLineTest() throws IOException {
+        testee.setReader(reader);
+
+        LineModifier modifier1 = mock(LineModifier.class);
+        LineModifier modifier2 = mock(LineModifier.class);
+        testee.handleModule(modifier1);
+        testee.handleModule(modifier2);
+
+        when(reader.readLine()).thenReturn(LINE_1);
+        when(modifier1.lineContinuersValid(any(), anyBoolean())).thenReturn(false);
+
+        // Happy case with two modifications
         assertNull(testee.getNextLogicalLine());
     }
 

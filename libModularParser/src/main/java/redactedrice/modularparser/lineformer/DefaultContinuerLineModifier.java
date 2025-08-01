@@ -1,17 +1,19 @@
 package redactedrice.modularparser.lineformer;
 
 
+import java.util.regex.Pattern;
+
 import redactedrice.modularparser.core.BaseModule;
 
 public class DefaultContinuerLineModifier extends BaseModule implements LineModifier {
     protected final String token;
-    protected final String tokenRegex;
+    protected final Pattern tokenRegex;
     protected final String replaceStr;
 
     public DefaultContinuerLineModifier(String name, String token, boolean removeToken) {
         super(name);
         this.token = token;
-        tokenRegex = "\\s*" + token + "\\s*";
+        tokenRegex = Pattern.compile("\\s*" + Pattern.quote(token) + "\\s*");
         if (removeToken) {
             replaceStr = " ";
         } else {
@@ -20,12 +22,17 @@ public class DefaultContinuerLineModifier extends BaseModule implements LineModi
     }
 
     @Override
-    public boolean hasOpenModifier(String line) {
+    public boolean lineContinuersValid(String line, boolean isComplete) {
+        return true;
+    }
+
+    @Override
+    public boolean lineHasOpenModifier(String line) {
         return line.endsWith(token);
     }
 
     @Override
     public String modifyLine(String line) {
-        return line.replaceAll(tokenRegex, replaceStr);
+        return tokenRegex.matcher(line).replaceAll(replaceStr);
     }
 }
