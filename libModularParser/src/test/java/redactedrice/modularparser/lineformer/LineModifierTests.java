@@ -15,36 +15,41 @@ public class LineModifierTests {
     @Test
     void validStartStopTokensTest() {
         boolean isComplete = true;
-        assertTrue(LineModifier.validStartStopTokens("", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(LineModifier.validStartStopTokens("1 2 3", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(
-                LineModifier.validStartStopTokens("1 (2) 3", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(LineModifier.validStartStopTokens("()(1 (2) )3", START_TOKEN, END_TOKEN,
-                isComplete));
+        assertTrue(LineModifier.validStartStopTokens("", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier.validStartStopTokens("1 2 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier.validStartStopTokens("1 (2) 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier
+                .validStartStopTokens("()(1 (2) )3", START_TOKEN, END_TOKEN, isComplete).isEmpty());
 
-        assertFalse(
-                LineModifier.validStartStopTokens("1 (2 (3)", START_TOKEN, END_TOKEN, isComplete));
-        assertFalse(
-                LineModifier.validStartStopTokens("1 (2 3", START_TOKEN, END_TOKEN, isComplete));
-        assertFalse(
-                LineModifier.validStartStopTokens("1 )(2) (3", START_TOKEN, END_TOKEN, isComplete));
+        assertFalse(LineModifier
+                .validStartStopTokens("1 (2 (3)", START_TOKEN, END_TOKEN, isComplete).isEmpty());
+        assertFalse(LineModifier.validStartStopTokens("1 (2 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertFalse(LineModifier
+                .validStartStopTokens("1 )(2) (3", START_TOKEN, END_TOKEN, isComplete).isEmpty());
 
         isComplete = false;
-        assertTrue(LineModifier.validStartStopTokens("", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(LineModifier.validStartStopTokens("1 2 3", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(
-                LineModifier.validStartStopTokens("1 (2) 3", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(LineModifier.validStartStopTokens("()(1 (2) )3", START_TOKEN, END_TOKEN,
-                isComplete));
+        assertTrue(LineModifier.validStartStopTokens("", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier.validStartStopTokens("1 2 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier.validStartStopTokens("1 (2) 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier
+                .validStartStopTokens("()(1 (2) )3", START_TOKEN, END_TOKEN, isComplete).isEmpty());
 
-        assertTrue(
-                LineModifier.validStartStopTokens("1 (2 (3)", START_TOKEN, END_TOKEN, isComplete));
-        assertTrue(LineModifier.validStartStopTokens("1 (2 3", START_TOKEN, END_TOKEN, isComplete));
+        assertTrue(LineModifier.validStartStopTokens("1 (2 (3)", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
+        assertTrue(LineModifier.validStartStopTokens("1 (2 3", START_TOKEN, END_TOKEN, isComplete)
+                .isEmpty());
 
-        assertFalse(
-                LineModifier.validStartStopTokens("1 )(2) (3", START_TOKEN, END_TOKEN, isComplete));
+        assertFalse(LineModifier
+                .validStartStopTokens("1 )(2) (3", START_TOKEN, END_TOKEN, isComplete).isEmpty());
 
         // Ensure it handles partial tokens
-        assertTrue(LineModifier.validStartStopTokens("(( ))(", "((", "))", isComplete));
+        assertTrue(LineModifier.validStartStopTokens("(( ))(", "((", "))", isComplete).isEmpty());
     }
 }
