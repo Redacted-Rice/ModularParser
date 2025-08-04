@@ -54,11 +54,17 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
                 raw = getNextLine();
                 addedLine = true;
                 if (raw == null) {
+                    log(LogLevel.ABORT,
+                            "Failed to read next line while still looking for closed modifier for %s: %s",
+                            modifier.getName(), logical);
                     return null;
                 }
                 logical += raw;
             }
             if (!isValid) {
+                log(LogLevel.ERROR,
+                        "Modifier %s expected to handle Logical line but determined is not valid: %s",
+                        modifier.getName(), logical);
                 return null;
             }
 

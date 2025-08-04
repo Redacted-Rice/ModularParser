@@ -17,7 +17,12 @@ public class DefaultMutliLineCommentLineModifier extends BaseModule implements L
 
     @Override
     public boolean lineContinuersValid(String line, boolean isComplete) {
-        return LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+        String error = LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+        if (!error.isEmpty()) {
+            log(LogLevel.ERROR, error);
+            return false;
+        }
+        return true;
     }
 
     @Override

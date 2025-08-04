@@ -4,8 +4,11 @@ package redactedrice.modularparser.lineformer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+
+import redactedrice.modularparser.core.ModularParser;
 
 public class DefaultGroupingLineModifierTest {
 
@@ -29,6 +32,8 @@ public class DefaultGroupingLineModifierTest {
         boolean removeTokens = true;
         DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
                 END_TOKEN, removeTokens);
+        ModularParser parser = mock(ModularParser.class);
+        testee.setParser(parser);
 
         boolean isComplete = true;
         assertTrue(testee.lineContinuersValid("1 (2) 3", isComplete));

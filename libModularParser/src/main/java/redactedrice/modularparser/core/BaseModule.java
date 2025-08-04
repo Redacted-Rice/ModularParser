@@ -8,7 +8,6 @@ public abstract class BaseModule implements Module {
     protected final String name;
     protected ModularParser parser;
 
-    // TODO Change to take parser as arg and auto register?
     protected BaseModule(String name) {
         this.name = name;
     }

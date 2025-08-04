@@ -4,6 +4,7 @@ package redactedrice.modularparser.lineformer;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public class DefaultGroupingLineModifier extends BaseModule implements LineModifier {
     protected static final Pattern NEWLINE_PATTERN = Pattern.compile("\\s*\\R\\s*");
@@ -26,7 +27,12 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
 
     @Override
     public boolean lineContinuersValid(String line, boolean isComplete) {
-        return LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+        String error = LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
+        if (!error.isEmpty()) {
+            log(LogLevel.ERROR, error);
+            return false;
+        }
+        return true;
     }
 
     @Override
