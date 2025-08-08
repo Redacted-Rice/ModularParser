@@ -22,7 +22,7 @@ import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
 import redactedrice.modularparser.lineparser.DefaultLambdaParser;
-import redactedrice.modularparser.lineparser.DefaultLineParserSupport;
+import redactedrice.modularparser.lineparser.DefaultLineParserSupporter;
 import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
@@ -79,7 +79,7 @@ public class Test {
 
         DefaultLineFormerSupporter reader = new DefaultLineFormerSupporter();
         parser.addModule(reader);
-        parser.addModule(new DefaultLineParserSupport());
+        parser.addModule(new DefaultLineParserSupporter());
         parser.addModule(new DefaultLiteralSupporter());
         DefaultLogSupporter logger = new DefaultLogSupporter();
         parser.addModule(logger);
