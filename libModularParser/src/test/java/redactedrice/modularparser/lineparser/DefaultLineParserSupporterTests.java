@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLineParserSupporterTest {
+public class DefaultLineParserSupporterTests {
 
     final String LINE_1 = "Line 1";
     final String LINE_2 = "Line 2";

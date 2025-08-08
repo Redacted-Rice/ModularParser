@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLinStartMatcherTest {
+public class DefaultLinStartMatcherTests {
 
     final String NAME = "LineStartMatcher";
     final String KEYWORD = "print";

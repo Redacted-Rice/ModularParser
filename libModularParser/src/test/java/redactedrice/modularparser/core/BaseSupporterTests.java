@@ -21,7 +21,7 @@ class BaseSupporterTests {
     }
 
     @Test
-    void handleModuleTests() {
+    void handleModuleTest() {
         TestModule module = new TestModule();
         TestModule2 module2 = new TestModule2();
 
