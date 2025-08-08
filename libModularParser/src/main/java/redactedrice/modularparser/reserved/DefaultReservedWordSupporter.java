@@ -1,38 +1,27 @@
 package redactedrice.modularparser.reserved;
 
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.core.Module;
-import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.BaseSupporter;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultReservedWordSupporter extends BaseModule implements ReservedWordSupporter {
-    private final List<WordReserver> reservers = new ArrayList<>();
-
+public class DefaultReservedWordSupporter extends BaseSupporter<WordReserver>
+        implements ReservedWordSupporter {
     public DefaultReservedWordSupporter() {
-        super(DefaultReservedWordSupporter.class.getSimpleName());
-    }
-
-    @Override
-    public void handleModule(Module module) {
-        if (module instanceof WordReserver) {
-            reservers.add((WordReserver) module);
-        }
+        super(DefaultReservedWordSupporter.class.getSimpleName(), WordReserver.class);
     }
 
     @Override
     public boolean checkModulesCompatibility() {
-        for (WordReserver beingChecked : reservers) {
+        for (WordReserver beingChecked : submodules) {
             // Check for exclusive reserved-word conflicts
             Set<String> exclusive = beingChecked.getReservedWords(ReservedType.EXCLUSIVE);
-            for (WordReserver other : reservers) {
+            for (WordReserver other : submodules) {
                 if (other == beingChecked) {
                     continue;
                 }
@@ -51,7 +40,11 @@ public class DefaultReservedWordSupporter extends BaseModule implements Reserved
 
     @Override
     public boolean isReservedWord(String word, Optional<ReservedType> type) {
-        for (WordReserver reserver : reservers) {
+        if (word == null || word.isBlank()) {
+            return false;
+        }
+
+        for (WordReserver reserver : submodules) {
             if (reserver.isReservedWord(word, type)) {
                 return true;
             }
@@ -62,14 +55,14 @@ public class DefaultReservedWordSupporter extends BaseModule implements Reserved
     @Override
     public Set<String> getReservedWords(ReservedType type) {
         Set<String> all = new HashSet<>();
-        reservers.stream().forEach(reserver -> all.addAll(reserver.getReservedWords(type)));
+        submodules.stream().forEach(reserver -> all.addAll(reserver.getReservedWords(type)));
         return all;
     }
 
     @Override
     public Map<String, ReservedType> getAllReservedWords() {
         Map<String, ReservedType> all = new HashMap<>();
-        reservers.stream().forEach(reserver -> all.putAll(reserver.getAllReservedWords()));
+        submodules.stream().forEach(reserver -> all.putAll(reserver.getAllReservedWords()));
         return all;
     }
 }
