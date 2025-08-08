@@ -2,7 +2,7 @@ package redactedrice.modularparser.lineparser;
 
 
 public class DefaultLambdaParser extends BaseLineStartMatcher {
-    private final DefaultLambdaParserFn handler;
+    protected final DefaultLambdaParserFn handler;
 
     public DefaultLambdaParser(String name, DefaultLambdaParserFn handler, String keyword) {
         super(name, keyword);
