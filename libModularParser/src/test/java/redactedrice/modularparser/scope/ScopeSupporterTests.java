@@ -1,0 +1,104 @@
+package redactedrice.modularparser.scope;
+
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Module;
+
+public class ScopeSupporterTests {
+
+    private static String NAME = "ScopeSupporter";
+
+    private class ScopeSupporterTester implements ScopeSupporter {
+        @Override
+        public void handleModule(Module module) {}
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public void setParser(ModularParser parser) {}
+
+        @Override
+        public void setModuleRefs() {}
+
+        @Override
+        public boolean checkModulesCompatibility() {
+            return false;
+        }
+
+        @Override
+        public void pushScope(String scope) {}
+
+        @Override
+        public void popScope() {}
+
+        @Override
+        public void removeScope(String scope) {}
+
+        @Override
+        public String currentScope() {
+            return null;
+        }
+
+        @Override
+        public String[] splitScope(String logicalLine) {
+            return null;
+        }
+
+        @Override
+        public String getOwner(Optional<String> scope, String name) {
+            return null;
+        }
+
+        @Override
+        public String getScope(String name) {
+            return null;
+        }
+
+        @Override
+        public Object getData(Optional<String> scope, String name, Module owner) {
+            return null;
+        }
+
+        @Override
+        public Set<String> getAllOwnedNames(Optional<String> scope, Module owner) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner) {
+            return null;
+        }
+
+        @Override
+        public boolean setData(String scope, String name, Module owner, Object data) {
+            return false;
+        }
+    }
+
+    @Test
+    void validStartStopTokensTest() {
+        ScopeSupporter testee = spy(new ScopeSupporterTester());
+        when(testee.getName()).thenReturn(NAME);
+
+        when(testee.getOwner(any(), any())).thenReturn(NAME);
+        assertTrue(testee.doesOwn(testee, Optional.of("global"), "foo"));
+
+        when(testee.getOwner(any(), any())).thenReturn("NotMyName");
+        assertFalse(testee.doesOwn(testee, Optional.of("global"), "foo"));
+    }
+}
