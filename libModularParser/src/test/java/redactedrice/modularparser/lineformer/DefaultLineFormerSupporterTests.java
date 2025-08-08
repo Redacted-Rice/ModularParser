@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.LineFormerSupporter.LineRange;
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLineFormerSupporterTest {
+public class DefaultLineFormerSupporterTests {
 
     final String LINE_1 = "Line 1";
     final String LINE_2 = "Line 2";

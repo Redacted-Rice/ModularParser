@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLambdaParserTest {
+public class DefaultLambdaParserTests {
 
     final String NAME = "LambdaParserTest";
     final String KEYWORD = "print";
