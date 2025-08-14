@@ -9,11 +9,11 @@ import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.Supporter;
 
 public interface ScopeSupporter extends Supporter {
-    void pushScope(String scope);
+    boolean pushScope(String scope);
 
-    void popScope();
+    boolean popScope();
 
-    void removeScope(String scope);
+    boolean removeScope(String scope);
 
     String currentScope();
 
@@ -27,7 +27,7 @@ public interface ScopeSupporter extends Supporter {
 
     String getOwner(Optional<String> scope, String name);
 
-    String getScope(String name);
+    String getNarrowestScope(String name);
 
     Object getData(Optional<String> scope, String name, Module owner);
 

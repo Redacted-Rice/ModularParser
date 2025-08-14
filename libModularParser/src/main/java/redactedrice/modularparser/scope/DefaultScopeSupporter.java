@@ -45,6 +45,9 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
 
     @Override
     public boolean tryParseLine(String logicalLine) {
+        if (logicalLine == null) {
+            return false;
+        }
         String[] split = splitScope(logicalLine);
         if (split == null || split.length <= 0) {
             return false;
@@ -59,27 +62,30 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     }
 
     @Override
-    public void pushScope(String scope) {
+    public boolean pushScope(String scope) {
         if (scopedVals.containsKey(scope)) {
             log(LogLevel.ERROR, "Adding already exising scope, moving to last defined: %s", scope);
-            scopeOrder.remove(scope);
+            return false;
         } else {
             scopedVals.put(scope, new HashMap<>());
             ownerMap.values().stream().forEach(scopeMap -> scopeMap.put(scope, new HashSet<>()));
         }
         scopeOrder.addFirst(scope);
+        return true;
     }
 
     @Override
-    public void popScope() {
+    public boolean popScope() {
         if (scopeOrder.isEmpty()) {
             log(LogLevel.ERROR, "No scope to pop");
+            return false;
         }
         removeScope(scopeOrder.peek());
+        return true;
     }
 
     @Override
-    public void removeScope(String scope) {
+    public boolean removeScope(String scope) {
         if (scopedVals.containsKey(scope)) {
             scopeOrder.remove(scope);
             scopedVals.remove(scope);
@@ -88,7 +94,9 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
             }
         } else {
             log(LogLevel.ERROR, "Attempting to remove undefined scope: %s", scope);
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -107,7 +115,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         return null;
     }
 
-    private OwnedObject getDataForScopeOrLowestScope(Optional<String> scope, String name) {
+    private OwnedObject getDataForScopeOrNarrowestScope(Optional<String> scope, String name) {
         if (!scope.isEmpty() && !scope.get().isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
             if (scopeMap != null) {
@@ -129,7 +137,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
 
     @Override
     public String getOwner(Optional<String> scope, String name) {
-        OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
+        OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
         if (obj != null) {
             return obj.owner();
         }
@@ -137,7 +145,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     }
 
     @Override
-    public String getScope(String name) {
+    public String getNarrowestScope(String name) {
         for (String scopeCheck : scopeOrder) {
             OwnedObject obj = scopedVals.get(scopeCheck).get(name);
             if (obj != null) {
@@ -149,7 +157,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
 
     @Override
     public Object getData(Optional<String> scope, String name, Module owner) {
-        OwnedObject obj = getDataForScopeOrLowestScope(scope, name);
+        OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
         if (obj != null && obj.owner().equals(owner.getName())) {
             return obj.obj();
         }
@@ -177,7 +185,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         Set<String> names = getAllOwnedNames(scope, owner);
         Map<String, Object> data = new HashMap<>();
         names.stream()
-                .forEach(name -> data.put(name, getDataForScopeOrLowestScope(scope, name).obj()));
+                .forEach(name -> data.put(name, getDataForScopeOrNarrowestScope(scope, name).obj()));
         return data;
     }
 
