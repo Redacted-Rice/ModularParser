@@ -2,8 +2,17 @@ package redactedrice.modularparser.scope;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -72,5 +81,181 @@ public class DefaultScopeSupporterTests {
         assertEquals(2, ownerScopeMap.size());
         assertTrue(ownerScopeMap.containsKey(SCOPE1));
         assertTrue(ownerScopeMap.containsKey(SCOPE2));
+    }
+
+    @Test
+    void tryParseLineTest() {
+        testee = spy(new DefaultScopeSupporter(NAME, true));
+        testee.setParser(parser);
+        testee.scopeOrder.push(SCOPE1);
+        testee.scopeOrder.push(SCOPE2);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+
+        assertFalse(testee.tryParseLine(null));
+        assertFalse(testee.tryParseLine("  "));
+        
+        final String SCOPE = "global";
+        final String REST_OF_LINE = "var x = 5";
+        final String LINE_1 = SCOPE + " " + REST_OF_LINE;
+        doReturn(null).when(testee).splitScope(LINE_1);
+        assertFalse(testee.tryParseLine(LINE_1));
+        doReturn(new String[] {}).when(testee).splitScope(LINE_1);
+        assertFalse(testee.tryParseLine(LINE_1));
+        
+        doReturn(new String[] {SCOPE, REST_OF_LINE}).when(testee).splitScope(LINE_1);
+        when(testee.currentScope()).thenReturn(SCOPE);
+        when(mod1.tryParseScoped(SCOPE, REST_OF_LINE, SCOPE)).thenReturn(false);
+        when(mod2.tryParseScoped(SCOPE, REST_OF_LINE, SCOPE)).thenReturn(false);
+        assertFalse(testee.tryParseLine(LINE_1));
+        verify(mod1).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+        verify(mod2).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+        
+        when(mod2.tryParseScoped(SCOPE, REST_OF_LINE, SCOPE)).thenReturn(true);
+        assertTrue(testee.tryParseLine(LINE_1));
+        verify(mod1, times(2)).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+        verify(mod2, times(2)).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+        
+        when(mod1.tryParseScoped(SCOPE, REST_OF_LINE, SCOPE)).thenReturn(true);
+        assertTrue(testee.tryParseLine(LINE_1));
+        verify(mod1, times(3)).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+        verify(mod2, times(2)).tryParseScoped(SCOPE, REST_OF_LINE, SCOPE);
+    }
+    
+    @Test
+    void pushPopRemoveCurrentScopeTest() {
+        testee = spy(new DefaultScopeSupporter(NAME, true));
+        testee.setParser(parser);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+        
+        // No scope
+        assertNull(testee.currentScope());
+        
+        // Push first
+        assertTrue(testee.pushScope(SCOPE1));
+        assertEquals(1, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE1));
+        assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
+        assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
+        assertEquals(SCOPE1, testee.currentScope());
+        
+        // Push already existing
+        assertFalse(testee.pushScope(SCOPE1));
+        assertEquals(1, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE1));
+        assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
+        assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
+        assertEquals(SCOPE1, testee.currentScope());
+        
+        // push second
+        assertTrue(testee.pushScope(SCOPE2));
+        assertEquals(2, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE1));
+        assertTrue(testee.scopeOrder.contains(SCOPE2));
+        assertEquals(2, testee.ownerMap.get(MOD1_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
+        assertEquals(2, testee.ownerMap.get(MOD2_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        assertEquals(SCOPE2, testee.currentScope());
+
+        // Remove non-exisitng
+        assertFalse(testee.removeScope("badScope"));
+        assertEquals(2, testee.scopeOrder.size());
+        
+        // remove first scope
+        assertTrue(testee.removeScope(SCOPE1));
+        assertEquals(1, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE2));
+        assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
+        assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        assertEquals(SCOPE2, testee.currentScope());
+        
+        // push it back
+        assertTrue(testee.pushScope(SCOPE1));
+        assertEquals(SCOPE1, testee.currentScope());
+        
+        // pop scope
+        assertTrue(testee.popScope());
+        assertEquals(SCOPE2, testee.currentScope());
+        assertEquals(1, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE2));
+        assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
+        assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        assertEquals(SCOPE2, testee.currentScope());
+        
+        // Pop last scope
+        assertTrue(testee.popScope());
+        assertNull(testee.currentScope());
+
+        // Pop with none remaining
+        assertFalse(testee.popScope());
+    }
+
+    @Test
+    void splitScopeTest() {
+    	final String UNUSED_SCOPE = "unusedScope";
+    	final String LINE = "var x = 42";
+    	final String SCOPE1_LINE = SCOPE1 + " " + LINE;
+    	final String SCOPE2_LINE = SCOPE2 + " " + LINE;
+    	final String UNUSED_SCOPE_LINE = UNUSED_SCOPE + " " + LINE;
+    	
+    	// allow implicit
+        testee = new DefaultScopeSupporter(NAME, true);
+        testee.setParser(parser);
+        testee.scopeOrder.push(SCOPE1);
+        testee.scopeOrder.push(SCOPE2);
+        
+        String[] result = testee.splitScope(SCOPE1_LINE);
+        assertEquals(2, result.length);
+        assertEquals(SCOPE1, result[0]);
+        assertEquals(LINE, result[1]);
+
+        result = testee.splitScope(SCOPE2_LINE);
+        assertEquals(2, result.length);
+        assertEquals(SCOPE2, result[0]);
+        assertEquals(LINE, result[1]);
+
+        result = testee.splitScope(LINE);
+        assertEquals(2, result.length);
+        assertTrue(result[0].isEmpty());
+        assertEquals(LINE, result[1]);
+        
+        // None existent scope - will be considered implicit
+        result = testee.splitScope(UNUSED_SCOPE_LINE);
+        assertEquals(2, result.length);
+        assertTrue(result[0].isEmpty());
+        assertEquals(UNUSED_SCOPE_LINE, result[1]);
+        
+        // Now try without implicit
+        testee = new DefaultScopeSupporter(NAME, false);
+        testee.setParser(parser);
+        testee.scopeOrder.push(SCOPE1);
+        testee.scopeOrder.push(SCOPE2);
+        
+        result = testee.splitScope(SCOPE1_LINE);
+        assertEquals(2, result.length);
+        assertEquals(SCOPE1, result[0]);
+        assertEquals(LINE, result[1]);
+
+        result = testee.splitScope(SCOPE2_LINE);
+        assertEquals(2, result.length);
+        assertEquals(SCOPE2, result[0]);
+        assertEquals(LINE, result[1]);
+
+        result = testee.splitScope(LINE);
+        assertNull(result);
+
+        // None existent scope - will be returned null
+        result = testee.splitScope(UNUSED_SCOPE_LINE);
+        assertNull(result);
     }
 }

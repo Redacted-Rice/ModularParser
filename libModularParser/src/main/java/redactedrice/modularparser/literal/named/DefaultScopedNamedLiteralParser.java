@@ -48,7 +48,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         if (m.group(1) == null) {
             // reassignment
             if (scope.isEmpty()) { // scope was not specified
-                scope = scopeSupporter.getScope(m.group(2));
+                scope = scopeSupporter.getNarrowestScope(m.group(2));
                 if (scope == null) {
                     log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", keyword,
                             m.group(2), m.group(3));

@@ -41,13 +41,19 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public void pushScope(String scope) {}
+        public boolean pushScope(String scope) {
+			return false;
+		}
 
         @Override
-        public void popScope() {}
+        public boolean popScope() {
+			return false;
+		}
 
         @Override
-        public void removeScope(String scope) {}
+        public boolean removeScope(String scope) {
+			return false;
+		}
 
         @Override
         public String currentScope() {
@@ -65,7 +71,7 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public String getScope(String name) {
+        public String getNarrowestScope(String name) {
             return null;
         }
 
