@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -136,18 +133,25 @@ public class DefaultScopeSupporterTests {
         assertTrue(testee.pushScope(SCOPE1));
         assertEquals(1, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE1));
+        
+        assertEquals(1, testee.scopedVals.size());
+        assertTrue(testee.scopedVals.containsKey(SCOPE1));
         assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
         assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
+        
         assertEquals(SCOPE1, testee.currentScope());
         
         // Push already existing
         assertFalse(testee.pushScope(SCOPE1));
         assertEquals(1, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE1));
+        
+        assertEquals(1, testee.scopedVals.size());
         assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
+        
         assertEquals(SCOPE1, testee.currentScope());
         
         // push second
@@ -155,12 +159,17 @@ public class DefaultScopeSupporterTests {
         assertEquals(2, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE1));
         assertTrue(testee.scopeOrder.contains(SCOPE2));
+
+        assertEquals(2, testee.scopedVals.size());
+        assertTrue(testee.scopedVals.containsKey(SCOPE1));
+        assertTrue(testee.scopedVals.containsKey(SCOPE2));
         assertEquals(2, testee.ownerMap.get(MOD1_NAME).size());
         assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
         assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
         assertEquals(2, testee.ownerMap.get(MOD2_NAME).size());
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        
         assertEquals(SCOPE2, testee.currentScope());
 
         // Remove non-exisitng
@@ -171,10 +180,14 @@ public class DefaultScopeSupporterTests {
         assertTrue(testee.removeScope(SCOPE1));
         assertEquals(1, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE2));
+
+        assertEquals(1, testee.scopedVals.size());
+        assertTrue(testee.scopedVals.containsKey(SCOPE2));
         assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
         assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        
         assertEquals(SCOPE2, testee.currentScope());
         
         // push it back
@@ -186,10 +199,14 @@ public class DefaultScopeSupporterTests {
         assertEquals(SCOPE2, testee.currentScope());
         assertEquals(1, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE2));
+
+        assertEquals(1, testee.scopedVals.size());
+        assertTrue(testee.scopedVals.containsKey(SCOPE2));
         assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
         assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+       
         assertEquals(SCOPE2, testee.currentScope());
         
         // Pop last scope

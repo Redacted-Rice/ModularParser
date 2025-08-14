@@ -18,8 +18,6 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineparser.LineParser;
 
 public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter, LineParser {
-    private record OwnedObject(String owner, Object obj) {}
-
     protected final List<ScopedParser> parsers = new LinkedList<>();
     // Scope -> var -> owner + data
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
@@ -115,7 +113,7 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         return null;
     }
 
-    private OwnedObject getDataForScopeOrNarrowestScope(Optional<String> scope, String name) {
+    protected OwnedObject getDataForScopeOrNarrowestScope(Optional<String> scope, String name) {
         if (!scope.isEmpty() && !scope.get().isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
             if (scopeMap != null) {
