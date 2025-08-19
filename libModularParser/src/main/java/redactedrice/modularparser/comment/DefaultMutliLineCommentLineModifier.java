@@ -15,43 +15,61 @@ public class DefaultMutliLineCommentLineModifier extends BaseModule implements L
         this.endToken = endToken;
     }
 
+    protected String recursivelyRemoveTokenPairs(String line, boolean openOk) {
+        int endIdx = line.indexOf(endToken);
+        int startIdx = line.indexOf(startToken);
+        // if both are < 0, then there are none or if only the end is not
+        // found and we allow open, then we are good
+        if ((endIdx < 0 && startIdx < 0) || (endIdx < 0 && openOk)) {
+            return line;
+        } else if (endIdx >= 0 && startIdx >= 0) {
+            if (endIdx < startIdx) {
+                return null;
+            }
+            // Strip the token pair and keep going
+            return recursivelyRemoveTokenPairs(removeTokenPair(line, startIdx, endIdx), openOk);
+        }
+        return null;
+    }
+
+    protected String removeTokenPair(String line, int startIdx, int endIdx) {
+        // Build a string with the comment replaced by a space
+        String lineStart = line.substring(0, startIdx);
+        boolean endsWithWhitespace = !lineStart.isEmpty() &&
+                Character.isWhitespace(lineStart.charAt(lineStart.length() - 1));
+        String lineEnd = line.substring(endIdx + endToken.length());
+        boolean startsWithWhitespace = !lineEnd.isEmpty() &&
+                Character.isWhitespace(lineEnd.charAt(0));
+
+        StringBuilder sb = new StringBuilder(lineStart.trim());
+        if (endsWithWhitespace || startsWithWhitespace) {
+            sb.append(' ');
+        }
+        sb.append(lineEnd.trim());
+        return sb.toString();
+    }
+
     @Override
     public boolean lineContinuersValid(String line, boolean isComplete) {
-        String error = LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
-        if (!error.isEmpty()) {
-            log(LogLevel.ERROR, error);
-            return false;
-        }
-        return true;
+        return null != recursivelyRemoveTokenPairs(line, !isComplete);
     }
 
     @Override
     public boolean lineHasOpenModifier(String line) {
-        return line.contains(startToken) && !line.contains(endToken);
+        int endIdx = line.lastIndexOf(endToken);
+        int startIdx = line.lastIndexOf(startToken);
+        return startIdx >= 0 && startIdx > endIdx;
     }
 
     @Override
     public String modifyLine(String line) {
-        // Do we have a start token?
-        int startIdx = line.indexOf(startToken);
-        // No comment, nothing to do
-        if (startIdx < 0) {
-            return line;
-        }
-
-        // We have a comment and should have a end too
-        int endIdx = line.indexOf(endToken);
-        if (endIdx < 0) {
-            log(LogLevel.ERROR,
-                    "Lineformer logic errror detected: Passed a line with a start token and not an end token!\n%s",
+        String stripped = recursivelyRemoveTokenPairs(line, false);
+        if (stripped == null) {
+            log(LogLevel.ERROR, "Lineformer logic errror detected: Passed an invalid line!\n%s",
                     line);
             return line;
         }
-
-        // Build a string with the comment replaced by a space
-        StringBuilder sb = new StringBuilder(line.substring(0, startIdx).trim());
-        sb.append(' ');
-        sb.append(line.substring(endIdx + endToken.length()).trim());
-        return sb.toString();
+        return stripped;
     }
+
 }

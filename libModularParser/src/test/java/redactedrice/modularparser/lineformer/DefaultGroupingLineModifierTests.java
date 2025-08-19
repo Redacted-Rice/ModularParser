@@ -49,7 +49,7 @@ public class DefaultGroupingLineModifierTests {
     }
 
     @Test
-    void hasOpenModifierTest() {
+    void lineHasOpenModifierTest() {
         boolean removeTokens = true;
         DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
                 END_TOKEN, removeTokens);

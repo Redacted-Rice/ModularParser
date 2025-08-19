@@ -17,12 +17,15 @@ public class DefaultContinuerLineModifierTests {
         boolean removeTokens = true;
         DefaultContinuerLineModifier testee = new DefaultContinuerLineModifier(NAME, TOKEN,
                 removeTokens);
+        assertEquals(NAME, testee.getName());
         assertEquals(TOKEN, testee.token);
-        assertEquals(TOKEN, testee.token);
+        assertEquals(" ", testee.replaceStr);
 
         removeTokens = false;
         testee = new DefaultContinuerLineModifier(NAME, TOKEN, removeTokens);
+        assertEquals(NAME, testee.getName());
         assertEquals(TOKEN, testee.token);
+        assertEquals(" " + TOKEN + " ", testee.replaceStr);
     }
 
     @Test
@@ -34,7 +37,7 @@ public class DefaultContinuerLineModifierTests {
     }
 
     @Test
-    void hasOpenModifierTest() {
+    void lineHasOpenModifierTest() {
         boolean removeTokens = true;
         DefaultContinuerLineModifier testee = new DefaultContinuerLineModifier(NAME, TOKEN,
                 removeTokens);
