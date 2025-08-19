@@ -26,7 +26,7 @@ public class DefaultSingleLineCommentLineModifier extends BaseModule implements 
     public String modifyLine(String line) {
         int idx = line.indexOf(token);
         if (idx >= 0) {
-            line = line.substring(0, idx);
+            line = line.substring(0, idx).strip();
         }
         return line;
     }
