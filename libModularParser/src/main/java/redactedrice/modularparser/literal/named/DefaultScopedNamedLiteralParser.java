@@ -9,22 +9,20 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.literal.LiteralSupporter;
-import redactedrice.modularparser.scope.BaseScopedParser;
+import redactedrice.modularparser.scope.BaseScopedKeywordParser;
 
-public class DefaultScopedNamedLiteralParser extends BaseScopedParser
+public class DefaultScopedNamedLiteralParser extends BaseScopedKeywordParser
         implements NamedLiteralParser {
     protected final boolean reassignmentAllowed;
-    protected final String keyword;
     protected final Pattern matcher;
 
     protected LiteralSupporter literalHandler;
 
     public DefaultScopedNamedLiteralParser(String moduleName, boolean reassignmentAllowed,
             String keyword) {
-        super(moduleName);
-        this.keyword = keyword.toLowerCase();
+        super(moduleName, keyword);
         // this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
-        matcher = Pattern.compile("^\\s*(?:(" + this.keyword + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
+        matcher = Pattern.compile("^\\s*(?:(" + this.getKeyword() + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
@@ -50,7 +48,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
             if (scope.isEmpty()) { // scope was not specified
                 scope = scopeSupporter.getNarrowestScope(m.group(2));
                 if (scope == null) {
-                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", keyword,
+                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", getKeyword(),
                             m.group(2), m.group(3));
                     return true;
                 }
@@ -65,12 +63,12 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
                 if (reassignmentAllowed) {
                     addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
-                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s", keyword,
+                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s", getKeyword(),
                             m.group(2), scope, m.group(3));
                 }
             } else {
                 log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
-                        keyword, m.group(2), scope, m.group(3));
+                        getKeyword(), m.group(2), scope, m.group(3));
             }
         } else {
             // Assignment
@@ -87,7 +85,7 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
                 log(LogLevel.ERROR, "Attempted to redefine existing %s %s in scope %s with %s",
-                        keyword, m.group(2), scope, m.group(3));
+                        getKeyword(), m.group(2), scope, m.group(3));
             }
         }
         return true;
@@ -98,10 +96,10 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedParser
         if (obj != null) {
             if (scopeSupporter.setData(scopeName, name, this, obj)) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
-                        (assignment ? "Added " : "Changed "), keyword, name, scopeName, obj);
+                        (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName, obj);
             }
         } else {
-            log(LogLevel.ERROR, "For %s %s cannot parse value: %s", keyword, name, literal);
+            log(LogLevel.ERROR, "For %s %s cannot parse value: %s", getKeyword(), name, literal);
         }
     }
 

@@ -1,17 +1,12 @@
 package redactedrice.modularparser.lineparser;
 
 
-import redactedrice.modularparser.reserved.BaseWordReserver;
-import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
+import redactedrice.modularparser.reserved.BaseKeywordReserver;
 
-public abstract class BaseLineStartMatcher extends BaseWordReserver implements LineParser {
-    protected final String keyword;
+public abstract class BaseLineStartMatcher extends BaseKeywordReserver implements LineParser {
 
     protected BaseLineStartMatcher(String name, String keyword) {
-        super(name);
-
-        this.keyword = keyword;
-        reservedWords.put(keyword, ReservedType.EXCLUSIVE);
+        super(name, keyword);
     }
 
     public boolean matches(String logicalLine) {
@@ -20,6 +15,6 @@ public abstract class BaseLineStartMatcher extends BaseWordReserver implements L
         }
 
         String[] words = logicalLine.trim().split("\\s+", 2);
-        return words[0].equals(keyword);
+        return words[0].equals(getKeyword());
     }
 }

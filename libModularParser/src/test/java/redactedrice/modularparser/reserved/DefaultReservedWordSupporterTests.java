@@ -3,23 +3,22 @@ package redactedrice.modularparser.reserved;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
-import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
 
 public class DefaultReservedWordSupporterTests {
+
+    final String MOD_1_NAME = "WordReserver1";
+    final String MOD_2_NAME = "WordReserver2";
 
     final String RESERVED_1 = "alias";
     final String RESERVED_2 = "var";
@@ -39,6 +38,8 @@ public class DefaultReservedWordSupporterTests {
 
         mod1 = mock(WordReserver.class);
         mod2 = mock(WordReserver.class);
+        when(mod1.getName()).thenReturn(MOD_1_NAME);
+        when(mod2.getName()).thenReturn(MOD_2_NAME);
         testee.handleModule(mod1);
         testee.handleModule(mod2);
     }
@@ -48,99 +49,41 @@ public class DefaultReservedWordSupporterTests {
         assertEquals("DefaultReservedWordSupporter", testee.getName());
     }
 
-    private void setupGetReservedWords() {
-        when(mod1.getReservedWords(ReservedType.EXCLUSIVE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_1)));
-        when(mod1.getReservedWords(ReservedType.SHAREABLE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_2)));
-
-        when(mod2.getReservedWords(ReservedType.SHAREABLE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_2)));
-        when(mod2.getReservedWords(ReservedType.EXCLUSIVE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_3)));
-        when(mod2.getReservedWords(ReservedType.SHAREABLE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_4)));
-    }
-
-    private void setupGetAllReservedWords() {
-        when(mod1.getAllReservedWords()).thenReturn(
-                Map.of(RESERVED_1, ReservedType.EXCLUSIVE, RESERVED_2, ReservedType.SHAREABLE));
-        when(mod2.getAllReservedWords()).thenReturn(Map.of(RESERVED_2, ReservedType.SHAREABLE,
-                RESERVED_3, ReservedType.EXCLUSIVE, RESERVED_4, ReservedType.SHAREABLE));
-    }
-
     @Test
     void checkModulesCompatibilityTest() {
-        setupGetReservedWords();
-        setupGetAllReservedWords();
-
+        when(mod1.getReservedWords()).thenReturn(Set.of(RESERVED_1, RESERVED_2));
+        when(mod2.getReservedWords()).thenReturn(Set.of(RESERVED_3, RESERVED_4));
         assertTrue(testee.checkModulesCompatibility());
 
-        // Test two claiming the same exclusively
-        when(mod1.getReservedWords(ReservedType.EXCLUSIVE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_3)));
-        assertFalse(testee.checkModulesCompatibility());
-
-        // Revert the behavior and try to claim a shareable word
-        when(mod1.getReservedWords(ReservedType.EXCLUSIVE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_1)));
-        when(mod2.getReservedWords(ReservedType.EXCLUSIVE))
-                .thenReturn(new HashSet<String>(Arrays.asList(RESERVED_2)));
+        // Test two claiming the same
+        when(mod1.getReservedWords()).thenReturn(Set.of(RESERVED_3));
         assertFalse(testee.checkModulesCompatibility());
     }
 
     @Test
-    void isReservedWordTest() {
-        when(mod1.isReservedWord(RESERVED_1, Optional.empty())).thenReturn(true);
-        when(mod1.isReservedWord(RESERVED_2, Optional.empty())).thenReturn(true);
-        when(mod1.isReservedWord(RESERVED_1, Optional.of(ReservedType.EXCLUSIVE))).thenReturn(true);
-        when(mod1.isReservedWord(RESERVED_2, Optional.of(ReservedType.SHAREABLE))).thenReturn(true);
+    void getReservedWordOwnerTest() {
+        when(mod1.isReservedWord(RESERVED_1)).thenReturn(true);
+        when(mod1.isReservedWord(RESERVED_2)).thenReturn(true);
+        when(mod2.isReservedWord(RESERVED_3)).thenReturn(true);
 
-        when(mod2.isReservedWord(RESERVED_2, Optional.empty())).thenReturn(true);
-        when(mod2.isReservedWord(RESERVED_3, Optional.empty())).thenReturn(true);
-        when(mod2.isReservedWord(RESERVED_2, Optional.of(ReservedType.SHAREABLE))).thenReturn(true);
-        when(mod2.isReservedWord(RESERVED_3, Optional.of(ReservedType.EXCLUSIVE))).thenReturn(true);
-
-        assertTrue(testee.isReservedWord(RESERVED_1));
-        assertTrue(testee.isReservedWord(RESERVED_2));
-        assertTrue(testee.isReservedWord(RESERVED_3));
-        assertFalse(testee.isReservedWord("notReserved"));
-        assertFalse(testee.isReservedWord(""));
-        assertFalse(testee.isReservedWord(null));
-
-        assertTrue(testee.isReservedWord(RESERVED_1, Optional.of(ReservedType.EXCLUSIVE)));
-        assertTrue(testee.isReservedWord(RESERVED_2, Optional.of(ReservedType.SHAREABLE)));
-        assertTrue(testee.isReservedWord(RESERVED_3, Optional.of(ReservedType.EXCLUSIVE)));
-        assertFalse(testee.isReservedWord(RESERVED_1, Optional.of(ReservedType.SHAREABLE)));
-        assertFalse(testee.isReservedWord(RESERVED_2, Optional.of(ReservedType.EXCLUSIVE)));
-        assertFalse(testee.isReservedWord(RESERVED_3, Optional.of(ReservedType.SHAREABLE)));
-
+        assertEquals(MOD_1_NAME, testee.getReservedWordOwner(RESERVED_1));
+        assertEquals(MOD_1_NAME, testee.getReservedWordOwner(RESERVED_2));
+        assertEquals(MOD_2_NAME, testee.getReservedWordOwner(RESERVED_3));
+        assertNull(testee.getReservedWordOwner("notReserved"));
+        assertNull(testee.getReservedWordOwner(""));
+        assertNull(testee.getReservedWordOwner(null));
     }
 
     @Test
     void getReservedWordTest() {
-        setupGetReservedWords();
+        when(mod1.getReservedWords()).thenReturn(Set.of(RESERVED_1, RESERVED_2));
+        when(mod2.getReservedWords()).thenReturn(Set.of(RESERVED_3, RESERVED_4));
 
-        Set<String> result = testee.getReservedWords(ReservedType.EXCLUSIVE);
-        assertEquals(2, result.size());
-        assertTrue(result.contains(RESERVED_1));
-        assertTrue(result.contains(RESERVED_3));
-
-        result = testee.getReservedWords(ReservedType.SHAREABLE);
-        assertEquals(2, result.size());
-        assertTrue(result.contains(RESERVED_2));
-        assertTrue(result.contains(RESERVED_4));
-    }
-
-    @Test
-    void getAllReservedWordTest() {
-        setupGetAllReservedWords();
-
-        Map<String, ReservedType> result = testee.getAllReservedWords();
+        Set<String> result = testee.getReservedWords();
         assertEquals(4, result.size());
-        assertEquals(ReservedType.EXCLUSIVE, result.get(RESERVED_1));
-        assertEquals(ReservedType.SHAREABLE, result.get(RESERVED_2));
-        assertEquals(ReservedType.EXCLUSIVE, result.get(RESERVED_3));
-        assertEquals(ReservedType.SHAREABLE, result.get(RESERVED_4));
+        assertTrue(result.contains(RESERVED_1));
+        assertTrue(result.contains(RESERVED_2));
+        assertTrue(result.contains(RESERVED_3));
+        assertTrue(result.contains(RESERVED_4));
     }
 }

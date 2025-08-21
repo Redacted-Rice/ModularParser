@@ -37,7 +37,7 @@ public class DefaultLambdaParserTests {
     void constructorTest() {
         assertEquals(fn, testee.handler);
         assertEquals(NAME, testee.getName());
-        assertEquals(KEYWORD, testee.keyword);
+        assertEquals(KEYWORD, testee.getKeyword());
     }
 
     @Test
