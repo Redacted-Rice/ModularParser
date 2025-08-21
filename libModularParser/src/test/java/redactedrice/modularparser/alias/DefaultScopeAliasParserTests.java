@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
@@ -22,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
-import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
+import redactedrice.modularparser.reserved.ReservedWordSupporter;
 import redactedrice.modularparser.scope.ScopeSupporter;
 
 public class DefaultScopeAliasParserTests {
@@ -30,8 +31,11 @@ public class DefaultScopeAliasParserTests {
     private ModularParser parser;
     private DefaultScopedAliasParser testee;
     private ScopeSupporter scopeSupporter;
+    private ReservedWordSupporter rwSupporter;
 
+    final String TESTEE_NAME = "BasicAliasHandler";
     final String SCOPE = "global";
+    final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
     private static String ALIAS_1 = "print";
     private static String ALIAS_2 = "lvar";
     private static String ALIAS_1_VAL = "println";
@@ -41,7 +45,10 @@ public class DefaultScopeAliasParserTests {
     void setup() {
         parser = mock(ModularParser.class);
         scopeSupporter = mock(ScopeSupporter.class);
+        when(scopeSupporter.getName()).thenReturn(SCOPE_SUPPORTER_NAME);
         when(parser.getSupporterOfType(ScopeSupporter.class)).thenReturn(scopeSupporter);
+        rwSupporter = mock(ReservedWordSupporter.class);
+        when(parser.getSupporterOfType(ReservedWordSupporter.class)).thenReturn(rwSupporter);
 
         testee = spy(new DefaultScopedAliasParser());
         testee.setParser(parser);
@@ -50,8 +57,8 @@ public class DefaultScopeAliasParserTests {
 
     @Test
     void constructorTest() {
-        assertEquals("BasicAliasHandler", testee.getName());
-        assertEquals("alias", testee.keyword);
+        assertEquals(TESTEE_NAME, testee.getName());
+        assertEquals("alias", testee.getKeyword());
     }
 
     @Test
@@ -91,6 +98,7 @@ public class DefaultScopeAliasParserTests {
 
     @Test
     void tryParseScopedTest() {
+        when(rwSupporter.getReservedWordOwner(any())).thenReturn(null);
         when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
 
         assertFalse(testee.tryParseScoped(SCOPE, "none matching line", SCOPE));
@@ -122,47 +130,33 @@ public class DefaultScopeAliasParserTests {
     }
 
     @Test
-    void isReservedWordTest() {
-        doReturn(false).when(testee).isAlias(any());
-        doReturn(true).when(testee).isAlias(ALIAS_1);
-        doReturn(true).when(testee).isAlias(ALIAS_2);
+    void tryParseScopedNameConflictTest() {
+        final String OTHER_OWNER = "SomeModule";
+        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
 
-        assertTrue(testee.isReservedWord("alias"));
-        assertTrue(testee.isReservedWord(ALIAS_1));
-        assertTrue(testee.isReservedWord(ALIAS_2));
-        assertFalse(testee.isReservedWord("SomeWord"));
+        // Other module reserved the word
+        when(rwSupporter.getReservedWordOwner(any())).thenReturn(OTHER_OWNER);
+        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
+        verify(testee).log(any(), anyString(), eq("print"), eq(OTHER_OWNER));
 
-        assertTrue(testee.isReservedWord("alias", Optional.of(ReservedType.EXCLUSIVE)));
-        assertFalse(testee.isReservedWord("alias", Optional.of(ReservedType.SHAREABLE)));
-        assertTrue(testee.isReservedWord(ALIAS_1, Optional.of(ReservedType.EXCLUSIVE)));
-        assertFalse(testee.isReservedWord(ALIAS_1, Optional.of(ReservedType.SHAREABLE)));
-        assertTrue(testee.isReservedWord(ALIAS_2, Optional.of(ReservedType.EXCLUSIVE)));
-        assertFalse(testee.isReservedWord(ALIAS_2, Optional.of(ReservedType.SHAREABLE)));
-    }
+        // Other module already defined this word
+        when(rwSupporter.getReservedWordOwner(any())).thenReturn(SCOPE_SUPPORTER_NAME);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(OTHER_OWNER);
+        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(OTHER_OWNER));
+        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
-    @Test
-    void getAllReservedWordsTest() {
-        doReturn(Set.of(ALIAS_1, ALIAS_2)).when(testee).getAliases();
+        // this module already defined this word
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(TESTEE_NAME));
+        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
-        Map<String, ReservedType> result = testee.getAllReservedWords();
-        assertEquals(3, result.size());
-        assertEquals(ReservedType.EXCLUSIVE, result.get("alias"));
-        assertEquals(ReservedType.EXCLUSIVE, result.get(ALIAS_1));
-        assertEquals(ReservedType.EXCLUSIVE, result.get(ALIAS_2));
-    }
-
-    @Test
-    void getReservedWordsTest() {
-        doReturn(Set.of(ALIAS_1, ALIAS_2)).when(testee).getAliases();
-
-        Set<String> result = testee.getReservedWords(ReservedType.EXCLUSIVE);
-        assertEquals(3, result.size());
-        assertTrue(result.contains("alias"));
-        assertTrue(result.contains(ALIAS_1));
-        assertTrue(result.contains(ALIAS_2));
-
-        result = testee.getReservedWords(ReservedType.SHAREABLE);
-        assertEquals(0, result.size());
+        // Already defined but in a different scope. This is okay
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        verify(scopeSupporter).setData(any(), any(), any(), any());
     }
 
     @Test

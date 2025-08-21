@@ -11,15 +11,23 @@ import java.util.regex.Pattern;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
 import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
+import redactedrice.modularparser.reserved.ReservedWordSupporter;
 import redactedrice.modularparser.scope.BaseScopedKeywordParser;
 
 public class DefaultScopedAliasParser extends BaseScopedKeywordParser
         implements LineModifier, AliasParser {
-    private final Pattern aliasDef;
+    protected final Pattern aliasDef;
+    protected ReservedWordSupporter reservedWordSupporter;
 
     public DefaultScopedAliasParser() {
         super("BasicAliasHandler", "alias");
         aliasDef = Pattern.compile("^\\s*" + getKeyword() + "\\s+(\\w+)\\s*=\\s*(.+)$");
+    }
+
+    @Override
+    public void setModuleRefs() {
+        super.setModuleRefs();
+        reservedWordSupporter = parser.getSupporterOfType(ReservedWordSupporter.class);
     }
 
     public static boolean isValidName(String name) {
@@ -75,12 +83,23 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser
             return true;
         }
 
-        // Check for collisions with reserved words
-        // if (parser.getAllReservedWords().containsKey(key)) {
-        // System.err.println(
-        // "Warning: alias '" + key + "' conflicts reserved word and will be ignored!");
-        // return true;
-        // }
+        // Check for collisions with reserved words. We get all since we are reserving
+        // them exclusively we can't share them
+        String reservedOwner = reservedWordSupporter.getReservedWordOwner(key);
+        if (reservedOwner != null) {
+            if (!reservedOwner.equals(scopeSupporter.getName())) {
+                log(LogLevel.ERROR, "Alias '%s' is reserved by '%s' and cannot be shared!", key,
+                        reservedOwner);
+                return true;
+            } else {
+                String wordOwner = scopeSupporter.getOwner(Optional.of(scope), key);
+                if (wordOwner != null) {
+                    log(LogLevel.ERROR, "Alias '%s' already defined in scope '%s' by '%s'!", key,
+                            scope, wordOwner);
+                    return true;
+                }
+            }
+        }
 
         if (scopeSupporter.setData(scope, key, this, val)) {
             log(LogLevel.DEBUG, "Added alias %s with value: %s", key, val);
