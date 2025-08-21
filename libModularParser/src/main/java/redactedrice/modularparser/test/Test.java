@@ -4,20 +4,13 @@ package redactedrice.modularparser.test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import redactedrice.modularparser.alias.DefaultAliasSupporter;
 import redactedrice.modularparser.alias.DefaultScopedAliasParser;
 import redactedrice.modularparser.comment.DefaultMutliLineCommentLineModifier;
 import redactedrice.modularparser.comment.DefaultSingleLineCommentLineModifier;
-import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
@@ -34,46 +27,10 @@ import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.log.DefaultConsoleLogHandler;
 import redactedrice.modularparser.log.DefaultLogSupporter;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
-import redactedrice.modularparser.reserved.ReservedWordSupporter.ReservedType;
-import redactedrice.modularparser.reserved.WordReserver;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
-    static private class ShareableReservedTest extends BaseModule implements WordReserver {
-        Set<String> sharedWords = new HashSet<>();
-
-        protected ShareableReservedTest(String name, String... shareables) {
-            super(name);
-            for (String shareable : shareables) {
-                sharedWords.add(shareable);
-            }
-        }
-
-        @Override
-        public boolean isReservedWord(String word, Optional<ReservedType> type) {
-            // Not needed
-            return false;
-        }
-
-        @Override
-        public Map<String, ReservedType> getAllReservedWords() {
-            Map<String, ReservedType> all = new HashMap<>();
-            for (String word : sharedWords) {
-                all.put(word, ReservedType.SHAREABLE);
-            }
-            return all;
-        }
-
-        @Override
-        public Set<String> getReservedWords(ReservedType type) {
-            if (type == ReservedType.SHAREABLE) {
-                return sharedWords;
-            }
-            return Collections.emptySet();
-        }
-    };
-
     public static void main(String[] args) throws IOException {
         ModularParser parser = new ModularParser();
 
@@ -188,9 +145,6 @@ public class Test {
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
         parser.parse();
-
-        parser.addModule(new ShareableReservedTest("shareable1", "commonWord", "anotherOne"));
-        parser.addModule(new ShareableReservedTest("shareable2", "commonWord", "anotherOne"));
 
         // Unhappy test cases
         // parser.addModule(new BasicLambdaModule("definitions",

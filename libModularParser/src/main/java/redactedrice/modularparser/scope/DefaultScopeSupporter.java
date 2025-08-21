@@ -12,12 +12,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.lineparser.LineParser;
+import redactedrice.modularparser.reserved.WordReserver;
 
-public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter, LineParser {
+public class DefaultScopeSupporter extends BaseModule
+        implements ScopeSupporter, LineParser, WordReserver {
     protected final List<ScopedParser> parsers = new LinkedList<>();
     // Scope -> var -> owner + data
     protected final Map<String, Map<String, OwnedObject>> scopedVals = new HashMap<>();
@@ -182,8 +184,8 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
     public Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner) {
         Set<String> names = getAllOwnedNames(scope, owner);
         Map<String, Object> data = new HashMap<>();
-        names.stream()
-                .forEach(name -> data.put(name, getDataForScopeOrNarrowestScope(scope, name).obj()));
+        names.stream().forEach(
+                name -> data.put(name, getDataForScopeOrNarrowestScope(scope, name).obj()));
         return data;
     }
 
@@ -206,5 +208,22 @@ public class DefaultScopeSupporter extends BaseModule implements ScopeSupporter,
         scopeMap.put(name, new OwnedObject(owner.getName(), data));
         ownerMap.get(owner.getName()).get(scope).add(name);
         return true;
+    }
+
+    @Override
+    public boolean isReservedWord(String word) {
+        for (Map<String, OwnedObject> valMap : scopedVals.values()) {
+            if (valMap.containsKey(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Set<String> getReservedWords() {
+        Set<String> forAllScopes = new HashSet<>();
+        scopedVals.values().stream().forEach(valMap -> forAllScopes.addAll(valMap.keySet()));
+        return forAllScopes;
     }
 }

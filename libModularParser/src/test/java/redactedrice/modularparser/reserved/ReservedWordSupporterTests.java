@@ -1,13 +1,12 @@
 package redactedrice.modularparser.reserved;
 
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -38,17 +37,12 @@ public class ReservedWordSupporterTests {
         }
 
         @Override
-        public boolean isReservedWord(String word, Optional<ReservedType> type) {
-            return false;
-        }
-
-        @Override
-        public Set<String> getReservedWords(ReservedType type) {
+        public String getReservedWordOwner(String word) {
             return null;
         }
 
         @Override
-        public Map<String, ReservedType> getAllReservedWords() {
+        public Set<String> getReservedWords() {
             return null;
         }
     }
@@ -56,7 +50,10 @@ public class ReservedWordSupporterTests {
     @Test
     void validStartStopTokensTest() {
         ReservedWordSupporter testee = spy(new ReservedWordSupporterTester());
-        when(testee.isReservedWord(any(), any())).thenReturn(true);
+        when(testee.getReservedWordOwner(any())).thenReturn("SomeModule");
         assertTrue(testee.isReservedWord("AnyWord"));
+
+        when(testee.getReservedWordOwner(any())).thenReturn(null);
+        assertFalse(testee.isReservedWord("DifferentWord"));
     }
 }

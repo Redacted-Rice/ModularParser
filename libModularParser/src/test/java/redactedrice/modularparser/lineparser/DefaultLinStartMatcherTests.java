@@ -41,8 +41,8 @@ public class DefaultLinStartMatcherTests {
     @Test
     void constructorTest() {
         assertEquals(NAME, testee.getName());
-        assertEquals(KEYWORD, testee.keyword);
-        assertTrue(testee.getAllReservedWords().containsKey(KEYWORD));
+        assertEquals(KEYWORD, testee.getKeyword());
+        assertTrue(testee.getReservedWords().contains(KEYWORD));
     }
 
     @Test

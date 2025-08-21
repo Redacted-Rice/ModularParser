@@ -1,25 +1,17 @@
 package redactedrice.modularparser.reserved;
 
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.Supporter;
 
 public interface ReservedWordSupporter extends Supporter {
-    public enum ReservedType {
-        EXCLUSIVE, SHAREABLE
-    }
 
     public default boolean isReservedWord(String word) {
-        return isReservedWord(word, Optional.empty());
+        return null != getReservedWordOwner(word);
     }
 
-    public boolean isReservedWord(String word, Optional<ReservedType> type);
+    public String getReservedWordOwner(String word);
 
-    public Set<String> getReservedWords(ReservedType type);
-
-    public Map<String, ReservedType> getAllReservedWords();
-
+    public Set<String> getReservedWords();
 }

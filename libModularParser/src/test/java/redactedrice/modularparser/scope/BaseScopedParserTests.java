@@ -13,14 +13,15 @@ import redactedrice.modularparser.core.ModularParser;
 
 class BaseScopedParserTests {
     final String NAME = "ScopedParser";
+    final String KEYWORD = "foo";
 
-    private BaseScopedParser testee;
+    private BaseScopedKeywordParser testee;
     private ModularParser parser;
     private ScopeSupporter scopeSupporter;
 
-    private class BaseScopedParserTester extends BaseScopedParser {
+    private class BaseScopedParserTester extends BaseScopedKeywordParser {
         protected BaseScopedParserTester(String name) {
-            super(name);
+            super(name, KEYWORD);
         }
 
         @Override
@@ -42,6 +43,7 @@ class BaseScopedParserTests {
     @Test
     void constructorSetterTest() {
         assertEquals(NAME, testee.getName());
+        assertEquals(KEYWORD, testee.getKeyword());
     }
 
     @Test
