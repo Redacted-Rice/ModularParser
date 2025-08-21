@@ -8,7 +8,5 @@ public interface LogSupporter extends Supporter {
 
     public void log(LogLevel level, String message);
 
-    public String format(String format, Object... args);
-
     public String appendStackTrace(String message, Throwable error);
 }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -146,9 +145,6 @@ class ModularParserModuleTests {
         final String NO_FORMER = "ModularParser: No Line Former was added";
         final String NO_PARSER = "ModularParser: No Line Parser was added";
         final String ABORTED = "ModularParser: Aborted! See previous logs for details";
-        when(logger.format(contains("No Line Former"))).thenReturn(NO_FORMER);
-        when(logger.format(contains("No Line Parser"))).thenReturn(NO_PARSER);
-        when(logger.format(contains("Aborted"))).thenReturn(ABORTED);
 
         assertFalse(testee.parse());
         assertEquals(ModularParser.Status.ABORT, testee.status);
@@ -172,7 +168,6 @@ class ModularParserModuleTests {
 
         // Test a parser error
         final String ERRORED = "ModularParser: Failed to parser some lines! See previous logs for details";
-        when(logger.format(contains("Failed to parser some lines"))).thenReturn(ERRORED);
         when(lfs.getNextLogicalLine()).thenReturn("test line", "test line 2", null);
         doAnswer(invocation -> {
             testee.status = ModularParser.Status.ERROR;

@@ -4,8 +4,6 @@ package redactedrice.modularparser.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -53,11 +51,8 @@ class ModularParserStatusTests {
         assertEquals(LOG_FULL, printed);
 
         // Now test with logger
-        when(mockLogger.format(any(), any())).thenReturn(LOG_FULL);
         testee.addModule(mockLogger);
         testee.logOrStdErr(LOG_FORMAT, LOG_DATA);
-
-        verify(mockLogger).format(eq(LOG_FORMAT), eq(LOG_DATA));
         verify(mockLogger).log(eq(LogLevel.ERROR), eq(LOG_FULL));
     }
 
@@ -70,7 +65,6 @@ class ModularParserStatusTests {
 
         // Now test with logger
         final String ERROR_LOG = "ModularParser: First Error Signaled";
-        when(mockLogger.format(contains("Error Signaled"))).thenReturn(ERROR_LOG);
         testee.addModule(mockLogger);
         testee.status = ModularParser.Status.OK;
         testee.notifyError();
@@ -92,7 +86,6 @@ class ModularParserStatusTests {
 
         // Now test with logger
         final String ABORT_LOG = "ModularParser: First Abort Signaled";
-        when(mockLogger.format(contains("Abort Signaled"))).thenReturn(ABORT_LOG);
         testee.addModule(mockLogger);
         testee.status = ModularParser.Status.OK;
         testee.notifyAbort();

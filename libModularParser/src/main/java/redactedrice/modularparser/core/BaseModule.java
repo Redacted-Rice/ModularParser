@@ -37,8 +37,7 @@ public abstract class BaseModule implements Module {
 
     public void log(LogLevel level, boolean notifyOnError, String message) {
         if (parser.getLogger() != null) {
-            String formatted = parser.getLogger().format("%s: %s", getName(), message);
-            parser.getLogger().log(level, formatted);
+            parser.getLogger().log(level, String.format("%s: %s", getName(), message));
         }
         if (notifyOnError) {
             if (level == LogLevel.ERROR) {
@@ -55,8 +54,7 @@ public abstract class BaseModule implements Module {
 
     public void log(LogLevel level, boolean notifyOnError, String format, Object... args) {
         if (parser.getLogger() != null) {
-            String message = parser.getLogger().format(format, args);
-            log(level, notifyOnError, message);
+            log(level, notifyOnError, String.format(format, args));
         }
     }
 

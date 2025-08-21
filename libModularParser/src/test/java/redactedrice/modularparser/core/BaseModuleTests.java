@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -61,11 +60,8 @@ class BaseModuleTests {
 
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
-        when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);
 
         testee.log(LogLevel.INFO, TEST_LOG);
-
-        verify(logger).format(eq("%s: %s"), eq(OBJ_NAME), eq(TEST_LOG));
         verify(logger).log(eq(LogLevel.INFO), eq(EXPECTED_LOG));
     }
 
@@ -86,13 +82,8 @@ class BaseModuleTests {
 
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
-        when(logger.format(anyString(), anyInt())).thenReturn(TEST_FORMATTED_LOG);
-        when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);
 
         testee.log(LogLevel.INFO, TEST_LOG, INT_VAL);
-
-        verify(logger).format(eq(TEST_LOG), eq(INT_VAL));
-        verify(logger).format(eq("%s: %s"), eq(OBJ_NAME), eq(TEST_FORMATTED_LOG));
         verify(logger).log(eq(LogLevel.INFO), eq(EXPECTED_LOG));
     }
 
@@ -101,7 +92,7 @@ class BaseModuleTests {
         final String TEST_LOG = "Test log";
         final String TEST_STACK_TRACE = "line 2: Some Trace";
         final String LOG_WITH_TRACE = TEST_LOG + ". Trace:\n" + TEST_STACK_TRACE;
-        final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
+        final String EXPECTED_LOG = OBJ_NAME + ": " + LOG_WITH_TRACE;
 
         ModularParser parser = mock(ModularParser.class);
         BaseModule testee = new BaseModuleTester(OBJ_NAME);
@@ -109,25 +100,22 @@ class BaseModuleTests {
         Throwable error = mock(Throwable.class);
 
         assertDoesNotThrow(() -> {
-            testee.log(LogLevel.INFO, error, EXPECTED_LOG);
+            testee.log(LogLevel.INFO, false, error, "Log before logger set");
         });
 
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
         when(logger.appendStackTrace(anyString(), any())).thenReturn(LOG_WITH_TRACE);
-        when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);
 
         testee.log(LogLevel.INFO, error, TEST_LOG);
 
         verify(logger).appendStackTrace(eq(TEST_LOG), eq(error));
-        verify(logger).format(eq("%s: %s"), eq(OBJ_NAME), eq(LOG_WITH_TRACE));
         verify(logger).log(eq(LogLevel.INFO), eq(EXPECTED_LOG));
     }
 
     @Test
     void logNotifyTest() {
         final String TEST_LOG = "Test log";
-        final String EXPECTED_LOG = OBJ_NAME + ": " + TEST_LOG;
 
         ModularParser parser = mock(ModularParser.class);
         BaseModule testee = new BaseModuleTester(OBJ_NAME);
@@ -135,7 +123,6 @@ class BaseModuleTests {
 
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
-        when(logger.format(anyString(), anyString(), anyString())).thenReturn(EXPECTED_LOG);
 
         testee.log(LogLevel.ERROR, false, TEST_LOG);
         verify(parser, never()).notifyError();

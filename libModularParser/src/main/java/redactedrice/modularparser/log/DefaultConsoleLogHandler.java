@@ -23,7 +23,7 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     @Override
     public void add(LogLevel level, String log) {
         if (enabled(level)) {
-            if (level == LogLevel.ERROR) {
+            if (level.ordinal() >= LogLevel.ERROR.ordinal()) {
                 System.err.println(format(level, log));
             } else {
                 System.out.println(format(level, log));

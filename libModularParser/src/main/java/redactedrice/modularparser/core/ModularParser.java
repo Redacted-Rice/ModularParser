@@ -153,7 +153,7 @@ public class ModularParser {
 
     protected void logOrStdErr(LogLevel level, String format, Object... args) {
         if (logger != null) {
-            logger.log(level, logger.format(format, args));
+            logger.log(level, String.format(format, args));
         } else {
             System.out.println(String.format(format, args));
         }
