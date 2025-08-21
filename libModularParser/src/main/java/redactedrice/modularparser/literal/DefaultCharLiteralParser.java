@@ -7,7 +7,7 @@ import redactedrice.modularparser.core.BaseModule;
 
 public class DefaultCharLiteralParser extends BaseModule implements LiteralParser {
     public DefaultCharLiteralParser() {
-        super("CharParser");
+        super("DefaultCharParser");
     }
 
     @Override
@@ -20,7 +20,7 @@ public class DefaultCharLiteralParser extends BaseModule implements LiteralParse
 
         // Double-quoted string
         if (trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-            String body = trimmed.substring(1, trimmed.length() - 1);
+            String body = trimmed.substring(1, trimmed.length() - 1).replaceAll("\\\"", "\"");
             return Optional.of(body);
         }
 

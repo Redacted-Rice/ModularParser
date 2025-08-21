@@ -11,10 +11,10 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
         implements ChainableLiteralParser {
     protected final String chainingToken;
 
-    protected LiteralSupporter literalHandler;
+    protected LiteralSupporter literalSupporter;
 
     public DefaultChainingChainableLiteralParser(String chainingToken, ModularParser parser) {
-        super("BasicChainingParser");
+        super("DefaultChainingParser");
         this.chainingToken = chainingToken;
         parser.addModule(new DefaultContinuerLineModifier("ChainingLiteralContinuerModule",
                 chainingToken, false));
@@ -22,31 +22,40 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
 
     @Override
     public void setModuleRefs() {
-        literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
+        super.setModuleRefs();
+        literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
     @Override
     public Optional<Object> tryParseLiteral(String literal) {
+        if (literal == null || literal.isBlank()) {
+            return Optional.empty();
+        }
+
         int chainIdx = literal.indexOf(chainingToken);
         if (chainIdx < 0) {
             return Optional.empty();
         }
 
-        Object evaluated = literalHandler.evaluateLiteral(literal.substring(0, chainIdx).trim());
-        return Optional.ofNullable(literalHandler.evaluateChainedLiteral(evaluated,
+        Object evaluated = literalSupporter.evaluateLiteral(literal.substring(0, chainIdx).trim());
+        return Optional.ofNullable(literalSupporter.evaluateChainedLiteral(evaluated,
                 literal.substring(chainIdx + chainingToken.length()).trim()));
     }
 
     @Override
     public Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
+        if (literal == null || literal.isBlank()) {
+            return Optional.empty();
+        }
+
         int chainIdx = literal.indexOf(chainingToken);
         if (chainIdx < 0) {
             return Optional.empty();
         }
 
-        Object evaluated = literalHandler.evaluateChainedLiteral(chained,
+        Object evaluated = literalSupporter.evaluateChainedLiteral(chained,
                 literal.substring(0, chainIdx).trim());
-        return Optional.ofNullable(literalHandler.evaluateChainedLiteral(evaluated,
+        return Optional.ofNullable(literalSupporter.evaluateChainedLiteral(evaluated,
                 literal.substring(chainIdx + chainingToken.length()).trim()));
     }
 

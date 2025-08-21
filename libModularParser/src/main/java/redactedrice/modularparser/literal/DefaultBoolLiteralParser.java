@@ -7,7 +7,7 @@ import redactedrice.modularparser.core.BaseModule;
 
 public class DefaultBoolLiteralParser extends BaseModule implements LiteralParser {
     public DefaultBoolLiteralParser() {
-        super("BoolParser");
+        super("DefaultBoolParser");
     }
 
     @Override

@@ -25,7 +25,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     protected final String[] optionalArgs;
     protected final Object[] optionalDefaults;
 
-    protected LiteralSupporter literalHandler;
+    protected LiteralSupporter literalSupporter;
 
     protected BaseArgumentChainableLiteral(String name, String keyword, String chainedArg,
             String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
@@ -39,7 +39,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
 
     @Override
     public void setModuleRefs() {
-        literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
+        literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
     protected boolean handleObjectLiteral(String literal, Map<String, Object> parsedArgs) {
@@ -70,9 +70,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             return false;
         }
 
-        if (!handleNamedArgs(namedParams, parsedArgs)) {
-            return false;
-        }
+        handleNamedArgs(namedParams, parsedArgs);
 
         for (String required : requiredArgs) {
             if (!parsedArgs.containsKey(required)) {
@@ -117,7 +115,8 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
                 continue;
             }
             String[] argSplit = arg.split(ARG_NAME_DELIMITER, 2);
-            if (argSplit.length == 1 || arg.startsWith("\"") && arg.endsWith("\"")) {
+            // If there is no space or its a quoted string, it doesn't have a name
+            if (argSplit.length == 1 || arg.startsWith("\"")) {
                 if (hasFoundNamed) {
                     log(LogLevel.ERROR, "Found positional arg after a named arg was used");
                     return false;
@@ -133,29 +132,28 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
 
     protected boolean handlePositionalArgs(List<String> positionalParams,
             Map<String, Object> parsedArgs) {
-        int positionalIdx = 0;
+        int requiredIdx = 0;
         int optionalIdx = 0;
-        while (positionalIdx + optionalIdx < positionalParams.size()) {
-            Object parsed = literalHandler
-                    .evaluateLiteral(positionalParams.get(positionalIdx + optionalIdx));
-            if (positionalIdx < requiredArgs.length) {
-                parsedArgs.put(requiredArgs[positionalIdx++], parsed);
+        while (requiredIdx + optionalIdx < positionalParams.size()) {
+            Object parsed = literalSupporter
+                    .evaluateLiteral(positionalParams.get(requiredIdx + optionalIdx));
+            if (requiredIdx < requiredArgs.length) {
+                parsedArgs.put(requiredArgs[requiredIdx++], parsed);
             } else if (optionalIdx < optionalArgs.length) {
                 parsedArgs.put(optionalArgs[optionalIdx++], parsed);
             } else {
-                log(LogLevel.ERROR, "Too many args were found");
+                log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
             }
         }
         return true;
     }
 
-    protected boolean handleNamedArgs(Map<String, String> namedParams,
+    protected void handleNamedArgs(Map<String, String> namedParams,
             Map<String, Object> parsedArgs) {
         for (Entry<String, String> entry : namedParams.entrySet()) {
-            parsedArgs.put(entry.getKey(), literalHandler.evaluateLiteral(entry.getValue()));
+            parsedArgs.put(entry.getKey(), literalSupporter.evaluateLiteral(entry.getValue()));
         }
-        return true;
     }
 
     public abstract Optional<Object> tryEvaluateObject(Map<String, Object> args);

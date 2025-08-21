@@ -9,11 +9,11 @@ import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.Module;
 
 public class DefaultLiteralSupporter extends BaseModule implements LiteralSupporter {
-    private final List<LiteralParser> handlers = new ArrayList<>();
-    private final List<ChainableLiteralParser> chainedHandlers = new ArrayList<>();
+    protected final List<LiteralParser> handlers = new ArrayList<>();
+    protected final List<ChainableLiteralParser> chainedHandlers = new ArrayList<>();
 
     public DefaultLiteralSupporter() {
-        super("LiteralSupportModule");
+        super("DefaultLiteralSupportModule");
     }
 
     @Override
@@ -29,8 +29,8 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
     @Override
     public Object evaluateLiteral(String literal) {
         Optional<Object> ret;
-        for (LiteralParser parser : handlers) {
-            ret = parser.tryParseLiteral(literal);
+        for (LiteralParser lp : handlers) {
+            ret = lp.tryParseLiteral(literal);
             if (ret.isPresent()) {
                 return ret.get();
             }
@@ -41,8 +41,8 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
     @Override
     public Object evaluateChainedLiteral(Object chained, String literal) {
         Optional<Object> ret;
-        for (ChainableLiteralParser parser : chainedHandlers) {
-            ret = parser.tryEvaluateChainedLiteral(chained, literal);
+        for (ChainableLiteralParser clp : chainedHandlers) {
+            ret = clp.tryEvaluateChainedLiteral(chained, literal);
             if (ret.isPresent()) {
                 return ret.get();
             }

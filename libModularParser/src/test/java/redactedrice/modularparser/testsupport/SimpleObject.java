@@ -1,4 +1,4 @@
-package redactedrice.modularparser.test;
+package redactedrice.modularparser.testsupport;
 
 
 public class SimpleObject {

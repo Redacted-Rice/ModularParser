@@ -1,4 +1,4 @@
-package redactedrice.modularparser.test;
+package redactedrice.modularparser.testsupport;
 
 
 import java.io.BufferedReader;
@@ -21,7 +21,6 @@ import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
-import redactedrice.modularparser.literal.SimpleObjectLiteralParser;
 import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
 import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.log.DefaultConsoleLogHandler;

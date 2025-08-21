@@ -1,10 +1,10 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.testsupport;
 
 
 import java.util.Map;
 import java.util.Optional;
 
-import redactedrice.modularparser.test.SimpleObject;
+import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 
 public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
     private final static String[] argsOrdered = new String[] {"intVal", "boolVal", "strVal", "so"};

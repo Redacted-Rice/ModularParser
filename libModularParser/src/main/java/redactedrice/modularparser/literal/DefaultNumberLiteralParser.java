@@ -7,52 +7,54 @@ import redactedrice.modularparser.core.BaseModule;
 
 public class DefaultNumberLiteralParser extends BaseModule implements LiteralParser {
     public DefaultNumberLiteralParser() {
-        super("NumberParser");
+        super("DefaultNumberParser");
     }
 
-    private enum PRIMITIVE_TYPE {
+    protected enum PrimitiveType {
         INT, LONG, DOUBLE, UNSPECIFIED
     }
 
     @Override
     public Optional<Object> tryParseLiteral(String literal) {
-        if (literal == null || literal.trim().isEmpty())
+        if (literal == null || literal.trim().isEmpty()) {
             return Optional.empty();
+        }
         String trimmed = literal.trim();
 
         // Check for suffix
         char last = trimmed.charAt(trimmed.length() - 1);
-        boolean hasSuffix = Character.isLetter(last) && trimmed.length() > 1;
-        String suffix = hasSuffix ? String.valueOf(Character.toLowerCase(last)) : "";
+        boolean hasSuffix = Character.isLetter(last);
+        String suffix = hasSuffix ? String.valueOf(Character.toLowerCase(last)) : "unspecified";
         String number = hasSuffix ? trimmed.substring(0, trimmed.length() - 1) : trimmed;
 
         return switch (suffix) {
-        case "i" -> parseWithType(number, PRIMITIVE_TYPE.INT);
-        case "l" -> parseWithType(number, PRIMITIVE_TYPE.LONG);
-        case "d" -> parseWithType(number, PRIMITIVE_TYPE.DOUBLE);
-        default -> parseWithType(number, PRIMITIVE_TYPE.UNSPECIFIED);
+        case "i" -> parseWithType(number, PrimitiveType.INT);
+        case "l" -> parseWithType(number, PrimitiveType.LONG);
+        case "d" -> parseWithType(number, PrimitiveType.DOUBLE);
+        case "unspecified" -> parseWithType(number, PrimitiveType.UNSPECIFIED);
+        default -> Optional.empty();
         };
     }
 
-    private Optional<Object> parseWithType(String number, PRIMITIVE_TYPE type) {
+    protected Optional<Object> parseWithType(String number, PrimitiveType type) {
         try {
             if (number.contains("e") || number.contains("E")) {
                 // First parse it as a double to handle any E values
                 double asDouble = Double.parseDouble(number);
                 // Then check if its an int or a long and return those first if it is
-                if (type == PRIMITIVE_TYPE.INT || type == PRIMITIVE_TYPE.UNSPECIFIED) {
+                if (type == PrimitiveType.INT || type == PrimitiveType.UNSPECIFIED) {
                     int asInt = (int) asDouble;
                     if (asDouble == asInt) {
                         return Optional.of(asInt);
-                    } else if (type == PRIMITIVE_TYPE.INT) {
+                    } else if (type == PrimitiveType.INT) {
                         return Optional.empty();
                     }
                 }
-                if (type == PRIMITIVE_TYPE.LONG || type == PRIMITIVE_TYPE.UNSPECIFIED) {
+                if (type == PrimitiveType.LONG || type == PrimitiveType.UNSPECIFIED) {
                     long asLong = (long) asDouble;
                     if (asDouble == asLong) {
                         return Optional.of(asLong);
-                    } else if (type == PRIMITIVE_TYPE.LONG) {
+                    } else if (type == PrimitiveType.LONG) {
                         return Optional.empty();
                     }
                 }
@@ -60,12 +62,14 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
                 // must be a double
                 return Optional.of(asDouble);
             }
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
 
         return parseAnyNonE(number, type);
     }
 
-    private Optional<Object> parseAnyNonE(String number, PRIMITIVE_TYPE type) {
+    protected Optional<Object> parseAnyNonE(String number, PrimitiveType type) {
         switch (type) {
         case INT:
             try {
@@ -82,6 +86,7 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
                 return Optional.of(Double.parseDouble(number));
             } catch (NumberFormatException e) {}
             break;
+        default:
         case UNSPECIFIED:
             try {
                 return Optional.of(Integer.parseInt(number));
