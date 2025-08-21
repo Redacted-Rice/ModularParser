@@ -69,6 +69,10 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser
         if ((val.startsWith("\"") && val.endsWith("\"")) ||
                 (val.startsWith("'") && val.endsWith("'"))) {
             val = val.substring(1, val.length() - 1);
+        } else if (val.startsWith("\"") || val.endsWith("\"") || val.startsWith("'") ||
+                val.endsWith("'")) {
+            log(LogLevel.ERROR, "Invalid alias definition - mismatched or only one quote: %s", key);
+            return true;
         }
 
         // Check for collisions with reserved words
