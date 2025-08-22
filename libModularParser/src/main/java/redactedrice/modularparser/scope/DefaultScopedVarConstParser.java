@@ -1,4 +1,4 @@
-package redactedrice.modularparser.literal.named;
+package redactedrice.modularparser.scope;
 
 
 import java.util.Collections;
@@ -8,17 +8,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.literal.LiteralParser;
 import redactedrice.modularparser.literal.LiteralSupporter;
-import redactedrice.modularparser.scope.BaseScopedKeywordParser;
 
-public class DefaultScopedNamedLiteralParser extends BaseScopedKeywordParser
-        implements NamedLiteralParser {
+public class DefaultScopedVarConstParser extends BaseScopedKeywordParser implements LiteralParser {
     protected final boolean reassignmentAllowed;
     protected final Pattern matcher;
 
     protected LiteralSupporter literalHandler;
 
-    public DefaultScopedNamedLiteralParser(String moduleName, boolean reassignmentAllowed,
+    public DefaultScopedVarConstParser(String moduleName, boolean reassignmentAllowed,
             String keyword) {
         super(moduleName, keyword);
         // this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
@@ -48,8 +47,8 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedKeywordParser
             if (scope.isEmpty()) { // scope was not specified
                 scope = scopeSupporter.getNarrowestScope(m.group(2));
                 if (scope == null) {
-                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", getKeyword(),
-                            m.group(2), m.group(3));
+                    log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s",
+                            getKeyword(), m.group(2), m.group(3));
                     return true;
                 }
             }
@@ -63,8 +62,8 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedKeywordParser
                 if (reassignmentAllowed) {
                     addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
-                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s", getKeyword(),
-                            m.group(2), scope, m.group(3));
+                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s",
+                            getKeyword(), m.group(2), scope, m.group(3));
                 }
             } else {
                 log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
@@ -112,12 +111,10 @@ public class DefaultScopedNamedLiteralParser extends BaseScopedKeywordParser
         return scopeSupporter.setData(scopeName, var, this, val);
     }
 
-    @Override
     public boolean isVariable(String var) {
         return scopeSupporter.getData(Optional.empty(), var, this) != null;
     }
 
-    @Override
     public Map<String, Object> getVariables() {
         return Collections.unmodifiableMap(scopeSupporter.getAllOwnedData(Optional.empty(), this));
     }
