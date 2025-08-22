@@ -1,4 +1,4 @@
-package redactedrice.modularparser.alias;
+package redactedrice.modularparser.scope;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -24,9 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
-import redactedrice.modularparser.scope.ScopeSupporter;
 
-public class DefaultScopeAliasParserTests {
+public class DefaultScopedVarConstParserTests {
 
     private ModularParser parser;
     private DefaultScopedAliasParser testee;
@@ -157,14 +155,6 @@ public class DefaultScopeAliasParserTests {
         when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
         verify(scopeSupporter).setData(any(), any(), any(), any());
-    }
-
-    @Test
-    void replaceAliasesTest() {
-        final String LINE = "Test lvar alias";
-        final String LINE_REPLACED = "Test local variable alias";
-        doReturn(LINE_REPLACED).when(testee).modifyLine(LINE);
-        assertEquals(LINE_REPLACED, testee.replaceAliases(LINE));
     }
 
     @Test

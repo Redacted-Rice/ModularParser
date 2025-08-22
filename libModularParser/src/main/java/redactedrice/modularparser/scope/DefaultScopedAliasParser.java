@@ -1,4 +1,4 @@
-package redactedrice.modularparser.alias;
+package redactedrice.modularparser.scope;
 
 
 import java.util.Collections;
@@ -10,12 +10,9 @@ import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.LineModifier;
-import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
-import redactedrice.modularparser.scope.BaseScopedKeywordParser;
 
-public class DefaultScopedAliasParser extends BaseScopedKeywordParser
-        implements LineModifier, AliasParser {
+public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements LineModifier {
     protected final Pattern aliasDef;
     protected ReservedWordSupporter reservedWordSupporter;
 
@@ -31,7 +28,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser
     }
 
     public static boolean isValidName(String name) {
-        return DefaultScopedNamedLiteralParser.isValidName(name);
+        return DefaultScopedVarConstParser.isValidName(name);
     }
 
     @Override
@@ -107,21 +104,14 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser
         return true;
     }
 
-    @Override
-    public String replaceAliases(String line) {
-        return modifyLine(line);
-    }
-
     public boolean setAlias(String scopeName, String alias, String val) {
         return scopeSupporter.setData(scopeName, alias, this, val);
     }
 
-    @Override
     public boolean isAlias(String alias) {
         return scopeSupporter.getData(Optional.empty(), alias, this) != null;
     }
 
-    @Override
     public Set<String> getAliases() {
         return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
     }

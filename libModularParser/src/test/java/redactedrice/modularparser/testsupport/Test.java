@@ -5,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-import redactedrice.modularparser.alias.DefaultAliasSupporter;
-import redactedrice.modularparser.alias.DefaultScopedAliasParser;
 import redactedrice.modularparser.comment.DefaultMutliLineCommentLineModifier;
 import redactedrice.modularparser.comment.DefaultSingleLineCommentLineModifier;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
@@ -21,12 +19,12 @@ import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
-import redactedrice.modularparser.literal.named.DefaultNamedLiteralSupporter;
-import redactedrice.modularparser.literal.named.DefaultScopedNamedLiteralParser;
 import redactedrice.modularparser.log.DefaultConsoleLogHandler;
 import redactedrice.modularparser.log.DefaultLogSupporter;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
+import redactedrice.modularparser.scope.DefaultScopedAliasParser;
+import redactedrice.modularparser.scope.DefaultScopedVarConstParser;
 
 // Simple test for development to check the behavior is as expected
 public class Test {
@@ -39,8 +37,6 @@ public class Test {
         parser.addModule(new DefaultLiteralSupporter());
         DefaultLogSupporter logger = new DefaultLogSupporter();
         parser.addModule(logger);
-        parser.addModule(new DefaultNamedLiteralSupporter());
-        parser.addModule(new DefaultAliasSupporter());
         parser.addModule(new DefaultReservedWordSupporter());
         parser.addModule(new DefaultConsoleLogHandler());
 
@@ -65,9 +61,8 @@ public class Test {
         parser.addModule(new DefaultBoolLiteralParser());
         parser.addModule(new SimpleObjectLiteralParser());
 
-        parser.addModule(new DefaultScopedNamedLiteralParser("BasicVarHandler", true, "variable"));
-        parser.addModule(
-                new DefaultScopedNamedLiteralParser("BasicConstHandler", false, "constant"));
+        parser.addModule(new DefaultScopedVarConstParser("BasicVarHandler", true, "variable"));
+        parser.addModule(new DefaultScopedVarConstParser("BasicConstHandler", false, "constant"));
         parser.addModule(new DefaultScopedAliasParser());
 
         parser.addModule(
@@ -80,9 +75,9 @@ public class Test {
                 # This is a comment (
                 /* This is (
                    a block comment */
-                alias greet = println "Hello"
-                file alias greet2 = println "Hello2"
-                global alias greet2 = println "Hello3"
+                alias greet = "println "Hello""
+                file alias greet2 = "println "Hello2""
+                global alias greet2 = "println "Hello3""
                 greet
                 variable num = 42
                 variable so1 = SimpleObject(intVal 5, boolVal true, strVal "test")
@@ -124,7 +119,7 @@ public class Test {
                 variable bar = "true ->
                    and something"
                 // Some comment  (
-                alias greet = println "Hello 2"
+                alias greet = "println "Hello 2""
                 // a comment end)
                 greet
                 (greet)
