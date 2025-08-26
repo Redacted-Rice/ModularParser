@@ -7,37 +7,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
 public class DefaultScopedVarConstParserTests {
 
     private ModularParser parser;
-    private DefaultScopedAliasParser testee;
+    private DefaultScopedVarConstParser testee;
     private ScopeSupporter scopeSupporter;
     private ReservedWordSupporter rwSupporter;
+    private LiteralSupporter lSupporter;
 
-    final String TESTEE_NAME = "BasicAliasHandler";
+    final String TESTEE_NAME = "BasicVarConstHandler";
+    final String KEYWORD = "var";
     final String SCOPE = "global";
     final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
-    private static String ALIAS_1 = "print";
-    private static String ALIAS_2 = "lvar";
-    private static String ALIAS_1_VAL = "println";
-    private static String ALIAS_2_VAL = "local var";
+    private static String VAR_1 = "print";
+    private static String VAR_2 = "lvar";
+    private static String VAR_1_VAL = "println";
+    private static String VAR_2_VAL = "local var";
 
     @BeforeEach
     void setup() {
@@ -47,51 +50,21 @@ public class DefaultScopedVarConstParserTests {
         when(parser.getSupporterOfType(ScopeSupporter.class)).thenReturn(scopeSupporter);
         rwSupporter = mock(ReservedWordSupporter.class);
         when(parser.getSupporterOfType(ReservedWordSupporter.class)).thenReturn(rwSupporter);
+        lSupporter = mock(LiteralSupporter.class);
+        when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(lSupporter);
 
-        testee = spy(new DefaultScopedAliasParser());
+        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, false, KEYWORD));
         testee.setParser(parser);
         testee.setModuleRefs();
     }
 
     @Test
-    void constructorTest() {
+    void constructorSetModuleRefsTest() {
         assertEquals(TESTEE_NAME, testee.getName());
-        assertEquals("alias", testee.getKeyword());
-    }
-
-    @Test
-    void isValidNameTest() {
-        assertFalse(DefaultScopedAliasParser.isValidName(null));
-        assertFalse(DefaultScopedAliasParser.isValidName(" "));
-        assertFalse(DefaultScopedAliasParser.isValidName("9var"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test space"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test.period"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test-hyphen"));
-
-        assertTrue(DefaultScopedAliasParser.isValidName("var"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v2"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v_with_underscore"));
-        assertTrue(DefaultScopedAliasParser.isValidName("Var"));
-        assertTrue(DefaultScopedAliasParser.isValidName("vAR"));
-    }
-
-    @Test
-    void lineContinuersValidLineHasOpenModifierTest() {
-        assertTrue(testee.lineContinuersValid("any string", true));
-        assertFalse(testee.lineHasOpenModifier("any string"));
-    }
-
-    @Test
-    void modifyLineTest() {
-        when(scopeSupporter.getAllOwnedData(any(), any()))
-                .thenReturn(Map.of(ALIAS_1, ALIAS_1_VAL, ALIAS_2, ALIAS_2_VAL));
-
-        final String NO_ALIAS = "This is a test line";
-        assertEquals(NO_ALIAS, testee.modifyLine(NO_ALIAS));
-
-        assertEquals("println local var test local var println",
-                testee.modifyLine("print lvar test lvar print"));
+        assertEquals(KEYWORD, testee.getKeyword());
+        assertEquals(scopeSupporter, testee.scopeSupporter);
+        assertEquals(lSupporter, testee.literalSupporter);
+        assertEquals(rwSupporter, testee.reservedWordSupporter);
     }
 
     @Test
@@ -102,87 +75,81 @@ public class DefaultScopedVarConstParserTests {
         assertFalse(testee.tryParseScoped(SCOPE, "none matching line", SCOPE));
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
-        assertTrue(testee.tryParseScoped(SCOPE, "alias 6bad = println", SCOPE));
+        assertTrue(testee.tryParseScoped(SCOPE, "var 6bad = 42", SCOPE));
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
-        clearInvocations(scopeSupporter);
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        assertTrue(testee.tryParseScoped(SCOPE, "var print = 42", SCOPE));
 
-        assertTrue(testee.tryParseScoped("", "alias print = 'println'", SCOPE));
-        verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
-        clearInvocations(scopeSupporter);
+        // TODO: Here
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("anything");
+        assertTrue(testee.tryParseScoped(SCOPE, "var print = 42", SCOPE));
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
+    }
 
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = \"println\"", SCOPE));
-        verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
-        clearInvocations(scopeSupporter);
-
-        assertTrue(testee.tryParseScoped(SCOPE, "alias bad = 'println", SCOPE));
-        assertTrue(testee.tryParseScoped(SCOPE, "alias bad = \"println", SCOPE));
-        assertTrue(testee.tryParseScoped(SCOPE, "alias bad = println'", SCOPE));
-        assertTrue(testee.tryParseScoped(SCOPE, "alias bad = println\"", SCOPE));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-
+    @Test
+    void addLiteralTest() {
+        when(lSupporter.evaluateLiteral(any())).thenReturn(null);
         when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(false);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = \"println\"", SCOPE));
-    }
-
-    @Test
-    void tryParseScopedNameConflictTest() {
-        final String OTHER_OWNER = "SomeModule";
-        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
-
-        // Other module reserved the word
-        when(rwSupporter.getReservedWordOwner(any())).thenReturn(OTHER_OWNER);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        testee.addLiteral("anything", SCOPE, "name", false);
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-        verify(testee).log(any(), anyString(), eq("print"), eq(OTHER_OWNER));
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
 
-        // Other module already defined this word
-        when(rwSupporter.getReservedWordOwner(any())).thenReturn(SCOPE_SUPPORTER_NAME);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(OTHER_OWNER);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(OTHER_OWNER));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-
-        // this module already defined this word
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(TESTEE_NAME));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-
-        // Already defined but in a different scope. This is okay
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        when(lSupporter.evaluateLiteral(any())).thenReturn(42);
+        testee.addLiteral("anything", SCOPE, "name", false);
         verify(scopeSupporter).setData(any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
+        verify(testee, never()).log(eq(LogLevel.DEBUG), anyString(), any(), any(), any(), any(),
+                any());
+
+        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
+        testee.addLiteral("anything", SCOPE, "name", false);
+        verify(scopeSupporter, times(2)).setData(any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.DEBUG), anyString(), eq("Changed "), any(), any(), any(),
+                any());
+
+        testee.addLiteral("anything", SCOPE, "name", true);
+        verify(scopeSupporter, times(3)).setData(any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.DEBUG), anyString(), eq("Added "), any(), any(), any(),
+                any());
     }
 
     @Test
-    void setAliasTest() {
-        when(scopeSupporter.setData(SCOPE, ALIAS_1, testee, ALIAS_1_VAL)).thenReturn(true);
-        when(scopeSupporter.setData(SCOPE, ALIAS_2, testee, ALIAS_2_VAL)).thenReturn(false);
+    void tryParseLiteralTest() {
+        when(scopeSupporter.getData(any(), any(), any())).thenReturn(null);
+        assertEquals(Optional.empty(), testee.tryParseLiteral("Any string"));
 
-        assertTrue(testee.setAlias(SCOPE, ALIAS_1, ALIAS_1_VAL));
-        assertFalse(testee.setAlias(SCOPE, ALIAS_2, ALIAS_2_VAL));
+        when(scopeSupporter.getData(any(), any(), any())).thenReturn(42);
+        assertEquals(Optional.of(42), testee.tryParseLiteral("Any string"));
     }
 
     @Test
-    void isAlias() {
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_1, testee)).thenReturn("not null");
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_2, testee)).thenReturn(null);
+    void setVariableTest() {
+        when(scopeSupporter.setData(SCOPE, VAR_1, testee, VAR_1_VAL)).thenReturn(true);
+        when(scopeSupporter.setData(SCOPE, VAR_2, testee, VAR_2_VAL)).thenReturn(false);
 
-        assertTrue(testee.isAlias(ALIAS_1));
-        assertFalse(testee.isAlias(ALIAS_2));
+        assertTrue(testee.setVariable(SCOPE, VAR_1, VAR_1_VAL));
+        assertFalse(testee.setVariable(SCOPE, VAR_2, VAR_2_VAL));
     }
 
     @Test
-    void getAllAliasesTest() {
-        Set<String> names = Set.of(ALIAS_1, ALIAS_2);
+    void isVariableTest() {
+        when(scopeSupporter.getData(Optional.empty(), VAR_1, testee)).thenReturn("not null");
+        when(scopeSupporter.getData(Optional.empty(), VAR_2, testee)).thenReturn(null);
+
+        assertTrue(testee.isVariable(VAR_1));
+        assertFalse(testee.isVariable(VAR_2));
+    }
+
+    @Test
+    void getVariablesTest() {
+        Set<String> names = Set.of(VAR_1, VAR_2);
         when(scopeSupporter.getAllOwnedNames(any(), any())).thenReturn(names);
 
-        Set<String> results = testee.getAliases();
+        Set<String> results = testee.getVariables();
         assertEquals(2, results.size());
-        assertTrue(results.contains(ALIAS_1));
-        assertTrue(results.contains(ALIAS_2));
+        assertTrue(results.contains(VAR_1));
+        assertTrue(results.contains(VAR_2));
     }
 }
