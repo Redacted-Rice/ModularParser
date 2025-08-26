@@ -21,6 +21,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
@@ -54,26 +55,11 @@ public class DefaultScopeAliasParserTests {
     }
 
     @Test
-    void constructorTest() {
+    void constructorSetModuleRefsTest() {
         assertEquals(TESTEE_NAME, testee.getName());
         assertEquals("alias", testee.getKeyword());
-    }
-
-    @Test
-    void isValidNameTest() {
-        assertFalse(DefaultScopedAliasParser.isValidName(null));
-        assertFalse(DefaultScopedAliasParser.isValidName(" "));
-        assertFalse(DefaultScopedAliasParser.isValidName("9var"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test space"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test.period"));
-        assertFalse(DefaultScopedAliasParser.isValidName("test-hyphen"));
-
-        assertTrue(DefaultScopedAliasParser.isValidName("var"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v2"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v"));
-        assertTrue(DefaultScopedAliasParser.isValidName("v_with_underscore"));
-        assertTrue(DefaultScopedAliasParser.isValidName("Var"));
-        assertTrue(DefaultScopedAliasParser.isValidName("vAR"));
+        assertEquals(scopeSupporter, testee.scopeSupporter);
+        assertEquals(rwSupporter, testee.reservedWordSupporter);
     }
 
     @Test
@@ -105,15 +91,16 @@ public class DefaultScopeAliasParserTests {
         assertTrue(testee.tryParseScoped(SCOPE, "alias 6bad = println", SCOPE));
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
-        clearInvocations(scopeSupporter);
 
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("anything");
+        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
         assertTrue(testee.tryParseScoped("", "alias print = 'println'", SCOPE));
-        verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
-        clearInvocations(scopeSupporter);
-
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = \"println\"", SCOPE));
         verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
         clearInvocations(scopeSupporter);
 
@@ -125,36 +112,6 @@ public class DefaultScopeAliasParserTests {
 
         when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(false);
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = \"println\"", SCOPE));
-    }
-
-    @Test
-    void tryParseScopedNameConflictTest() {
-        final String OTHER_OWNER = "SomeModule";
-        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
-
-        // Other module reserved the word
-        when(rwSupporter.getReservedWordOwner(any())).thenReturn(OTHER_OWNER);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-        verify(testee).log(any(), anyString(), eq("print"), eq(OTHER_OWNER));
-
-        // Other module already defined this word
-        when(rwSupporter.getReservedWordOwner(any())).thenReturn(SCOPE_SUPPORTER_NAME);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(OTHER_OWNER);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(OTHER_OWNER));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-
-        // this module already defined this word
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(testee).log(any(), anyString(), eq("print"), eq(SCOPE), eq(TESTEE_NAME));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
-
-        // Already defined but in a different scope. This is okay
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
-        assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
-        verify(scopeSupporter).setData(any(), any(), any(), any());
     }
 
     @Test
@@ -176,7 +133,7 @@ public class DefaultScopeAliasParserTests {
     }
 
     @Test
-    void getAllAliasesTest() {
+    void getAliasesTest() {
         Set<String> names = Set.of(ALIAS_1, ALIAS_2);
         when(scopeSupporter.getAllOwnedNames(any(), any())).thenReturn(names);
 

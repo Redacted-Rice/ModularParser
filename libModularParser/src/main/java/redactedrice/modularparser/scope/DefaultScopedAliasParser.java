@@ -27,10 +27,6 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
         reservedWordSupporter = parser.getSupporterOfType(ReservedWordSupporter.class);
     }
 
-    public static boolean isValidName(String name) {
-        return DefaultScopedVarConstParser.isValidName(name);
-    }
-
     @Override
     public boolean lineContinuersValid(String line, boolean isComplete) {
         return true;
@@ -69,6 +65,18 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
             return true;
         }
 
+        // Check for collisions with reserved words outside scope supporter
+        if (!ensureWordAvailableOrOwned(scope, key)) {
+            return true;
+        }
+
+        String wordOwner = scopeSupporter.getOwner(Optional.of(scope), name);
+        if (wordOwner != null) {
+            log(LogLevel.ERROR, "Alias '%s' already defined in scope '%s' by '%s'!", name, scope,
+                    wordOwner);
+            return true;
+        }
+
         String val = m.group(2).trim();
         // strip quotes
         if ((val.startsWith("\"") && val.endsWith("\"")) ||
@@ -76,26 +84,9 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
             val = val.substring(1, val.length() - 1);
         } else if (val.startsWith("\"") || val.endsWith("\"") || val.startsWith("'") ||
                 val.endsWith("'")) {
+            System.err.println(val);
             log(LogLevel.ERROR, "Invalid alias definition - mismatched or only one quote: %s", key);
             return true;
-        }
-
-        // Check for collisions with reserved words. We get all since we are reserving
-        // them exclusively we can't share them
-        String reservedOwner = reservedWordSupporter.getReservedWordOwner(key);
-        if (reservedOwner != null) {
-            if (!reservedOwner.equals(scopeSupporter.getName())) {
-                log(LogLevel.ERROR, "Alias '%s' is reserved by '%s' and cannot be shared!", key,
-                        reservedOwner);
-                return true;
-            } else {
-                String wordOwner = scopeSupporter.getOwner(Optional.of(scope), key);
-                if (wordOwner != null) {
-                    log(LogLevel.ERROR, "Alias '%s' already defined in scope '%s' by '%s'!", key,
-                            scope, wordOwner);
-                    return true;
-                }
-            }
         }
 
         if (scopeSupporter.setData(scope, key, this, val)) {

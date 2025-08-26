@@ -2,8 +2,8 @@ package redactedrice.modularparser.scope;
 
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +15,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     protected final boolean reassignmentAllowed;
     protected final Pattern matcher;
 
-    protected LiteralSupporter literalHandler;
+    protected LiteralSupporter literalSupporter;
 
     public DefaultScopedVarConstParser(String moduleName, boolean reassignmentAllowed,
             String keyword) {
@@ -25,14 +25,10 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         this.reassignmentAllowed = reassignmentAllowed;
     }
 
-    public static boolean isValidName(String name) {
-        return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
-    }
-
     @Override
     public void setModuleRefs() {
         super.setModuleRefs();
-        literalHandler = parser.getSupporterOfType(LiteralSupporter.class);
+        literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
     }
 
     @Override
@@ -42,23 +38,31 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             return false;
         }
 
+        final String key = m.group(2);
+        if (!isValidName(key)) {
+            log(LogLevel.ERROR, "Invalid variable name: %s", key);
+            return true;
+        }
+
+        // Check for collisions with reserved words outside scope supporter
+        if (!ensureWordAvailableOrOwned(scope, key)) {
+            return true;
+        }
+
+        // TODO: here
+
         if (m.group(1) == null) {
             // reassignment
             if (scope.isEmpty()) { // scope was not specified
-                scope = scopeSupporter.getNarrowestScope(m.group(2));
+                scope = scopeSupporter.getNarrowestScope(key);
                 if (scope == null) {
                     log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s",
-                            getKeyword(), m.group(2), m.group(3));
+                            getKeyword(), key, m.group(3));
                     return true;
                 }
             }
 
-            if (!isValidName(m.group(2))) {
-                log(LogLevel.ERROR, "Invalid variable name: %s", m.group(2));
-                return true;
-            }
-
-            if (!scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
+            if (!scopeSupporter.getOwner(Optional.of(scope), key).isEmpty()) {
                 if (reassignmentAllowed) {
                     addLiteral(m.group(3), scope, m.group(2), false);
                 } else {
@@ -75,12 +79,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                 scope = defaultScope;
             }
 
-            if (!isValidName(m.group(2))) {
-                log(LogLevel.ERROR, "Invalid variable name: %s", m.group(2));
-                return true;
-            }
-
-            if (scopeSupporter.getOwner(Optional.of(scope), m.group(2)).isEmpty()) {
+            if (scopeSupporter.getOwner(Optional.of(scope), key).isEmpty()) {
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
                 log(LogLevel.ERROR, "Attempted to redefine existing %s %s in scope %s with %s",
@@ -90,8 +89,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         return true;
     }
 
-    private void addLiteral(String literal, String scopeName, String name, boolean assignment) {
-        Object obj = literalHandler.evaluateLiteral(literal);
+    protected void addLiteral(String literal, String scopeName, String name, boolean assignment) {
+        Object obj = literalSupporter.evaluateLiteral(literal);
         if (obj != null) {
             if (scopeSupporter.setData(scopeName, name, this, obj)) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
@@ -115,7 +114,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         return scopeSupporter.getData(Optional.empty(), var, this) != null;
     }
 
-    public Map<String, Object> getVariables() {
-        return Collections.unmodifiableMap(scopeSupporter.getAllOwnedData(Optional.empty(), this));
+    public Set<String> getVariables() {
+        return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
     }
 }
