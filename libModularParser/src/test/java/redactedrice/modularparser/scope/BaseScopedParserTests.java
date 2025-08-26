@@ -65,7 +65,8 @@ class BaseScopedParserTests {
     @Test
     void isValidNameTest() {
         assertFalse(BaseScopedKeywordParser.isValidName(null));
-        assertFalse(BaseScopedKeywordParser.isValidName(" "));
+        assertFalse(BaseScopedKeywordParser.isValidName(""));
+        assertFalse(BaseScopedKeywordParser.isValidName("    "));
         assertFalse(BaseScopedKeywordParser.isValidName("9var"));
         assertFalse(BaseScopedKeywordParser.isValidName("test space"));
         assertFalse(BaseScopedKeywordParser.isValidName("test.period"));

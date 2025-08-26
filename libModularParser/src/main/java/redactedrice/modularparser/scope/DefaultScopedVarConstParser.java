@@ -38,6 +38,12 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             return false;
         }
 
+        if (m.group(1) == null && !reassignmentAllowed) {
+            log(LogLevel.DEBUG, "See reassignment but its not supported by this module: %s",
+                    logicalLine);
+            return false;
+        }
+
         final String key = m.group(2);
         if (!isValidName(key)) {
             log(LogLevel.ERROR, "Invalid variable name: %s", key);
@@ -48,8 +54,6 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (!ensureWordAvailableOrOwned(scope, key)) {
             return true;
         }
-
-        // TODO: here
 
         if (m.group(1) == null) {
             // reassignment
@@ -62,16 +66,16 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                 }
             }
 
-            if (!scopeSupporter.getOwner(Optional.of(scope), key).isEmpty()) {
-                if (reassignmentAllowed) {
-                    addLiteral(m.group(3), scope, m.group(2), false);
-                } else {
-                    log(LogLevel.ERROR, "Attempted to reassign %s %s in scope %s with %s",
-                            getKeyword(), m.group(2), scope, m.group(3));
-                }
-            } else {
+            String owner = scopeSupporter.getOwner(Optional.of(scope), key);
+            if (owner == null || owner.isEmpty()) {
                 log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
                         getKeyword(), m.group(2), scope, m.group(3));
+            } else if (!owner.equals(getName())) {
+                log(LogLevel.ERROR,
+                        "Attempted to reassign %s %s in scope %s with %s which is owned by module %s",
+                        getKeyword(), m.group(2), scope, m.group(3), owner);
+            } else {
+                addLiteral(m.group(3), scope, m.group(2), false);
             }
         } else {
             // Assignment
@@ -79,7 +83,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                 scope = defaultScope;
             }
 
-            if (scopeSupporter.getOwner(Optional.of(scope), key).isEmpty()) {
+            String owner = scopeSupporter.getOwner(Optional.of(scope), key);
+            if (owner == null || owner.isEmpty()) {
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
                 log(LogLevel.ERROR, "Attempted to redefine existing %s %s in scope %s with %s",

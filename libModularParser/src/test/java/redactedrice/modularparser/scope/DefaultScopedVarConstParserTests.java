@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -53,7 +56,7 @@ public class DefaultScopedVarConstParserTests {
         lSupporter = mock(LiteralSupporter.class);
         when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(lSupporter);
 
-        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, false, KEYWORD));
+        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, true, KEYWORD));
         testee.setParser(parser);
         testee.setModuleRefs();
     }
@@ -68,24 +71,89 @@ public class DefaultScopedVarConstParserTests {
     }
 
     @Test
-    void tryParseScopedTest() {
-        when(rwSupporter.getReservedWordOwner(any())).thenReturn(null);
-        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
+    void tryParseScopedCommonTest() {
+        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
 
         assertFalse(testee.tryParseScoped(SCOPE, "none matching line", SCOPE));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+
+        assertFalse(testee.tryParseScoped(SCOPE, "global x = \"scope not stripped\"", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
         assertTrue(testee.tryParseScoped(SCOPE, "var 6bad = 42", SCOPE));
-        verify(scopeSupporter, never()).setData(any(), any(), any(), any());
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
-        assertTrue(testee.tryParseScoped(SCOPE, "var print = 42", SCOPE));
+        assertTrue(testee.tryParseScoped(SCOPE, "var x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+    }
 
-        // TODO: Here
+    @Test
+    void tryParseScopedAssignmentTest() {
+        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
+
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("anything");
-        assertTrue(testee.tryParseScoped(SCOPE, "var print = 42", SCOPE));
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        assertTrue(testee.tryParseScoped(SCOPE, "var x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        assertTrue(testee.tryParseScoped("local", "var x = 42", SCOPE));
+        verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
+        assertTrue(testee.tryParseScoped("", "var x = 42", SCOPE));
+        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+    }
+
+    @Test
+    void tryParseScopedReassignmentTest() {
+        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
+        clearInvocations(testee);
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
+        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
+        clearInvocations(testee);
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("OtherModule");
+        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
+        clearInvocations(testee);
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+        clearInvocations(testee);
+        clearInvocations(scopeSupporter);
+
+        when(scopeSupporter.getNarrowestScope(any())).thenReturn(null);
+        assertTrue(testee.tryParseScoped("", "x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
+        clearInvocations(testee);
+
+        when(scopeSupporter.getNarrowestScope(any())).thenReturn("local");
+        assertTrue(testee.tryParseScoped("", "x = 42", SCOPE));
+        verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
+        clearInvocations(testee);
+        clearInvocations(scopeSupporter);
+
+        // Test with reassignment disabled
+        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, false, KEYWORD));
+        testee.setParser(parser);
+        testee.setModuleRefs();
+        assertFalse(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
     }
 
     @Test
