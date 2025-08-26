@@ -119,6 +119,10 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         return scopeSupporter.getData(Optional.empty(), var, this) != null;
     }
 
+    public Object getVariableValue(String var) {
+        return scopeSupporter.getData(Optional.empty(), var, this);
+    }
+
     public Set<String> getVariables() {
         return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
     }

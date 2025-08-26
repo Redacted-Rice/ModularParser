@@ -3,6 +3,7 @@ package redactedrice.modularparser.scope;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -130,6 +131,15 @@ public class DefaultScopeAliasParserTests {
 
         assertTrue(testee.isAlias(ALIAS_1));
         assertFalse(testee.isAlias(ALIAS_2));
+    }
+
+    @Test
+    void getAliasValueTest() {
+        when(scopeSupporter.getData(Optional.empty(), ALIAS_1, testee)).thenReturn("object");
+        when(scopeSupporter.getData(Optional.empty(), ALIAS_2, testee)).thenReturn(null);
+
+        assertEquals("object", testee.getAliasValue(ALIAS_1));
+        assertNull(testee.getAliasValue(ALIAS_2));
     }
 
     @Test

@@ -87,6 +87,9 @@ public class BaseArgumentChainableLiteralTest {
         assertEquals("something", parsedArgs.get("strVal"));
         assertEquals(false, parsedArgs.get("boolVal"));
         assertEquals(null, parsedArgs.get("so"));
+
+        assertTrue(testee.handleObjectLiteral(
+                "SIMpleObjeCT  (\"spaces and mixed cases should work too\")", parsedArgs));
     }
 
     @Test
