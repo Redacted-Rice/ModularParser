@@ -103,6 +103,11 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
         return scopeSupporter.getData(Optional.empty(), alias, this) != null;
     }
 
+    public String getAliasValue(String alias) {
+        // Aliases are only strings
+        return (String) scopeSupporter.getData(Optional.empty(), alias, this);
+    }
+
     public Set<String> getAliases() {
         return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
     }

@@ -10,14 +10,17 @@ import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 public class DefaultChainingChainableLiteralParser extends BaseModule
         implements ChainableLiteralParser {
     protected final String chainingToken;
+    protected final boolean queueNotStack;
 
     protected LiteralSupporter literalSupporter;
 
-    public DefaultChainingChainableLiteralParser(String chainingToken, ModularParser parser) {
-        super("DefaultChainingParser");
+    public DefaultChainingChainableLiteralParser(String name, String chainingToken,
+            boolean queueNotStack, ModularParser parser) {
+        super(name);
         this.chainingToken = chainingToken;
-        parser.addModule(new DefaultContinuerLineModifier("ChainingLiteralContinuerModule",
-                chainingToken, false));
+        this.queueNotStack = queueNotStack;
+        parser.addModule(
+                new DefaultContinuerLineModifier(name + "Continuer", chainingToken, false));
     }
 
     @Override
@@ -37,9 +40,17 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
             return Optional.empty();
         }
 
-        Object evaluated = literalSupporter.evaluateLiteral(literal.substring(0, chainIdx).trim());
-        return Optional.ofNullable(literalSupporter.evaluateChainedLiteral(evaluated,
-                literal.substring(chainIdx + chainingToken.length()).trim()));
+        String evalFirst;
+        String evalSecond;
+        if (queueNotStack) {
+            evalFirst = literal.substring(chainIdx + chainingToken.length()).trim();
+            evalSecond = literal.substring(0, chainIdx).trim();
+        } else {
+            evalFirst = literal.substring(0, chainIdx).trim();
+            evalSecond = literal.substring(chainIdx + chainingToken.length()).trim();
+        }
+        Object evaluated = literalSupporter.evaluateLiteral(evalFirst);
+        return Optional.ofNullable(literalSupporter.evaluateChainedLiteral(evaluated, evalSecond));
     }
 
     @Override

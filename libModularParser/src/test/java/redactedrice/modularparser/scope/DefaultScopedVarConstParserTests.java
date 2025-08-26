@@ -3,6 +3,7 @@ package redactedrice.modularparser.scope;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -208,6 +209,15 @@ public class DefaultScopedVarConstParserTests {
 
         assertTrue(testee.isVariable(VAR_1));
         assertFalse(testee.isVariable(VAR_2));
+    }
+
+    @Test
+    void getVariableValueTest() {
+        when(scopeSupporter.getData(Optional.empty(), VAR_1, testee)).thenReturn("object");
+        when(scopeSupporter.getData(Optional.empty(), VAR_2, testee)).thenReturn(null);
+
+        assertEquals("object", testee.getVariableValue(VAR_1));
+        assertNull(testee.getVariableValue(VAR_2));
     }
 
     @Test
