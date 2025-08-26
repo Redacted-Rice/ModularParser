@@ -18,6 +18,7 @@ import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 
 public class DefaultChainingChainableLiteralParserTests {
 
+    private static String NAME = "DefaultChainerArrow";
     private static String TOKEN = "->";
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
@@ -28,14 +29,14 @@ public class DefaultChainingChainableLiteralParserTests {
         parser = mock(ModularParser.class);
         literalSupporter = mock(LiteralSupporter.class);
         when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(literalSupporter);
-        testee = spy(new DefaultChainingChainableLiteralParser(TOKEN, parser));
+        testee = spy(new DefaultChainingChainableLiteralParser(NAME, TOKEN, false, parser));
         testee.setParser(parser);
         testee.setModuleRefs();
     }
 
     @Test
     void constructorSetModuleRefsTest() {
-        assertEquals("DefaultChainingParser", testee.getName());
+        assertEquals(NAME, testee.getName());
         assertEquals(TOKEN, testee.chainingToken);
         // Verify the line continuer was added
         verify(parser).addModule(
@@ -55,6 +56,14 @@ public class DefaultChainingChainableLiteralParserTests {
         when(literalSupporter.evaluateChainedLiteral(lhsObject, "a continuer"))
                 .thenReturn(rhsObject);
         assertEquals(Optional.of(rhsObject), testee.tryParseLiteral("line with -> a continuer"));
+
+        // Try with a queue instead of a stack
+        testee = spy(new DefaultChainingChainableLiteralParser(NAME, "<-", true, parser));
+        testee.setParser(parser);
+        testee.setModuleRefs();
+        when(literalSupporter.evaluateLiteral("a continuer")).thenReturn(lhsObject);
+        when(literalSupporter.evaluateChainedLiteral(lhsObject, "line with")).thenReturn(rhsObject);
+        assertEquals(Optional.of(rhsObject), testee.tryParseLiteral("line with <- a continuer"));
     }
 
     @Test

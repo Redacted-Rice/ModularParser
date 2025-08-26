@@ -55,7 +55,8 @@ public class Test {
                 new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
         parser.addModule(new DefaultContinuerLineModifier("BasicLineContinuerModule", "\\", true));
 
-        parser.addModule(new DefaultChainingChainableLiteralParser("->", parser));
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicArrowChainer", "->", false,
+                parser));
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
         parser.addModule(new DefaultBoolLiteralParser());

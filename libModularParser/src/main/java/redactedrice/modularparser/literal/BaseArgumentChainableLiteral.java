@@ -15,7 +15,7 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
         implements ChainableLiteralParser {
-    protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\(([^)]*)\\)");
+    protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
 
@@ -46,7 +46,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         if (literal == null) {
             return false;
         }
-        String trimmed = literal.trim();
+        String trimmed = literal.substring(0).trim();
 
         Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
         if (!m.find()) {
