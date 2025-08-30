@@ -3,10 +3,10 @@ package redactedrice.modularparser.literal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 
 public class DefaultLiteralSupporter extends BaseModule implements LiteralSupporter {
     protected final List<LiteralParser> handlers = new ArrayList<>();
@@ -27,26 +27,32 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
     }
 
     @Override
-    public Object evaluateLiteral(String literal) {
-        Optional<Object> ret;
+    public Response<Object> evaluateLiteral(String literal) {
+    	if (literal.isEmpty()) {
+    		return Response.error("Empty literal passed");
+    	}
+    	Response<Object> ret;
         for (LiteralParser lp : handlers) {
             ret = lp.tryParseLiteral(literal);
-            if (ret.isPresent()) {
-                return ret.get();
+            if (ret.wasHandled()) {
+                return ret;
             }
         }
-        return null;
+        return Response.notHandled();
     }
 
     @Override
-    public Object evaluateChainedLiteral(Object chained, String literal) {
-        Optional<Object> ret;
+    public Response<Object> evaluateChainedLiteral(Object chained, String literal) {
+    	if (literal.isEmpty()) {
+    		return Response.error("Empty literal passed");
+    	}
+    	Response<Object> ret;
         for (ChainableLiteralParser clp : chainedHandlers) {
             ret = clp.tryEvaluateChainedLiteral(chained, literal);
-            if (ret.isPresent()) {
-                return ret.get();
+            if (ret.wasHandled()) {
+                return ret;
             }
         }
-        return null;
+        return Response.notHandled();
     }
 }

@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 
@@ -94,11 +94,11 @@ public class BaseArgumentChainableLiteralTest {
 
     @Test
     void tryParseLiteralTest() {
-        final Optional<Object> EXPECTED = Optional.of("Object");
+        final Response<Object> EXPECTED = Response.is("Object");
         doReturn(EXPECTED).when(testee).tryEvaluateObject(any());
 
         doReturn(false).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(Optional.empty(), testee.tryParseLiteral("anything"));
+        assertEquals(Response.notHandled(), testee.tryParseLiteral("anything"));
         verify(testee, never()).tryEvaluateObject(any());
 
         doReturn(true).when(testee).handleObjectLiteral(any(), any());
@@ -109,11 +109,11 @@ public class BaseArgumentChainableLiteralTest {
     @Test
     void tryEvaluateChainedLiteral() {
         final Object BASE_OBJ = "BaseObj";
-        final Optional<Object> EXPECTED = Optional.of("Object");
+        final Response<Object> EXPECTED = Response.is("Object");
         doReturn(EXPECTED).when(testee).tryEvaluateObject(any());
 
         doReturn(false).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(Optional.empty(), testee.tryEvaluateChainedLiteral(BASE_OBJ, "anything"));
+        assertEquals(Response.notHandled(), testee.tryEvaluateChainedLiteral(BASE_OBJ, "anything"));
         verify(testee, never()).tryEvaluateObject(any());
 
         doReturn(true).when(testee).handleObjectLiteral(any(), any());
@@ -145,11 +145,11 @@ public class BaseArgumentChainableLiteralTest {
     @Test
     void handlePositionalArgsTest() {
         List<String> positionalParams = List.of("42", "f", "something");
-        when(literalSupporter.evaluateLiteral("42")).thenReturn(42);
-        when(literalSupporter.evaluateLiteral("f")).thenReturn(false);
-        when(literalSupporter.evaluateLiteral("something")).thenReturn("something");
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
+        when(literalSupporter.evaluateLiteral("f")).thenReturn(Response.is(false));
+        when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
         when(literalSupporter.evaluateLiteral("so"))
-                .thenReturn(new SimpleObject(5, false, "test", null));
+                .thenReturn(Response.is(new SimpleObject(5, false, "test", null)));
 
         Map<String, Object> parsedArgs = new HashMap<>();
         assertTrue(testee.handlePositionalArgs(positionalParams, parsedArgs));
@@ -168,8 +168,8 @@ public class BaseArgumentChainableLiteralTest {
     @Test
     void handleNamedArgsTest() {
         Map<String, String> namedParams = Map.of("intVal", "42", "strVal", "something");
-        when(literalSupporter.evaluateLiteral("42")).thenReturn(42);
-        when(literalSupporter.evaluateLiteral("something")).thenReturn("something");
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
+        when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
 
         Map<String, Object> parsedArgs = new HashMap<>();
         testee.handleNamedArgs(namedParams, parsedArgs);

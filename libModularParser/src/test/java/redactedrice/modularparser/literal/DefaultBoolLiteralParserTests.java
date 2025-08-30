@@ -3,9 +3,9 @@ package redactedrice.modularparser.literal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
+
+import redactedrice.modularparser.core.Response;
 
 public class DefaultBoolLiteralParserTests {
 
@@ -19,19 +19,17 @@ public class DefaultBoolLiteralParserTests {
     void tryParseLiteralTest() {
         DefaultBoolLiteralParser testee = new DefaultBoolLiteralParser();
 
-        assertEquals(Optional.empty(), testee.tryParseLiteral(null));
-        assertEquals(Optional.empty(), testee.tryParseLiteral(""));
-        assertEquals(Optional.empty(), testee.tryParseLiteral("something"));
-        assertEquals(Optional.empty(), testee.tryParseLiteral("fal"));
+        assertEquals(Response.notHandled(), testee.tryParseLiteral("something"));
+        assertEquals(Response.notHandled(), testee.tryParseLiteral("fal"));
 
-        assertEquals(Optional.of(false), testee.tryParseLiteral("f"));
-        assertEquals(Optional.of(false), testee.tryParseLiteral("F"));
-        assertEquals(Optional.of(false), testee.tryParseLiteral("false"));
-        assertEquals(Optional.of(false), testee.tryParseLiteral("FaLSe"));
+        assertEquals(Response.is(false), testee.tryParseLiteral("f"));
+        assertEquals(Response.is(false), testee.tryParseLiteral("F"));
+        assertEquals(Response.is(false), testee.tryParseLiteral("false"));
+        assertEquals(Response.is(false), testee.tryParseLiteral("FaLSe"));
 
-        assertEquals(Optional.of(true), testee.tryParseLiteral("t"));
-        assertEquals(Optional.of(true), testee.tryParseLiteral("T"));
-        assertEquals(Optional.of(true), testee.tryParseLiteral("true"));
-        assertEquals(Optional.of(true), testee.tryParseLiteral("TrUe"));
+        assertEquals(Response.is(true), testee.tryParseLiteral("t"));
+        assertEquals(Response.is(true), testee.tryParseLiteral("T"));
+        assertEquals(Response.is(true), testee.tryParseLiteral("true"));
+        assertEquals(Response.is(true), testee.tryParseLiteral("TrUe"));
     }
 }

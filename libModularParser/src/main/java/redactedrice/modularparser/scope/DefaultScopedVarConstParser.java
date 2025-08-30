@@ -2,12 +2,12 @@ package redactedrice.modularparser.scope;
 
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.LiteralParser;
 import redactedrice.modularparser.literal.LiteralSupporter;
 
@@ -68,7 +68,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                 }
             }
 
-            String owner = scopeSupporter.getOwner(Optional.of(scope), key);
+            String owner = scopeSupporter.getOwner(scope, key);
             if (owner == null || owner.isEmpty()) {
                 log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
                         getKeyword(), m.group(2), scope, m.group(3));
@@ -85,7 +85,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                 scope = defaultScope;
             }
 
-            String owner = scopeSupporter.getOwner(Optional.of(scope), key);
+            String owner = scopeSupporter.getOwner(scope, key);
             if (owner == null || owner.isEmpty()) {
                 addLiteral(m.group(3), scope, m.group(2), true);
             } else {
@@ -109,8 +109,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     }
 
     @Override
-    public Optional<Object> tryParseLiteral(String literal) {
-        return Optional.ofNullable(scopeSupporter.getData(Optional.empty(), literal, this));
+    public Response<Object> tryParseLiteral(String literal) {
+        return scopeSupporter.getData(null, literal, this);
     }
 
     public boolean setVariable(String scopeName, String var, Object val) {
@@ -118,14 +118,14 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     }
 
     public boolean isVariable(String var) {
-        return scopeSupporter.getData(Optional.empty(), var, this) != null;
+        return scopeSupporter.getData(null, var, this) != null;
     }
 
     public Object getVariableValue(String var) {
-        return scopeSupporter.getData(Optional.empty(), var, this);
+        return scopeSupporter.getData(null, var, this);
     }
 
     public Set<String> getVariables() {
-        return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
+        return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(null, this));
     }
 }

@@ -1,8 +1,8 @@
 package redactedrice.modularparser.literal;
 
 
-import java.util.Optional;
+import redactedrice.modularparser.core.Response;
 
 public interface ChainableLiteralParser extends LiteralParser {
-    Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal);
+    Response<Object> tryEvaluateChainedLiteral(Object chained, String literal);
 }

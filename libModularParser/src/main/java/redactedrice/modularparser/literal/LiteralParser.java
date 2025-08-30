@@ -1,10 +1,9 @@
 package redactedrice.modularparser.literal;
 
 
-import java.util.Optional;
-
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 
 public interface LiteralParser extends Module {
-    public Optional<Object> tryParseLiteral(String literal);
+    public Response<Object> tryParseLiteral(String literal);
 }

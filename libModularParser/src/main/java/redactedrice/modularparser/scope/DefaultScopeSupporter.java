@@ -9,12 +9,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineparser.LineParser;
 import redactedrice.modularparser.reserved.WordReserver;
 
@@ -115,9 +115,9 @@ public class DefaultScopeSupporter extends BaseModule
         return null;
     }
 
-    protected OwnedObject getDataForScopeOrNarrowestScope(Optional<String> scope, String name) {
-        if (!scope.isEmpty() && !scope.get().isEmpty()) {
-            Map<String, OwnedObject> scopeMap = scopedVals.get(scope.get());
+    protected OwnedObject getDataForScopeOrNarrowestScope(String scope, String name) {
+        if (scope != null && !scope.isEmpty()) {
+            Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
             if (scopeMap != null) {
                 OwnedObject obj = scopeMap.get(name);
                 if (obj != null) {
@@ -136,7 +136,7 @@ public class DefaultScopeSupporter extends BaseModule
     }
 
     @Override
-    public String getOwner(Optional<String> scope, String name) {
+    public String getOwner(String scope, String name) {
         OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
         if (obj != null) {
             return obj.owner();
@@ -156,23 +156,23 @@ public class DefaultScopeSupporter extends BaseModule
     }
 
     @Override
-    public Object getData(Optional<String> scope, String name, Module owner) {
+    public Response<Object> getData(String scope, String name, Module owner) {
         OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
         if (obj != null && obj.owner().equals(owner.getName())) {
-            return obj.obj();
+            return Response.is(obj.obj());
         }
         return null;
     }
 
     @Override
-    public Set<String> getAllOwnedNames(Optional<String> scope, Module owner) {
+    public Set<String> getAllOwnedNames(String scope, Module owner) {
         Map<String, Set<String>> owned = ownerMap.get(owner.getName());
         if (owned == null) {
             return Collections.emptySet();
         }
         Set<String> vars;
-        if (!scope.isEmpty() && !scope.get().isEmpty()) {
-            vars = owned.get(scope.get());
+        if (scope != null && !scope.isEmpty()) {
+            vars = owned.get(scope);
         } else {
             vars = new HashSet<>();
             owned.values().forEach(scopeVars -> vars.addAll(scopeVars));
@@ -181,7 +181,7 @@ public class DefaultScopeSupporter extends BaseModule
     }
 
     @Override
-    public Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner) {
+    public Map<String, Object> getAllOwnedData(String scope, Module owner) {
         Set<String> names = getAllOwnedNames(scope, owner);
         Map<String, Object> data = new HashMap<>();
         names.stream().forEach(

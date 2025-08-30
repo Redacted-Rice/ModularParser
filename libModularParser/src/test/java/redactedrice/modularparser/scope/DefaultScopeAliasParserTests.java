@@ -16,7 +16,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
 public class DefaultScopeAliasParserTests {
@@ -126,8 +126,8 @@ public class DefaultScopeAliasParserTests {
 
     @Test
     void isAlias() {
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_1, testee)).thenReturn("not null");
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_2, testee)).thenReturn(null);
+        when(scopeSupporter.getData(null, ALIAS_1, testee)).thenReturn(Response.is("not null"));
+        when(scopeSupporter.getData(null, ALIAS_2, testee)).thenReturn(Response.is(null));
 
         assertTrue(testee.isAlias(ALIAS_1));
         assertFalse(testee.isAlias(ALIAS_2));
@@ -135,8 +135,8 @@ public class DefaultScopeAliasParserTests {
 
     @Test
     void getAliasValueTest() {
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_1, testee)).thenReturn("object");
-        when(scopeSupporter.getData(Optional.empty(), ALIAS_2, testee)).thenReturn(null);
+        when(scopeSupporter.getData(null, ALIAS_1, testee)).thenReturn(Response.is("object"));
+        when(scopeSupporter.getData(null, ALIAS_2, testee)).thenReturn(Response.is(null));
 
         assertEquals("object", testee.getAliasValue(ALIAS_1));
         assertNull(testee.getAliasValue(ALIAS_2));
