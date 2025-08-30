@@ -35,6 +35,9 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
         Matcher m = matcher.matcher(logicalLine);
         if (!m.matches()) {
+        	// TODO This works but how can we get feedback back for a setter?
+        	// Maybe add an explicit eval call?
+        	literalSupporter.evaluateLiteral(logicalLine);
             return false;
         }
 
