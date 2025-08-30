@@ -6,11 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
@@ -46,7 +46,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         if (literal == null) {
             return false;
         }
-        String trimmed = literal.substring(0).trim();
+        String trimmed = literal.trim();
 
         Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
         if (!m.find()) {
@@ -88,20 +88,20 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     }
 
     @Override
-    public Optional<Object> tryParseLiteral(String literal) {
+    public Response<Object> tryParseLiteral(String literal) {
         Map<String, Object> parsedArgs = new HashMap<>();
         if (!handleObjectLiteral(literal, parsedArgs)) {
-            return Optional.empty();
+            return null;
         }
         return tryEvaluateObject(parsedArgs);
     }
 
     @Override
-    public Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
+    public Response<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
         Map<String, Object> parsedArgs = new HashMap<>();
         parsedArgs.put(chainedArg, chained);
         if (!handleObjectLiteral(literal, parsedArgs)) {
-            return Optional.empty();
+            return null;
         }
         return tryEvaluateObject(parsedArgs);
     }
@@ -156,6 +156,6 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         }
     }
 
-    public abstract Optional<Object> tryEvaluateObject(Map<String, Object> args);
+    public abstract Response<Object> tryEvaluateObject(Map<String, Object> args);
 
 }

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
@@ -165,7 +165,7 @@ public class DefaultScopedVarConstParserTests {
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
 
-        when(lSupporter.evaluateLiteral(any())).thenReturn(42);
+        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.is(42));
         testee.addLiteral("anything", SCOPE, "name", false);
         verify(scopeSupporter).setData(any(), any(), any(), any());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
@@ -187,10 +187,10 @@ public class DefaultScopedVarConstParserTests {
     @Test
     void tryParseLiteralTest() {
         when(scopeSupporter.getData(any(), any(), any())).thenReturn(null);
-        assertEquals(Optional.empty(), testee.tryParseLiteral("Any string"));
+        assertEquals(Response.notHandled(), testee.tryParseLiteral("Any string"));
 
-        when(scopeSupporter.getData(any(), any(), any())).thenReturn(42);
-        assertEquals(Optional.of(42), testee.tryParseLiteral("Any string"));
+        when(scopeSupporter.getData(any(), any(), any())).thenReturn(Response.is(42));
+        assertEquals(Response.is(42), testee.tryParseLiteral("Any string"));
     }
 
     @Test
@@ -204,8 +204,8 @@ public class DefaultScopedVarConstParserTests {
 
     @Test
     void isVariableTest() {
-        when(scopeSupporter.getData(Optional.empty(), VAR_1, testee)).thenReturn("not null");
-        when(scopeSupporter.getData(Optional.empty(), VAR_2, testee)).thenReturn(null);
+        when(scopeSupporter.getData(null, VAR_1, testee)).thenReturn(Response.is("not null"));
+        when(scopeSupporter.getData(null, VAR_2, testee)).thenReturn(Response.is(null));
 
         assertTrue(testee.isVariable(VAR_1));
         assertFalse(testee.isVariable(VAR_2));
@@ -213,8 +213,8 @@ public class DefaultScopedVarConstParserTests {
 
     @Test
     void getVariableValueTest() {
-        when(scopeSupporter.getData(Optional.empty(), VAR_1, testee)).thenReturn("object");
-        when(scopeSupporter.getData(Optional.empty(), VAR_2, testee)).thenReturn(null);
+        when(scopeSupporter.getData(null, VAR_1, testee)).thenReturn(Response.is("object"));
+        when(scopeSupporter.getData(null, VAR_2, testee)).thenReturn(Response.is(null));
 
         assertEquals("object", testee.getVariableValue(VAR_1));
         assertNull(testee.getVariableValue(VAR_2));

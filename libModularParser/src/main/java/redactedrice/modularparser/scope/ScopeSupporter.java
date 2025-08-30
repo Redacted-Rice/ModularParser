@@ -2,10 +2,10 @@ package redactedrice.modularparser.scope;
 
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.core.Supporter;
 
 public interface ScopeSupporter extends Supporter {
@@ -21,19 +21,19 @@ public interface ScopeSupporter extends Supporter {
     // Otherwise returns null
     String[] splitScope(String logicalLine);
 
-    default boolean doesOwn(Module module, Optional<String> scope, String name) {
-        return getOwner(scope, name) == module.getName();
+    default boolean doesOwn(Module module, String scope, String name) {
+        return getOwner(scope, name).equals(module.getName());
     }
 
-    String getOwner(Optional<String> scope, String name);
+    String getOwner(String scope, String name);
 
     String getNarrowestScope(String name);
 
-    Object getData(Optional<String> scope, String name, Module owner);
+    Response<Object> getData(String scope, String name, Module owner);
 
-    Set<String> getAllOwnedNames(Optional<String> scope, Module owner);
+    Set<String> getAllOwnedNames(String scope, Module owner);
 
-    Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner);
+    Map<String, Object> getAllOwnedData(String scope, Module owner);
 
     boolean setData(String scope, String name, Module owner, Object data);
 }

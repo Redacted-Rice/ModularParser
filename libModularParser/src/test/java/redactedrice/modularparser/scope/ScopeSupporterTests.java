@@ -8,13 +8,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 
 public class ScopeSupporterTests {
 
@@ -66,7 +66,7 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public String getOwner(Optional<String> scope, String name) {
+        public String getOwner(String scope, String name) {
             return null;
         }
 
@@ -76,17 +76,17 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public Object getData(Optional<String> scope, String name, Module owner) {
+        public Response<Object> getData(String scope, String name, Module owner) {
             return null;
         }
 
         @Override
-        public Set<String> getAllOwnedNames(Optional<String> scope, Module owner) {
+        public Set<String> getAllOwnedNames(String scope, Module owner) {
             return null;
         }
 
         @Override
-        public Map<String, Object> getAllOwnedData(Optional<String> scope, Module owner) {
+        public Map<String, Object> getAllOwnedData(String scope, Module owner) {
             return null;
         }
 
@@ -102,9 +102,9 @@ public class ScopeSupporterTests {
         when(testee.getName()).thenReturn(NAME);
 
         when(testee.getOwner(any(), any())).thenReturn(NAME);
-        assertTrue(testee.doesOwn(testee, Optional.of("global"), "foo"));
+        assertTrue(testee.doesOwn(testee, "global", "foo"));
 
         when(testee.getOwner(any(), any())).thenReturn("NotMyName");
-        assertFalse(testee.doesOwn(testee, Optional.of("global"), "foo"));
+        assertFalse(testee.doesOwn(testee, "global", "foo"));
     }
 }

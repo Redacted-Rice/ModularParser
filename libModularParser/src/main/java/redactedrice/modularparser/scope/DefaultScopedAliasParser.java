@@ -3,12 +3,12 @@ package redactedrice.modularparser.scope;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.LineModifier;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
@@ -40,7 +40,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     @Override
     public String modifyLine(String line) {
         String out = line;
-        for (Map.Entry<String, Object> e : scopeSupporter.getAllOwnedData(Optional.empty(), this)
+        for (Map.Entry<String, Object> e : scopeSupporter.getAllOwnedData(null, this)
                 .entrySet()) {
             out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
                     Matcher.quoteReplacement((String) e.getValue()));
@@ -50,7 +50,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
 
     @Override
     public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
-        if (scope.isEmpty()) {
+        if (scope == null) {
             scope = defaultScope;
         }
 
@@ -70,7 +70,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
             return true;
         }
 
-        String wordOwner = scopeSupporter.getOwner(Optional.of(scope), name);
+        String wordOwner = scopeSupporter.getOwner(scope, name);
         if (wordOwner != null) {
             log(LogLevel.ERROR, "Alias '%s' already defined in scope '%s' by '%s'!", name, scope,
                     wordOwner);
@@ -100,15 +100,15 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     }
 
     public boolean isAlias(String alias) {
-        return scopeSupporter.getData(Optional.empty(), alias, this) != null;
+        return scopeSupporter.getData(null, alias, this) != null;
     }
 
-    public String getAliasValue(String alias) {
+    public Response<Object> getAliasValue(String alias) {
         // Aliases are only strings
-        return (String) scopeSupporter.getData(Optional.empty(), alias, this);
+        return scopeSupporter.getData(null, alias, this);
     }
 
     public Set<String> getAliases() {
-        return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(Optional.empty(), this));
+        return Collections.unmodifiableSet(scopeSupporter.getAllOwnedNames(null, this));
     }
 }

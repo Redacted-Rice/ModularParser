@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -68,28 +67,28 @@ public class DefaultScopeSupportDataTests {
     @Test
     void getDataForScopeOrNarrowestScopeTest() {
         // test with specified scope
-        assertEquals(OBJ1, testee.getDataForScopeOrNarrowestScope(Optional.of(SCOPE1), VAR1));
-        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope(Optional.of(SCOPE2), VAR1));
-        assertEquals(OBJ3, testee.getDataForScopeOrNarrowestScope(Optional.of(SCOPE1), VAR2));
+        assertEquals(OBJ1, testee.getDataForScopeOrNarrowestScope(SCOPE1, VAR1));
+        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope(SCOPE2, VAR1));
+        assertEquals(OBJ3, testee.getDataForScopeOrNarrowestScope(SCOPE1, VAR2));
 
-        assertNull(testee.getDataForScopeOrNarrowestScope(Optional.of("Unused"), VAR1));
-        assertNull(testee.getDataForScopeOrNarrowestScope(Optional.of(SCOPE1), UNUSED_VAR));
+        assertNull(testee.getDataForScopeOrNarrowestScope("Unused", VAR1));
+        assertNull(testee.getDataForScopeOrNarrowestScope(SCOPE1, UNUSED_VAR));
         
         // Now using default scope
-        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope(Optional.empty(), VAR1));
-        assertEquals(OBJ3, testee.getDataForScopeOrNarrowestScope(Optional.empty(), VAR2));
-        assertNull(testee.getDataForScopeOrNarrowestScope(Optional.empty(), UNUSED_VAR));
-        // Empty scope
-        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope(Optional.of(""), VAR1));
+        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope(null, VAR1));
+        assertEquals(OBJ3, testee.getDataForScopeOrNarrowestScope(null, VAR2));
+        assertNull(testee.getDataForScopeOrNarrowestScope(null, UNUSED_VAR));
+        // Empty scope (also default)
+        assertEquals(OBJ2, testee.getDataForScopeOrNarrowestScope("", VAR1));
     }
     
     @Test
     void getOwnerTest() {        
         doReturn(null).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-        assertTrue(testee.getOwner(Optional.of(SCOPE1), VAR1).isEmpty());
+        assertTrue(testee.getOwner(SCOPE1, VAR1).isEmpty());
 
         doReturn(OBJ1).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-        assertEquals(MOD1_NAME, testee.getOwner(Optional.of(SCOPE1), VAR1));
+        assertEquals(MOD1_NAME, testee.getOwner(SCOPE1, VAR1));
     }
     
     @Test
@@ -102,42 +101,42 @@ public class DefaultScopeSupportDataTests {
     @Test
     void getDataTest() {  
         doReturn(null).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-    	assertNull(testee.getData(Optional.of(SCOPE1), VAR1, mod1));
+    	assertNull(testee.getData(SCOPE1, VAR1, mod1));
     	
         doReturn(OBJ3).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-    	assertNull(testee.getData(Optional.of(SCOPE1), VAR2, mod1));
-    	assertEquals(OBJ3.obj(), testee.getData(Optional.of(SCOPE1), VAR2, mod2));
+    	assertNull(testee.getData(SCOPE1, VAR2, mod1));
+    	assertEquals(OBJ3.obj(), testee.getData(SCOPE1, VAR2, mod2));
     }
     
     @Test
     void getAllOwnedNamesTest() {  
-    	Set<String> results = testee.getAllOwnedNames(Optional.of(SCOPE1), mod1);
+    	Set<String> results = testee.getAllOwnedNames(SCOPE1, mod1);
     	assertEquals(1, results.size());
     	assertTrue(results.contains(VAR1));
     	
-    	results = testee.getAllOwnedNames(Optional.of(SCOPE2), mod1);
+    	results = testee.getAllOwnedNames(SCOPE2, mod1);
     	assertEquals(0, results.size());
     	
-    	results = testee.getAllOwnedNames(Optional.empty(), mod1);
+    	results = testee.getAllOwnedNames(null, mod1);
     	assertEquals(1, results.size());
     	assertTrue(results.contains(VAR1));
-    	results = testee.getAllOwnedNames(Optional.of(""), mod1);
+    	results = testee.getAllOwnedNames("", mod1);
     	assertEquals(1, results.size());
     	assertTrue(results.contains(VAR1));
     	
-    	results = testee.getAllOwnedNames(Optional.of(SCOPE1), mod2);
+    	results = testee.getAllOwnedNames(SCOPE1, mod2);
     	assertEquals(1, results.size());
     	assertTrue(results.contains(VAR2));
     	
-    	results = testee.getAllOwnedNames(Optional.of(SCOPE2), mod2);
+    	results = testee.getAllOwnedNames(SCOPE2, mod2);
     	assertEquals(1, results.size());
     	assertTrue(results.contains(VAR1));
     	
-    	results = testee.getAllOwnedNames(Optional.empty(), mod2);
+    	results = testee.getAllOwnedNames(null, mod2);
     	assertEquals(2, results.size());
     	assertTrue(results.contains(VAR1));
     	assertTrue(results.contains(VAR2));
-    	results = testee.getAllOwnedNames(Optional.of(""), mod2);
+    	results = testee.getAllOwnedNames("", mod2);
     	assertEquals(2, results.size());
     	assertTrue(results.contains(VAR1));
     	assertTrue(results.contains(VAR2));
@@ -145,11 +144,11 @@ public class DefaultScopeSupportDataTests {
     	// Non existent owner/owns nothing
         ScopedParser mod3 = mock(ScopedParser.class);
         when(mod3.getName()).thenReturn("Module 3");
-    	results = testee.getAllOwnedNames(Optional.of(SCOPE2), mod3);
+    	results = testee.getAllOwnedNames(SCOPE2, mod3);
     	assertEquals(0, results.size());
     	
     	testee.handleModule(mod3);
-    	results = testee.getAllOwnedNames(Optional.of(SCOPE2), mod3);
+    	results = testee.getAllOwnedNames(SCOPE2, mod3);
     	assertEquals(0, results.size());
     }
     

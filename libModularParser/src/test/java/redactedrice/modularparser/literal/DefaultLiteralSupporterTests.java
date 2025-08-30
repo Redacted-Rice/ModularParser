@@ -10,12 +10,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.Module;
+import redactedrice.modularparser.core.Response;
 
 public class DefaultLiteralSupporterTests {
 
@@ -80,10 +79,10 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod3);
         testee.handleModule(mod4);
 
-        when(mod1.tryParseLiteral(any())).thenReturn(Optional.empty());
-        when(mod2.tryParseLiteral(any())).thenReturn(Optional.empty());
-        when(mod3.tryParseLiteral(any())).thenReturn(Optional.empty());
-        when(mod4.tryParseLiteral(any())).thenReturn(Optional.empty());
+        when(mod1.tryParseLiteral(any())).thenReturn(Response.notHandled());
+        when(mod2.tryParseLiteral(any())).thenReturn(Response.notHandled());
+        when(mod3.tryParseLiteral(any())).thenReturn(Response.notHandled());
+        when(mod4.tryParseLiteral(any())).thenReturn(Response.notHandled());
 
         assertNull(testee.evaluateLiteral("any string"));
         verify(mod1).tryParseLiteral(any());
@@ -91,8 +90,8 @@ public class DefaultLiteralSupporterTests {
         verify(mod3).tryParseLiteral(any());
         verify(mod4).tryParseLiteral(any());
 
-        when(mod3.tryParseLiteral(any())).thenReturn(Optional.of(42));
-        assertEquals(42, testee.evaluateLiteral("42"));
+        when(mod3.tryParseLiteral(any())).thenReturn(Response.is(42));
+        assertEquals(Response.is(42), testee.evaluateLiteral("42"));
         verify(mod1, times(2)).tryParseLiteral(any());
         verify(mod2, times(2)).tryParseLiteral(any());
         verify(mod3, times(2)).tryParseLiteral(any());
@@ -107,15 +106,15 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod3);
         testee.handleModule(mod4);
 
-        when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Optional.empty());
-        when(mod4.tryEvaluateChainedLiteral(any(), any())).thenReturn(Optional.empty());
+        when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());
+        when(mod4.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());
 
         assertNull(testee.evaluateChainedLiteral("object", "any string"));
         verify(mod3).tryEvaluateChainedLiteral(any(), any());
         verify(mod4).tryEvaluateChainedLiteral(any(), any());
 
-        when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Optional.of(42));
-        assertEquals(42, testee.evaluateChainedLiteral("object", "42"));
+        when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.is(42));
+        assertEquals(Response.is(42), testee.evaluateChainedLiteral("object", "42"));
         verify(mod3, times(2)).tryEvaluateChainedLiteral(any(), any());
         verify(mod4).tryEvaluateChainedLiteral(any(), any());
     }

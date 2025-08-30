@@ -1,11 +1,12 @@
 package redactedrice.modularparser.literal;
 
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ReflectionUtils;
 
 public class DefaultObjectPathParser extends BaseModule
@@ -28,15 +29,17 @@ public class DefaultObjectPathParser extends BaseModule
 	     literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
 	 }
 	
-	 protected Optional<Object> handleWithArgs(Object chained, String literal) {
-	     if (literal == null) {
-	         return Optional.empty();
-	     }
+	 protected Response<Object> handleWithArgs(Object chained, String literal) {
+		 if (chained == null) {
+			 // Not handled by this
+	         return Response.notHandled();
+		 }
 	     String trimmed = literal.trim();
 	
 	     Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
 	     if (!m.find()) {
-	         return Optional.empty();
+			 // Not handled by this
+	         return Response.notHandled();
 	     }
 	     
 	     String fieldName = m.group(1);
@@ -53,47 +56,43 @@ public class DefaultObjectPathParser extends BaseModule
 	     }
 	     
 	     try {
-			Optional<Object> result = Optional.ofNullable(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
-			if (result.isEmpty()) {
-				return Optional.ofNullable(new SuccessNoReturn(fieldName + "()"));
-			}
+			return Response.is(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException | NoSuchFieldException e) {
-	         return Optional.empty();
+			 // Not handled by this but still could be valid for something else
+	         return Response.notHandled();
 		}
 	 }
 	
 	 @Override
-	 public Optional<Object> tryParseLiteral(String literal) {
+	 public Response<Object> tryParseLiteral(String literal) {
 		 if (literal.contains(chainingCharacter)) {
-			 // Cannot evaluate by itself - must be on an object
-			 Object result = literalSupporter.evaluateLiteral(literal);
-			 if (result instanceof SuccessNoReturn) {
-				 return Optional.empty();
+			 // If it has the chaining character, we should handle it
+			 Response<Object> ret = literalSupporter.evaluateLiteral(literal);
+			 // It should have been handled
+			 if (ret.wasNotHandled()) {
+				 return Response.error("Failed to parse literal " + literal);
 			 }
-			 return Optional.ofNullable(result);
+			 return ret;
 		 }
-	     return Optional.empty();
+	     return Response.notHandled();
 	 }
 	
 	 @Override
-	 public Optional<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
+	 public Response<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
 		 if (chained == null || literal == null) {
-			 return Optional.empty();
+			 return Response.notHandled();
 		 }
-		 Optional<Object> result = handleWithArgs(chained, literal);
-		 if (result.isPresent()) {
+		 Response<Object> result = handleWithArgs(chained, literal);
+		 if (result.wasHandled()) {
 			 return result;
 		 }
 		 try {
-			result = Optional.ofNullable(ReflectionUtils.getVariable(chained, literal));
-			if (result.isEmpty()) {
-				return Optional.ofNullable(new SuccessNoReturn(literal));
-			}
+			return Response.is(ReflectionUtils.getVariable(chained, literal));
 		 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException | NoSuchFieldException e) {
 			 // fall through to empty return
 		 }
-		 return Optional.empty();
+		 return Response.notHandled();
  }
 }

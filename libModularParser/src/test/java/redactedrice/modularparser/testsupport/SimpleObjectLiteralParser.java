@@ -2,8 +2,8 @@ package redactedrice.modularparser.testsupport;
 
 
 import java.util.Map;
-import java.util.Optional;
 
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 
 public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
@@ -16,9 +16,14 @@ public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
     }
 
     @Override
-    public Optional<Object> tryEvaluateObject(Map<String, Object> args) {
-        return Optional.of(new SimpleObject((int) args.get(argsOrdered[0]),
-                (boolean) args.get(argsOrdered[1]), (String) args.get(argsOrdered[2]),
-                (SimpleObject) args.get(argsOrdered[3])));
+    public Response<Object> tryEvaluateObject(Map<String, Object> args) {
+    	try {
+            return Response.is(new SimpleObject((int) args.get(argsOrdered[0]),
+                    (boolean) args.get(argsOrdered[1]), (String) args.get(argsOrdered[2]),
+                    (SimpleObject) args.get(argsOrdered[3])));
+    	} catch (ClassCastException e) {
+    		// This should have been handled if this was called
+    	    return Response.error("failed to cast value: " + e.getMessage());
+    	}
     }
 }

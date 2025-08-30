@@ -104,7 +104,7 @@ public class ObjectChainingTests {
                 false, parser));
         parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueDotChainer", ".",
                 false, parser));
-        parser.addModule(new DefaultObjectPathParser());
+        parser.addModule(new DefaultObjectPathParser("BasicOjectPathParser", ".", ","));
         
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
