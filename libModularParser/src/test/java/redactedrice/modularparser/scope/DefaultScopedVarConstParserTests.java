@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -43,6 +44,7 @@ public class DefaultScopedVarConstParserTests {
     final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
     private static String VAR_1 = "print";
     private static String VAR_2 = "lvar";
+    private static String VAR_3 = "rvar";
     private static String VAR_1_VAL = "println";
     private static String VAR_2_VAL = "local var";
 
@@ -74,6 +76,7 @@ public class DefaultScopedVarConstParserTests {
     @Test
     void tryParseScopedCommonTest() {
         doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
+        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
 
         assertFalse(testee.tryParseScoped(SCOPE, "none matching line", SCOPE));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
@@ -106,6 +109,9 @@ public class DefaultScopedVarConstParserTests {
         when(scopeSupporter.getOwner(any(), any())).thenReturn("");
         assertTrue(testee.tryParseScoped("", "var x = 42", SCOPE));
         verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+        
+        assertTrue(testee.tryParseScoped(null, "var x = 42", SCOPE));
+        verify(testee, times(2)).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
     }
 
     @Test
@@ -144,7 +150,7 @@ public class DefaultScopedVarConstParserTests {
         clearInvocations(testee);
 
         when(scopeSupporter.getNarrowestScope(any())).thenReturn("local");
-        assertTrue(testee.tryParseScoped("", "x = 42", SCOPE));
+        assertTrue(testee.tryParseScoped(null, "x = 42", SCOPE));
         verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
         clearInvocations(testee);
         clearInvocations(scopeSupporter);
@@ -186,7 +192,7 @@ public class DefaultScopedVarConstParserTests {
 
     @Test
     void tryParseLiteralTest() {
-        when(scopeSupporter.getData(any(), any(), any())).thenReturn(null);
+        when(scopeSupporter.getData(any(), any(), any())).thenReturn(Response.notHandled());
         assertEquals(Response.notHandled(), testee.tryParseLiteral("Any string"));
 
         when(scopeSupporter.getData(any(), any(), any())).thenReturn(Response.is(42));
@@ -206,18 +212,22 @@ public class DefaultScopedVarConstParserTests {
     void isVariableTest() {
         when(scopeSupporter.getData(null, VAR_1, testee)).thenReturn(Response.is("not null"));
         when(scopeSupporter.getData(null, VAR_2, testee)).thenReturn(Response.is(null));
+        when(scopeSupporter.getData(null, VAR_3, testee)).thenReturn(Response.notHandled());
 
         assertTrue(testee.isVariable(VAR_1));
-        assertFalse(testee.isVariable(VAR_2));
+        assertTrue(testee.isVariable(VAR_2));
+        assertFalse(testee.isVariable(VAR_3));
     }
 
     @Test
     void getVariableValueTest() {
         when(scopeSupporter.getData(null, VAR_1, testee)).thenReturn(Response.is("object"));
         when(scopeSupporter.getData(null, VAR_2, testee)).thenReturn(Response.is(null));
+        when(scopeSupporter.getData(null, VAR_3, testee)).thenReturn(Response.notHandled());
 
-        assertEquals("object", testee.getVariableValue(VAR_1));
-        assertNull(testee.getVariableValue(VAR_2));
+        assertEquals(Response.is("object"), testee.getVariableValue(VAR_1));
+        assertEquals(Response.is(null), testee.getVariableValue(VAR_2));
+        assertEquals(Response.notHandled(), testee.getVariableValue(VAR_3));
     }
 
     @Test

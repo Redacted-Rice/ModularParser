@@ -51,7 +51,7 @@ public class DefaultChainingChainableLiteralParserTests {
         final Object rhsObject = "StringObjToo";
         when(literalSupporter.evaluateLiteral("line with")).thenReturn(Response.is(lhsObject));
         when(literalSupporter.evaluateChainedLiteral(lhsObject, "a continuer"))
-                .thenReturn(rhsObject);
+                .thenReturn(Response.is(rhsObject));
         assertEquals(Response.is(rhsObject), testee.tryParseLiteral("line with -> a continuer"));
 
         // Try with a queue instead of a stack
@@ -59,7 +59,7 @@ public class DefaultChainingChainableLiteralParserTests {
         testee.setParser(parser);
         testee.setModuleRefs();
         when(literalSupporter.evaluateLiteral("a continuer")).thenReturn(Response.is(lhsObject));
-        when(literalSupporter.evaluateChainedLiteral(lhsObject, "line with")).thenReturn(rhsObject);
+        when(literalSupporter.evaluateChainedLiteral(lhsObject, "line with")).thenReturn(Response.is(rhsObject));
         assertEquals(Response.is(rhsObject), testee.tryParseLiteral("line with <- a continuer"));
     }
 
@@ -72,9 +72,9 @@ public class DefaultChainingChainableLiteralParserTests {
         final Object lhsObject = "StringObj";
         final Object rhsObject = "StringObjToo";
         when(literalSupporter.evaluateChainedLiteral(startObject, "line with"))
-                .thenReturn(lhsObject);
+                .thenReturn(Response.is(lhsObject));
         when(literalSupporter.evaluateChainedLiteral(lhsObject, "a continuer"))
-                .thenReturn(rhsObject);
+                .thenReturn(Response.is(rhsObject));
         assertEquals(Response.is(rhsObject),
                 testee.tryEvaluateChainedLiteral(startObject, "line with -> a continuer"));
     }

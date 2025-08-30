@@ -60,7 +60,7 @@ public class BaseArgumentChainableLiteralTest {
     void handleObjectLiteralTest() {
         doReturn(true).when(testee).parseArgs(any(), any(), any());
         doReturn(true).when(testee).handlePositionalArgs(any(), any());
-        doNothing().when(testee).handleNamedArgs(any(), any());
+        doReturn(true).when(testee).handleNamedArgs(any(), any());
 
         Map<String, Object> parsedArgs = new HashMap<>();
         assertFalse(testee.handleObjectLiteral(null, parsedArgs));
@@ -77,7 +77,7 @@ public class BaseArgumentChainableLiteralTest {
 
         // Not required args
         doReturn(true).when(testee).handlePositionalArgs(any(), any());
-        doNothing().when(testee).handleNamedArgs(any(), any());
+        doReturn(true).when(testee).handleNamedArgs(any(), any());
         assertFalse(testee.handleObjectLiteral("SimpleObject(\"doesn't matter\")", parsedArgs));
 
         parsedArgs = new HashMap<>(Map.of("intVal", 42, "strVal", "something"));
@@ -150,6 +150,7 @@ public class BaseArgumentChainableLiteralTest {
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
         when(literalSupporter.evaluateLiteral("so"))
                 .thenReturn(Response.is(new SimpleObject(5, false, "test", null)));
+        when(literalSupporter.evaluateLiteral("oops")).thenReturn(Response.is("foundValThough"));
 
         Map<String, Object> parsedArgs = new HashMap<>();
         assertTrue(testee.handlePositionalArgs(positionalParams, parsedArgs));
@@ -162,6 +163,7 @@ public class BaseArgumentChainableLiteralTest {
         assertEquals("something", parsedArgs.get("strVal"));
 
         positionalParams = List.of("42", "f", "something", "so", "oops");
+        boolean val = testee.handlePositionalArgs(positionalParams, parsedArgs);
         assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
     }
 

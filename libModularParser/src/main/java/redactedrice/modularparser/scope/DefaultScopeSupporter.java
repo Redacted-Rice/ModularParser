@@ -161,7 +161,7 @@ public class DefaultScopeSupporter extends BaseModule
         if (obj != null && obj.owner().equals(owner.getName())) {
             return Response.is(obj.obj());
         }
-        return null;
+        return Response.notHandled();
     }
 
     @Override

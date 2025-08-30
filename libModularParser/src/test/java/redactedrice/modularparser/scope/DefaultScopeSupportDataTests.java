@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Response;
 
 public class DefaultScopeSupportDataTests {
 
@@ -101,11 +102,11 @@ public class DefaultScopeSupportDataTests {
     @Test
     void getDataTest() {  
         doReturn(null).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-    	assertNull(testee.getData(SCOPE1, VAR1, mod1));
+    	assertEquals(Response.notHandled(), testee.getData(SCOPE1, VAR1, mod1));
     	
         doReturn(OBJ3).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-    	assertNull(testee.getData(SCOPE1, VAR2, mod1));
-    	assertEquals(OBJ3.obj(), testee.getData(SCOPE1, VAR2, mod2));
+    	assertEquals(Response.notHandled(), testee.getData(SCOPE1, VAR2, mod1));
+    	assertEquals(Response.is(OBJ3.obj()), testee.getData(SCOPE1, VAR2, mod2));
     }
     
     @Test

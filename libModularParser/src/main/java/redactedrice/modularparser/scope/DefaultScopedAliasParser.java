@@ -50,7 +50,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
 
     @Override
     public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
-        if (scope == null) {
+        if (scope == null || scope.isBlank()) {
             scope = defaultScope;
         }
 
@@ -100,7 +100,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     }
 
     public boolean isAlias(String alias) {
-        return scopeSupporter.getData(null, alias, this) != null;
+        return scopeSupporter.getData(null, alias, this).wasHandled();
     }
 
     public Response<Object> getAliasValue(String alias) {

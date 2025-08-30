@@ -34,10 +34,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
         Matcher m = matcher.matcher(logicalLine);
         if (!m.matches()) {
-        	// TODO This works but how can we get feedback back for a setter?
-        	// Maybe add an explicit eval call?
-        	literalSupporter.evaluateLiteral(logicalLine);
-            return false;
+        	return literalSupporter.evaluateLiteral(logicalLine).wasHandled();
         }
 
         if (m.group(1) == null && !reassignmentAllowed) {
@@ -52,20 +49,20 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             return true;
         }
 
-        // Check for collisions with reserved words outside scope supporter
-        if (!ensureWordAvailableOrOwned(scope, key)) {
-            return true;
-        }
-
         if (m.group(1) == null) {
             // reassignment
-            if (scope.isEmpty()) { // scope was not specified
+            if (scope == null || scope.isEmpty()) { // scope was not specified
                 scope = scopeSupporter.getNarrowestScope(key);
                 if (scope == null) {
                     log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s",
                             getKeyword(), key, m.group(3));
                     return true;
                 }
+            }
+
+            // Check for collisions with reserved words outside scope supporter
+            if (!ensureWordAvailableOrOwned(scope, key)) {
+                return true;
             }
 
             String owner = scopeSupporter.getOwner(scope, key);
@@ -81,8 +78,13 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             }
         } else {
             // Assignment
-            if (scope.isEmpty()) { // scope was not specified
+            if (scope == null || scope.isEmpty()) { // scope was not specified
                 scope = defaultScope;
+            }
+
+            // Check for collisions with reserved words outside scope supporter
+            if (!ensureWordAvailableOrOwned(scope, key)) {
+                return true;
             }
 
             String owner = scopeSupporter.getOwner(scope, key);
@@ -117,12 +119,12 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         return scopeSupporter.setData(scopeName, var, this, val);
     }
 
-    public boolean isVariable(String var) {
-        return scopeSupporter.getData(null, var, this) != null;
+    public boolean isVariable(String name) {
+        return scopeSupporter.getData(null, name, this).wasHandled();
     }
 
-    public Object getVariableValue(String var) {
-        return scopeSupporter.getData(null, var, this);
+    public Object getVariableValue(String name) {
+        return scopeSupporter.getData(null, name, this);
     }
 
     public Set<String> getVariables() {

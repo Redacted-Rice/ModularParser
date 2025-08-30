@@ -91,7 +91,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     public Response<Object> tryParseLiteral(String literal) {
         Map<String, Object> parsedArgs = new HashMap<>();
         if (!handleObjectLiteral(literal, parsedArgs)) {
-            return null;
+            return Response.notHandled();
         }
         return tryEvaluateObject(parsedArgs);
     }
@@ -101,7 +101,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         Map<String, Object> parsedArgs = new HashMap<>();
         parsedArgs.put(chainedArg, chained);
         if (!handleObjectLiteral(literal, parsedArgs)) {
-            return null;
+            return Response.notHandled();
         }
         return tryEvaluateObject(parsedArgs);
     }
@@ -135,12 +135,17 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         int requiredIdx = 0;
         int optionalIdx = 0;
         while (requiredIdx + optionalIdx < positionalParams.size()) {
-            Object parsed = literalSupporter
-                    .evaluateLiteral(positionalParams.get(requiredIdx + optionalIdx));
+        	int combined = requiredIdx + optionalIdx;
+        	String literal = positionalParams.get(combined);
+            Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
+            if (!parsed.wasValueReturned()) {
+                log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, combined);
+            	return false;
+            }
             if (requiredIdx < requiredArgs.length) {
-                parsedArgs.put(requiredArgs[requiredIdx++], parsed);
+                parsedArgs.put(requiredArgs[requiredIdx++], parsed.value());
             } else if (optionalIdx < optionalArgs.length) {
-                parsedArgs.put(optionalArgs[optionalIdx++], parsed);
+                parsedArgs.put(optionalArgs[optionalIdx++], parsed.value());
             } else {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
@@ -149,11 +154,17 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         return true;
     }
 
-    protected void handleNamedArgs(Map<String, String> namedParams,
+    protected boolean handleNamedArgs(Map<String, String> namedParams,
             Map<String, Object> parsedArgs) {
         for (Entry<String, String> entry : namedParams.entrySet()) {
-            parsedArgs.put(entry.getKey(), literalSupporter.evaluateLiteral(entry.getValue()));
+            Response<Object> parsed = literalSupporter.evaluateLiteral(entry.getValue());
+            if (!parsed.wasValueReturned()) {
+                log(LogLevel.ERROR, "Failed to parse %s arg %s ", entry.getKey(), entry.getValue());
+            	return false;
+            }
+            parsedArgs.put(entry.getKey(), parsed.value());
         }
+        return true;
     }
 
     public abstract Response<Object> tryEvaluateObject(Map<String, Object> args);
