@@ -14,6 +14,16 @@ public final class Response<T> {
 	}
 	
 	@Override
+	public String toString() {
+	    return "Response{" +
+	           "val=" + val +
+	           ", handled=" + handled +
+	           ", error='" + error + '\'' +
+	           '}';
+	}
+
+	
+	@Override
 	public boolean equals(Object obj) {
 	    if (this == obj) {
 	    	return true;
@@ -55,6 +65,10 @@ public final class Response<T> {
 		return handled;
 	}
 	
+	public boolean wasValueReturned() {
+		return wasHandled() && !wasError();
+	}
+	
 	public boolean wasError() {
 		return !error.isBlank();
 	}
@@ -65,5 +79,14 @@ public final class Response<T> {
 	
 	public String getError() {
 		return error;
+	}
+	
+	public Response<T> convertToErrorIfNoValueReturned(String notHandledArg, String errorArg) {
+        if (wasNotHandled()) {
+        	return Response.error(notHandledArg);
+        } else if (wasError()) {
+        	return Response.error(errorArg + ":" + error);
+        }
+        return this;
 	}
 }

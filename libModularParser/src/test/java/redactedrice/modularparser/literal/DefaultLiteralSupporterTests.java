@@ -84,7 +84,7 @@ public class DefaultLiteralSupporterTests {
         when(mod3.tryParseLiteral(any())).thenReturn(Response.notHandled());
         when(mod4.tryParseLiteral(any())).thenReturn(Response.notHandled());
 
-        assertNull(testee.evaluateLiteral("any string"));
+        assertEquals(Response.notHandled(), testee.evaluateLiteral("any string"));
         verify(mod1).tryParseLiteral(any());
         verify(mod2).tryParseLiteral(any());
         verify(mod3).tryParseLiteral(any());
@@ -109,7 +109,7 @@ public class DefaultLiteralSupporterTests {
         when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());
         when(mod4.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());
 
-        assertNull(testee.evaluateChainedLiteral("object", "any string"));
+        assertEquals(Response.notHandled(), testee.evaluateChainedLiteral("object", "any string"));
         verify(mod3).tryEvaluateChainedLiteral(any(), any());
         verify(mod4).tryEvaluateChainedLiteral(any(), any());
 

@@ -2,6 +2,7 @@ package redactedrice.modularparser.literal;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -73,10 +74,11 @@ public class DefaultNumberLiteralParserTests {
                 testee.parseWithType("42E9", PrimitiveType.UNSPECIFIED));
 
         // bad value with E and bad type
-        assertEquals(Response.notHandled(), testee.parseWithType("4.2E-1", PrimitiveType.INT));
-        assertEquals(Response.notHandled(), testee.parseWithType("42E9", PrimitiveType.INT));
-        assertEquals(Response.notHandled(), testee.parseWithType("4.2E-1", PrimitiveType.LONG));
+        assertTrue(testee.parseWithType("4.2E-1", PrimitiveType.INT).wasError());
+        assertTrue(testee.parseWithType("42E9", PrimitiveType.INT).wasError());
+        assertTrue(testee.parseWithType("4.2E-1", PrimitiveType.LONG).wasError());
         assertEquals(Response.notHandled(), testee.parseWithType("4E4.2", PrimitiveType.UNSPECIFIED));
+        assertEquals(Response.notHandled(), testee.parseWithType("Some String", PrimitiveType.UNSPECIFIED));
     }
 
     @Test

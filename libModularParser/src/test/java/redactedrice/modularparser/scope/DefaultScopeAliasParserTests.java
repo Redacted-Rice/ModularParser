@@ -38,6 +38,7 @@ public class DefaultScopeAliasParserTests {
     final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
     private static String ALIAS_1 = "print";
     private static String ALIAS_2 = "lvar";
+    private static String ALIAS_3 = "rvar";
     private static String ALIAS_1_VAL = "println";
     private static String ALIAS_2_VAL = "local var";
 
@@ -128,18 +129,22 @@ public class DefaultScopeAliasParserTests {
     void isAlias() {
         when(scopeSupporter.getData(null, ALIAS_1, testee)).thenReturn(Response.is("not null"));
         when(scopeSupporter.getData(null, ALIAS_2, testee)).thenReturn(Response.is(null));
+        when(scopeSupporter.getData(null, ALIAS_3, testee)).thenReturn(Response.notHandled());
 
         assertTrue(testee.isAlias(ALIAS_1));
-        assertFalse(testee.isAlias(ALIAS_2));
+        assertTrue(testee.isAlias(ALIAS_2));
+        assertFalse(testee.isAlias(ALIAS_3));
     }
 
     @Test
     void getAliasValueTest() {
         when(scopeSupporter.getData(null, ALIAS_1, testee)).thenReturn(Response.is("object"));
         when(scopeSupporter.getData(null, ALIAS_2, testee)).thenReturn(Response.is(null));
+        when(scopeSupporter.getData(null, ALIAS_3, testee)).thenReturn(Response.notHandled());
 
-        assertEquals("object", testee.getAliasValue(ALIAS_1));
-        assertNull(testee.getAliasValue(ALIAS_2));
+        assertEquals(Response.is("object"), testee.getAliasValue(ALIAS_1));
+        assertEquals(Response.is(null), testee.getAliasValue(ALIAS_2));
+        assertEquals(Response.notHandled(), testee.getAliasValue(ALIAS_3));
     }
 
     @Test

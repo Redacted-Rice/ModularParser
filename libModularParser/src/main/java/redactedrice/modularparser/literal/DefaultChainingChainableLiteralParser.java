@@ -44,8 +44,20 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
             evalFirst = literal.substring(0, chainIdx).trim();
             evalSecond = literal.substring(chainIdx + chainingToken.length()).trim();
         }
-        Object evaluated = literalSupporter.evaluateLiteral(evalFirst);
-        return Response.is(literalSupporter.evaluateChainedLiteral(evaluated, evalSecond));
+        
+        Response<Object> evaluated = literalSupporter.evaluateLiteral(evalFirst);
+        if (evaluated.wasNotHandled()) {
+        	return Response.error("Failed to parse first literal " + evalFirst);
+        } else if (evaluated.wasError()) {
+        	return Response.error("Error parsing first literal:" + evaluated.getError());
+        }
+        evaluated = literalSupporter.evaluateChainedLiteral(evaluated.value(), evalSecond);
+        if (evaluated.wasNotHandled()) {
+        	return Response.error("Failed to parse second literal " + evalSecond);
+        } else if (evaluated.wasError()) {
+	    	return Response.error("Error parsing second literal:" + evaluated.getError());
+	    }
+        return evaluated;
     }
 
     @Override
@@ -59,10 +71,21 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
             return Response.notHandled();
         }
 
-        Object evaluated = literalSupporter.evaluateChainedLiteral(chained,
-                literal.substring(0, chainIdx).trim());
-        return Response.is(literalSupporter.evaluateChainedLiteral(evaluated,
-                literal.substring(chainIdx + chainingToken.length()).trim()));
+        String evalFirst = literal.substring(0, chainIdx).trim();
+        String evalSecond = literal.substring(chainIdx + chainingToken.length()).trim();
+        Response<Object> evaluated = literalSupporter.evaluateChainedLiteral(chained, evalFirst);
+        if (evaluated.wasNotHandled()) {
+        	return Response.error("Failed to parse first literal " + evalFirst);
+        } else if (evaluated.wasError()) {
+        	return Response.error("Error parsing first literal:" + evaluated.getError());
+        }
+        evaluated = literalSupporter.evaluateChainedLiteral(evaluated.value(), evalSecond);
+        if (evaluated.wasNotHandled()) {
+        	return Response.error("Failed to parse second literal " + evalSecond);
+        } else if (evaluated.wasError()) {
+	    	return Response.error("Error parsing second literal:" + evaluated.getError());
+	    }
+        return evaluated;
     }
 
 }
