@@ -12,3 +12,4 @@ plugins {
 
 rootProject.name = "ModularParser"
 include("libModularParser")
+includeBuild("../ReflectionHelpers")
