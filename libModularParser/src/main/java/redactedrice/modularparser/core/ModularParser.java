@@ -132,7 +132,10 @@ public class ModularParser {
 
         String line;
         while (!aborted() && (line = lineFormer.getNextLogicalLine()) != null) {
-            lineParser.parseLine(line);
+            if (!lineParser.parseLine(line)) {
+            	logOrStdErr(LogLevel.ERROR, 
+        				"ModularParser: Unspecified error while parsing line %s", line);
+            }
         }
         if (logger != null) {
             if (aborted()) {

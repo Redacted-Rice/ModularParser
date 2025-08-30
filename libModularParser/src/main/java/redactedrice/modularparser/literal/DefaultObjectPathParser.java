@@ -9,14 +9,18 @@ import redactedrice.modularparser.core.BaseModule;
 import redactedrice.reflectionhelpers.utils.ReflectionUtils;
 
 public class DefaultObjectPathParser extends BaseModule
-	     implements ChainableLiteralParser {
-	 protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
-     protected final static String ARG_DELIMITER = ",";
-	
+	     implements ChainableLiteralParser {	
+	 protected static final Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
+
+     protected final String chainingCharacter;
+     protected final String argDelimiter;
+     
 	 protected LiteralSupporter literalSupporter;
 	
-	 public DefaultObjectPathParser() {
-	     super("DefaultObjectPathParser");
+	 public DefaultObjectPathParser(String name, String chainingCharacter, String argDelimiter) {
+	     super(name);
+	     this.chainingCharacter = chainingCharacter;
+	     this.argDelimiter = argDelimiter;
 	 }
 	
 	 @Override
@@ -39,7 +43,7 @@ public class DefaultObjectPathParser extends BaseModule
 	     String argsString = m.group(2);
 	     Object[] argsParsed = new Object[] {};
 	     if (!argsString.isBlank()) {
-		     String[] args = argsString.split(ARG_DELIMITER);
+		     String[] args = argsString.split(argDelimiter);
 		     
 		     // parse args
 		     argsParsed = new Object[args.length];
@@ -49,7 +53,10 @@ public class DefaultObjectPathParser extends BaseModule
 	     }
 	     
 	     try {
-			return Optional.ofNullable(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
+			Optional<Object> result = Optional.ofNullable(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
+			if (result.isEmpty()) {
+				return Optional.ofNullable(new SuccessNoReturn(fieldName + "()"));
+			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException | NoSuchFieldException e) {
 	         return Optional.empty();
@@ -58,7 +65,14 @@ public class DefaultObjectPathParser extends BaseModule
 	
 	 @Override
 	 public Optional<Object> tryParseLiteral(String literal) {
-		 // Cannot evaluate by itself - must be on an object
+		 if (literal.contains(chainingCharacter)) {
+			 // Cannot evaluate by itself - must be on an object
+			 Object result = literalSupporter.evaluateLiteral(literal);
+			 if (result instanceof SuccessNoReturn) {
+				 return Optional.empty();
+			 }
+			 return Optional.ofNullable(result);
+		 }
 	     return Optional.empty();
 	 }
 	
@@ -72,10 +86,14 @@ public class DefaultObjectPathParser extends BaseModule
 			 return result;
 		 }
 		 try {
-			return Optional.ofNullable(ReflectionUtils.getVariable(chained, literal));
+			result = Optional.ofNullable(ReflectionUtils.getVariable(chained, literal));
+			if (result.isEmpty()) {
+				return Optional.ofNullable(new SuccessNoReturn(literal));
+			}
 		 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException | NoSuchFieldException e) {
-			 return Optional.empty();
+			 // fall through to empty return
 		 }
+		 return Optional.empty();
  }
 }

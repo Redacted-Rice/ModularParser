@@ -20,7 +20,6 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     public DefaultScopedVarConstParser(String moduleName, boolean reassignmentAllowed,
             String keyword) {
         super(moduleName, keyword);
-        // this.reservedWords.put(keyword, ReservedType.EXCLUSIVE);
         matcher = Pattern.compile("^\\s*(?:(" + this.getKeyword() + ")\\s+)?(\\w+)\\s*=\\s*(.+)$");
         this.reassignmentAllowed = reassignmentAllowed;
     }
