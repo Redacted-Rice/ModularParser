@@ -6,6 +6,7 @@ public class SimpleObject {
     public boolean boolField;
     public String strField;
     public SimpleObject so;
+    private int[] intArray;
 
     public SimpleObject(int intField, boolean boolField, String strField, SimpleObject so) {
         this.so = so;
@@ -23,4 +24,28 @@ public class SimpleObject {
         }
         return ret;
     }
+    
+    public SimpleObject getSo() {
+    	return so;
+    }
+
+    public int getInt() {
+    	return intField;
+    }
+
+    public boolean getBool() {
+    	return boolField;
+    }
+
+    public void setInt(int inInt) {
+    	intField = inInt;
+    }
+
+	public int[] getIntArray() {
+		return intArray;
+	}
+
+	public void setIntArray(int... intArray) {
+		this.intArray = intArray;
+	}
 }
