@@ -10,21 +10,13 @@ import java.util.regex.Pattern;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.LineModifier;
-import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
 public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements LineModifier {
     protected final Pattern aliasDef;
-    protected ReservedWordSupporter reservedWordSupporter;
 
     public DefaultScopedAliasParser() {
         super("BasicAliasHandler", "alias");
         aliasDef = Pattern.compile("^\\s*" + getKeyword() + "\\s+(\\w+)\\s*=\\s*(.+)$");
-    }
-
-    @Override
-    public void setModuleRefs() {
-        super.setModuleRefs();
-        reservedWordSupporter = parser.getSupporterOfType(ReservedWordSupporter.class);
     }
 
     @Override
@@ -84,8 +76,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
             val = val.substring(1, val.length() - 1);
         } else if (val.startsWith("\"") || val.endsWith("\"") || val.startsWith("'") ||
                 val.endsWith("'")) {
-            System.err.println(val);
-            log(LogLevel.ERROR, "Invalid alias definition - mismatched or only one quote: %s", key);
+            log(LogLevel.ERROR, "Invalid alias definition - name %s mismatched or only one quote: %s", key, val);
             return true;
         }
 
@@ -104,7 +95,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     }
 
     public Response<Object> getAliasValue(String alias) {
-        // Aliases are only strings
+        // TODO: Aliases are only strings
         return scopeSupporter.getData(null, alias, this);
     }
 

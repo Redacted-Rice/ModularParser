@@ -28,8 +28,8 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
 
     @Override
     public Response<Object> evaluateLiteral(String literal) {
-    	if (literal.isEmpty()) {
-    		return Response.error("Empty literal passed");
+    	if (literal == null || literal.isBlank()) {
+    		return Response.error("Null or empty literal passed");
     	}
     	Response<Object> ret;
         for (LiteralParser lp : handlers) {
@@ -43,8 +43,8 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
 
     @Override
     public Response<Object> evaluateChainedLiteral(Object chained, String literal) {
-    	if (literal.isEmpty()) {
-    		return Response.error("Empty literal passed");
+    	if (literal == null || literal.isBlank()) {
+    		return Response.error("Null or empty literal passed");
     	}
     	Response<Object> ret;
         for (ChainableLiteralParser clp : chainedHandlers) {

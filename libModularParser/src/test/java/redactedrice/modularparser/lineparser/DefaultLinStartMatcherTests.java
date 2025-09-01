@@ -47,8 +47,6 @@ public class DefaultLinStartMatcherTests {
 
     @Test
     void matches() {
-        assertFalse(testee.matches(null));
-        assertFalse(testee.matches(""));
         assertFalse(testee.matches("test line"));
         assertFalse(testee.matches("not at start print"));
         assertFalse(testee.matches("sprint yeah"));

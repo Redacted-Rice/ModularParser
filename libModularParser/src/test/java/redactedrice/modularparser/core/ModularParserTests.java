@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-class ModularParserModuleTests {
+class ModularParserTests {
 
     final String LOGGER_NAME = "TestLogger";
     final String PLAIN_MODULE_NAME = "TestModule3";
@@ -162,7 +162,7 @@ class ModularParserModuleTests {
         assertTrue(testee.addModule(lps));
 
         // Test happy case
-        when(lfs.getNextLogicalLine()).thenReturn("test line", "test line 2", null);
+        when(lfs.getNextLogicalLine()).thenReturn("test line", "   ", "test line 2", null);
         assertTrue(testee.parse());
         verify(lps, times(2)).parseLine(any());
 

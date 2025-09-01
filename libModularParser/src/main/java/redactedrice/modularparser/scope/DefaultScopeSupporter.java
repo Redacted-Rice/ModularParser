@@ -45,9 +45,6 @@ public class DefaultScopeSupporter extends BaseModule
 
     @Override
     public boolean tryParseLine(String logicalLine) {
-        if (logicalLine == null) {
-            return false;
-        }
         String[] split = splitScope(logicalLine);
         if (split == null || split.length <= 0) {
             return false;
@@ -115,6 +112,7 @@ public class DefaultScopeSupporter extends BaseModule
         return null;
     }
 
+    // TODO move to response
     protected OwnedObject getDataForScopeOrNarrowestScope(String scope, String name) {
         if (scope != null && !scope.isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
@@ -135,6 +133,7 @@ public class DefaultScopeSupporter extends BaseModule
         return null;
     }
 
+    // TODO: Move to response
     @Override
     public String getOwner(String scope, String name) {
         OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
@@ -144,6 +143,7 @@ public class DefaultScopeSupporter extends BaseModule
         return "";
     }
 
+    // TODO: Move to response
     @Override
     public String getNarrowestScope(String name) {
         for (String scopeCheck : scopeOrder) {

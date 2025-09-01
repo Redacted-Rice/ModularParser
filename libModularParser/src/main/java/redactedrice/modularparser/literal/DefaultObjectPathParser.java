@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
+import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ReflectionUtils;
 
@@ -18,10 +19,13 @@ public class DefaultObjectPathParser extends BaseModule
      
 	 protected LiteralSupporter literalSupporter;
 	
-	 public DefaultObjectPathParser(String name, String chainingCharacter, String argDelimiter) {
+	 public DefaultObjectPathParser(String name, String chainingCharacter, String argDelimiter, ModularParser parser) {
 	     super(name);
 	     this.chainingCharacter = chainingCharacter;
 	     this.argDelimiter = argDelimiter;
+	     
+        parser.addModule(new DefaultChainingChainableLiteralParser(name + "Chainer", 
+        		chainingCharacter, false, parser));
 	 }
 	
 	 @Override
