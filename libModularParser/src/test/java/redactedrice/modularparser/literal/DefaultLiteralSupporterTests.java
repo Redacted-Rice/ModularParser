@@ -2,7 +2,6 @@ package redactedrice.modularparser.literal;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -78,6 +77,9 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod2);
         testee.handleModule(mod3);
         testee.handleModule(mod4);
+        
+        assertTrue(testee.evaluateLiteral(null).wasError());
+        assertTrue(testee.evaluateLiteral("   ").wasError());
 
         when(mod1.tryParseLiteral(any())).thenReturn(Response.notHandled());
         when(mod2.tryParseLiteral(any())).thenReturn(Response.notHandled());
@@ -105,6 +107,9 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod2);
         testee.handleModule(mod3);
         testee.handleModule(mod4);
+        
+        assertTrue(testee.evaluateChainedLiteral("anything", null).wasError());
+        assertTrue(testee.evaluateChainedLiteral("anything", "   ").wasError());
 
         when(mod3.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());
         when(mod4.tryEvaluateChainedLiteral(any(), any())).thenReturn(Response.notHandled());

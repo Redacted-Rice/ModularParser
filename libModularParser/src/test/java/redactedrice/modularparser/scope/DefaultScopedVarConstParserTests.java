@@ -3,7 +3,6 @@ package redactedrice.modularparser.scope;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -30,8 +29,7 @@ import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
-public class DefaultScopedVarConstParserTests {
-
+class DefaultScopedVarConstParserTests {
     private ModularParser parser;
     private DefaultScopedVarConstParser testee;
     private ScopeSupporter scopeSupporter;
@@ -74,93 +72,119 @@ public class DefaultScopedVarConstParserTests {
     }
 
     @Test
-    void tryParseScopedCommonTest() {
-        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
-        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
+    void tryParseScopedTest() {
+        doReturn(true).when(testee).handleReassignment(any(), any(), any());
+        doReturn(true).when(testee).handleAssignment(any(), any(), any(), any());
+        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.is("anything"));
+        assertTrue(testee.tryParseScoped(null, "obj3.intField", SCOPE));
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
-        assertFalse(testee.tryParseScoped(SCOPE, "none matching line", SCOPE));
-        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
+        assertFalse(testee.tryParseScoped(SCOPE, "non-matching line", SCOPE));
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
         assertFalse(testee.tryParseScoped(SCOPE, "global x = \"scope not stripped\"", SCOPE));
-        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
         assertTrue(testee.tryParseScoped(SCOPE, "var 6bad = 42", SCOPE));
-        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
+        // Good assignment
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
         assertTrue(testee.tryParseScoped(SCOPE, "var x = 42", SCOPE));
-        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-    }
-
-    @Test
-    void tryParseScopedAssignmentTest() {
-        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
-
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
-        assertTrue(testee.tryParseScoped(SCOPE, "var x = 42", SCOPE));
-        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
-
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
-        assertTrue(testee.tryParseScoped("local", "var x = 42", SCOPE));
-        verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
-
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
-        assertTrue(testee.tryParseScoped("", "var x = 42", SCOPE));
-        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee).handleAssignment(any(), any(), any(), any());
+        clearInvocations(testee);
         
-        assertTrue(testee.tryParseScoped(null, "var x = 42", SCOPE));
-        verify(testee, times(2)).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
-    }
+        // Reassignment allowed
+        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
+        // Reassignment not allowed
+        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, false, KEYWORD));
+        testee.setParser(parser);
+        testee.setModuleRefs();
+
+        assertFalse(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        verify(testee, never()).handleReassignment(any(), any(), any());
+        verify(testee, never()).handleAssignment(any(), any(), any(), any());
+    }
+    
     @Test
     void tryParseScopedReassignmentTest() {
         doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
+        
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        assertFalse(testee.handleReassignment(SCOPE, "x", "42"));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-
         when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
-        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        assertTrue(testee.handleReassignment(SCOPE, "x", "42"));;
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn("");
-        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        assertTrue(testee.handleReassignment(SCOPE, "x", "42"));;
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn("OtherModule");
-        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
         clearInvocations(testee);
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
-        assertTrue(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+        assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
         clearInvocations(testee);
         clearInvocations(scopeSupporter);
 
         when(scopeSupporter.getNarrowestScope(any())).thenReturn(null);
-        assertTrue(testee.tryParseScoped("", "x = 42", SCOPE));
+        assertFalse(testee.handleReassignment("", "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
         clearInvocations(testee);
 
         when(scopeSupporter.getNarrowestScope(any())).thenReturn("local");
-        assertTrue(testee.tryParseScoped(null, "x = 42", SCOPE));
+        assertTrue(testee.handleReassignment(null, "x", "42"));
         verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
         clearInvocations(testee);
         clearInvocations(scopeSupporter);
-
-        // Test with reassignment disabled
-        testee = spy(new DefaultScopedVarConstParser(TESTEE_NAME, false, KEYWORD));
-        testee.setParser(parser);
-        testee.setModuleRefs();
-        assertFalse(testee.tryParseScoped(SCOPE, "x = 42", SCOPE));
+    }
+    
+    @Test
+    void tryParseScopedAssignmentTest() {
+        doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
+        
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        assertFalse(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+
+        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        assertTrue(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        assertTrue(testee.handleAssignment("local", SCOPE, "x", "42"));
+        verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
+        assertTrue(testee.handleAssignment("", SCOPE, "x", "42"));
+        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+        
+        assertTrue(testee.handleAssignment(null, SCOPE, "x", "42"));
+        verify(testee, times(2)).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
     }
 
     @Test

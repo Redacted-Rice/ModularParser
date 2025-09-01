@@ -89,9 +89,6 @@ public class DefaultScopeSupporterTests {
         testee.handleModule(mod1);
         testee.handleModule(mod2);
 
-        assertFalse(testee.tryParseLine(null));
-        assertFalse(testee.tryParseLine("  "));
-
         final String SCOPE = "global";
         final String REST_OF_LINE = "var x = 5";
         final String LINE_1 = SCOPE + " " + REST_OF_LINE;

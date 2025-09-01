@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,7 +26,7 @@ import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 
-public class BaseArgumentChainableLiteralTest {
+class BaseArgumentChainableLiteralTest {
 
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
@@ -145,6 +144,11 @@ public class BaseArgumentChainableLiteralTest {
     @Test
     void handlePositionalArgsTest() {
         List<String> positionalParams = List.of("42", "f", "something");
+
+        Map<String, Object> parsedArgs = new HashMap<>();
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.notHandled());
+        assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
+        
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
         when(literalSupporter.evaluateLiteral("f")).thenReturn(Response.is(false));
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
@@ -152,7 +156,7 @@ public class BaseArgumentChainableLiteralTest {
                 .thenReturn(Response.is(new SimpleObject(5, false, "test", null)));
         when(literalSupporter.evaluateLiteral("oops")).thenReturn(Response.is("foundValThough"));
 
-        Map<String, Object> parsedArgs = new HashMap<>();
+        parsedArgs = new HashMap<>();
         assertTrue(testee.handlePositionalArgs(positionalParams, parsedArgs));
         assertEquals(3, parsedArgs.size());
         assertTrue(parsedArgs.containsKey("intVal"));
@@ -163,18 +167,24 @@ public class BaseArgumentChainableLiteralTest {
         assertEquals("something", parsedArgs.get("strVal"));
 
         positionalParams = List.of("42", "f", "something", "so", "oops");
-        boolean val = testee.handlePositionalArgs(positionalParams, parsedArgs);
         assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
     }
 
     @Test
     void handleNamedArgsTest() {
         Map<String, String> namedParams = Map.of("intVal", "42", "strVal", "something");
+
+        Map<String, Object> parsedArgs = new HashMap<>();
+        // Depending on map used, either may be returned
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.notHandled());
+        when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.notHandled());
+        assertFalse(testee.handleNamedArgs(namedParams, parsedArgs));
+        
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
 
-        Map<String, Object> parsedArgs = new HashMap<>();
-        testee.handleNamedArgs(namedParams, parsedArgs);
+        parsedArgs = new HashMap<>();
+        assertTrue(testee.handleNamedArgs(namedParams, parsedArgs));
         assertEquals(2, parsedArgs.size());
         assertTrue(parsedArgs.containsKey("intVal"));
         assertEquals(42, parsedArgs.get("intVal"));

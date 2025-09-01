@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,11 +42,11 @@ public class DefaultLambdaParserTests {
 
     @Test
     void tryParseLine() {
-        when(testee.matches(any())).thenReturn(false);
+        doReturn(false).when(testee).matches(any());
         assertFalse(testee.tryParseLine("test line"));
         verify(fn, never()).handle(any());
 
-        when(testee.matches(any())).thenReturn(true);
+        doReturn(true).when(testee).matches(any());
         assertTrue(testee.tryParseLine("print 'test'"));
         verify(fn).handle(any());
     }

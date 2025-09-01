@@ -70,13 +70,13 @@ public class ObjectChainingTests {
         parser.parse();
 
         assertTrue(varParser.isVariable("obj3"));
-        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3");
+        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
         assertEquals(obj3.intField, 3);
         assertEquals(obj3.so.intField, 2);
         assertEquals(obj3.so.so.intField, 1);
 
         assertTrue(varParser.isVariable("obj4"));
-        SimpleObject obj4 = (SimpleObject) varParser.getVariableValue("obj4");
+        SimpleObject obj4 = (SimpleObject) varParser.getVariableValue("obj4").value();
         assertEquals(obj4.intField, 4);
         assertEquals(obj4.so.intField, 5);
         assertEquals(obj4.so.so.intField, 6);
@@ -102,9 +102,7 @@ public class ObjectChainingTests {
                 new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
         parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "->",
                 false, parser));
-        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueDotChainer", ".",
-                false, parser));
-        parser.addModule(new DefaultObjectPathParser("BasicOjectPathParser", ".", ","));
+        parser.addModule(new DefaultObjectPathParser("BasicOjectPathParser", ".", ",", parser));
         
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
@@ -128,17 +126,17 @@ public class ObjectChainingTests {
         parser.parse();
 
         assertTrue(varParser.isVariable("obj3"));
-        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3");
+        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
         assertEquals(obj3.intField, 3);
         assertEquals(obj3.so.intField, 2);
         assertEquals(obj3.so.so.intField, 5);
 
         assertTrue(varParser.isVariable("intField"));
-        int intField = (int) varParser.getVariableValue("intField");
+        int intField = (int) varParser.getVariableValue("intField").value();
         assertEquals(1, intField);
 
         assertTrue(varParser.isVariable("boolField"));
-        boolean boolField = (boolean) varParser.getVariableValue("boolField");
+        boolean boolField = (boolean) varParser.getVariableValue("boolField").value();
         assertTrue(boolField);
     }
 }
