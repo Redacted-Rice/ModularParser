@@ -45,9 +45,9 @@ public class ObjectChainingTests {
 
         parser.addModule(
                 new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
-        parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "->",
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "<-",
                 false, parser));
-        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueArrowChainer", "<-",
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueArrowChainer", "->",
                 true, parser));
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
@@ -100,8 +100,8 @@ public class ObjectChainingTests {
 
         parser.addModule(
                 new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
-        parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "->",
-                false, parser));
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueArrowChainer", "->",
+                true, parser));
         parser.addModule(new DefaultObjectPathParser("BasicOjectPathParser", ".", ",", parser));
         
         parser.addModule(new DefaultNumberLiteralParser());
@@ -127,9 +127,9 @@ public class ObjectChainingTests {
 
         assertTrue(varParser.isVariable("obj3"));
         SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
-        assertEquals(obj3.intField, 3);
-        assertEquals(obj3.so.intField, 2);
-        assertEquals(obj3.so.so.intField, 5);
+        assertEquals(3, obj3.intField);
+        assertEquals(2, obj3.so.intField);
+        assertEquals(5, obj3.so.so.intField);
 
         assertTrue(varParser.isVariable("intField"));
         int intField = (int) varParser.getVariableValue("intField").value();

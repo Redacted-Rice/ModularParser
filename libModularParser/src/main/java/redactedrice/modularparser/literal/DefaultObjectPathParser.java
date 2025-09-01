@@ -25,7 +25,7 @@ public class DefaultObjectPathParser extends BaseModule
 	     this.argDelimiter = argDelimiter;
 	     
         parser.addModule(new DefaultChainingChainableLiteralParser(name + "Chainer", 
-        		chainingCharacter, false, parser));
+        		chainingCharacter, true, parser));
 	 }
 	
 	 @Override
@@ -55,7 +55,15 @@ public class DefaultObjectPathParser extends BaseModule
 		     // parse args
 		     argsParsed = new Object[args.length];
 		     for (int i = 0; i < args.length; i++) {
-		    	 argsParsed[i] = literalSupporter.evaluateLiteral(args[i]);
+		    	 Response<Object> evaluated = literalSupporter.evaluateLiteral(args[i]);
+		         if (evaluated.wasNotHandled()) {
+		        	 return Response.error("Failed to parsing arg " + i + " of args " + 
+	        			 	literal + ":" + evaluated.getError());
+		         } else if (evaluated.wasError()) {
+		        	 return Response.error("Error parsing arg " + i + " of args " + 
+	        			 	literal + ":" + evaluated.getError());
+		         }
+	    		 argsParsed[i] = evaluated.value();
 		     }
 	     }
 	     

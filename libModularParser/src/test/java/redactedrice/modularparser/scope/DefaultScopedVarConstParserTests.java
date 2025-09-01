@@ -189,7 +189,7 @@ class DefaultScopedVarConstParserTests {
 
     @Test
     void addLiteralTest() {
-        when(lSupporter.evaluateLiteral(any())).thenReturn(null);
+        when(lSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
         when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(false);
         testee.addLiteral("anything", SCOPE, "name", false);
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
@@ -197,19 +197,19 @@ class DefaultScopedVarConstParserTests {
 
         when(lSupporter.evaluateLiteral(any())).thenReturn(Response.is(42));
         testee.addLiteral("anything", SCOPE, "name", false);
-        verify(scopeSupporter).setData(any(), any(), any(), any());
+        verify(scopeSupporter).setData(any(), any(), any(), eq(42));
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
         verify(testee, never()).log(eq(LogLevel.DEBUG), anyString(), any(), any(), any(), any(),
                 any());
 
-        when(scopeSupporter.setData(any(), any(), any(), any())).thenReturn(true);
+        when(scopeSupporter.setData(any(), any(), any(), eq(42))).thenReturn(true);
         testee.addLiteral("anything", SCOPE, "name", false);
         verify(scopeSupporter, times(2)).setData(any(), any(), any(), any());
         verify(testee).log(eq(LogLevel.DEBUG), anyString(), eq("Changed "), any(), any(), any(),
                 any());
 
         testee.addLiteral("anything", SCOPE, "name", true);
-        verify(scopeSupporter, times(3)).setData(any(), any(), any(), any());
+        verify(scopeSupporter, times(3)).setData(any(), any(), any(), eq(42));
         verify(testee).log(eq(LogLevel.DEBUG), anyString(), eq("Added "), any(), any(), any(),
                 any());
     }

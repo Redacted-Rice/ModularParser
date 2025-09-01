@@ -80,13 +80,4 @@ public final class Response<T> {
 	public String getError() {
 		return error;
 	}
-	
-	public Response<T> convertToErrorIfNoValueReturned(String notHandledArg, String errorArg) {
-        if (wasNotHandled()) {
-        	return Response.error(notHandledArg);
-        } else if (wasError()) {
-        	return Response.error(errorArg + ":" + error);
-        }
-        return this;
-	}
 }

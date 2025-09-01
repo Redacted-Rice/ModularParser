@@ -57,6 +57,17 @@ class DefaultObjectPathParserTest {
         
     	final String noArgs = "no arg";
     	final String args = "3 args";
+    	final String argsString = "method(1, 2, 3)";
+    	
+    	when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
+    	assertTrue(testee.handleWithArgs("anything", argsString).wasError());
+    	when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.error("test"));
+    	assertTrue(testee.handleWithArgs("anything", argsString).wasError());
+    	
+    	when(literalSupporter.evaluateLiteral(any()))
+    			.thenReturn(Response.is(1))
+    			.thenReturn(Response.is(2))
+    			.thenReturn(Response.is(3));
     	try (MockedStatic<ReflectionUtils> mock = mockStatic(ReflectionUtils.class)) {
             mock.when(() -> ReflectionUtils.invoke(any(), any())).thenReturn(noArgs);
             mock.when(() -> ReflectionUtils.invoke(any(), any(), any(), any(), any())).thenReturn(args);
