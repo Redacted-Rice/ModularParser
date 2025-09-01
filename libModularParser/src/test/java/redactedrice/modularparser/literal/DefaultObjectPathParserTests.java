@@ -10,7 +10,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 
 import org.junit.jupiter.api.BeforeEach;
