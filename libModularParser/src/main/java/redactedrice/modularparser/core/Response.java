@@ -5,23 +5,43 @@ import java.util.Objects;
 public final class Response<T> {
 	protected T val;
 	protected boolean handled;
-	protected String error;
+	protected boolean error;
+	protected String errorStr;
 	
-	protected Response(T val, boolean handled, String error) {
+	protected Response(T val, boolean handled, boolean error, String errorStr) {
 		this.val = val;
 		this.handled = handled;
 		this.error = error;
+		this.errorStr = errorStr;
+	}
+	
+	public static <T> Response<T> notHandled() {
+		return new Response<>(null, false, false, "");
+	}
+	
+	public static <T> Response<T> is(T val) {
+		return new Response<>(val, true, false, "");
+	}
+	
+	public static <T> Response<T> error(String error) {
+		if (error == null) {
+			error = "";
+		}
+		return new Response<>(null, true, true, error);
 	}
 	
 	@Override
 	public String toString() {
-	    return "Response{" +
-	           "val=" + val +
-	           ", handled=" + handled +
-	           ", error='" + error + '\'' +
-	           '}';
+		String asString = "Response(";
+		if (error) {
+			asString += "error='" + errorStr + "'";
+		} else if (!handled) {
+			asString += "not handled";
+		} else {
+			asString += "val=" + val.toString();
+		}
+	    return asString + ")";
 	}
-
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -36,25 +56,15 @@ public final class Response<T> {
 
 	    return handled == other.handled &&
 	           Objects.equals(val, other.val) &&
-	           Objects.equals(error, other.error);
+	           // This case shouldn't really be hit but keep it here
+	           // in case the class changes
+	           Objects.equals(error, other.error) && 
+	           Objects.equals(errorStr, other.errorStr);
 	}
 
 	@Override
 	public int hashCode() {
-	    return Objects.hash(val, handled, error);
-	}
-
-	
-	public static <T> Response<T> notHandled() {
-		return new Response<>(null, false, "");
-	}
-	
-	public static <T> Response<T> is(T val) {
-		return new Response<>(val, true, "");
-	}
-	
-	public static <T> Response<T> error(String error) {
-		return new Response<>(null, true, error);
+	    return Objects.hash(val, handled, error, errorStr);
 	}
 	
 	public boolean wasNotHandled() {
@@ -70,7 +80,7 @@ public final class Response<T> {
 	}
 	
 	public boolean wasError() {
-		return !error.isBlank();
+		return error;
 	}
 	
 	public T value() {
@@ -78,6 +88,6 @@ public final class Response<T> {
 	}
 	
 	public String getError() {
-		return error;
+		return errorStr;
 	}
 }
