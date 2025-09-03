@@ -10,8 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
-import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Response;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
         implements ChainableLiteralParser {
@@ -40,6 +40,30 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     @Override
     public void setModuleRefs() {
         literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public String getChainedArg() {
+        return chainedArg;
+    }
+
+    public String[] getRequiredArgs() {
+        return requiredArgs;
+    }
+
+    public String[] getOptionalArgs() {
+        return optionalArgs;
+    }
+
+    public Object[] getOptionalDefaults() {
+        return optionalDefaults;
+    }
+
+    public LiteralSupporter getLiteralSupporter() {
+        return literalSupporter;
     }
 
     protected boolean handleObjectLiteral(String literal, Map<String, Object> parsedArgs) {
@@ -135,12 +159,12 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         int requiredIdx = 0;
         int optionalIdx = 0;
         while (requiredIdx + optionalIdx < positionalParams.size()) {
-        	int combined = requiredIdx + optionalIdx;
-        	String literal = positionalParams.get(combined);
+            int combined = requiredIdx + optionalIdx;
+            String literal = positionalParams.get(combined);
             Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
             if (!parsed.wasValueReturned()) {
                 log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, combined);
-            	return false;
+                return false;
             }
             if (requiredIdx < requiredArgs.length) {
                 parsedArgs.put(requiredArgs[requiredIdx++], parsed.value());
@@ -160,7 +184,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             Response<Object> parsed = literalSupporter.evaluateLiteral(entry.getValue());
             if (!parsed.wasValueReturned()) {
                 log(LogLevel.ERROR, "Failed to parse %s arg %s ", entry.getKey(), entry.getValue());
-            	return false;
+                return false;
             }
             parsedArgs.put(entry.getKey(), parsed.value());
         }
