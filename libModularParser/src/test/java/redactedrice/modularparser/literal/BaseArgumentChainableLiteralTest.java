@@ -47,12 +47,12 @@ class BaseArgumentChainableLiteralTest {
     @Test
     void constructorSetModuleRefsTest() {
         assertEquals("SimpleObjectParser", testee.getName());
-        assertEquals("simpleobject", testee.keyword);
-        assertEquals(CHAINED_ARG, testee.chainedArg);
-        assertEquals(1, testee.requiredArgs.length);
-        assertEquals(3, testee.optionalArgs.length);
-        assertEquals(3, testee.optionalDefaults.length);
-        assertEquals(literalSupporter, testee.literalSupporter);
+        assertEquals("simpleobject", testee.getKeyword());
+        assertEquals(CHAINED_ARG, testee.getChainedArg());
+        assertEquals(1, testee.getRequiredArgs().length);
+        assertEquals(3, testee.getOptionalArgs().length);
+        assertEquals(3, testee.getOptionalDefaults().length);
+        assertEquals(literalSupporter, testee.getLiteralSupporter());
     }
 
     @Test
@@ -148,7 +148,7 @@ class BaseArgumentChainableLiteralTest {
         Map<String, Object> parsedArgs = new HashMap<>();
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.notHandled());
         assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
-        
+
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
         when(literalSupporter.evaluateLiteral("f")).thenReturn(Response.is(false));
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
@@ -179,7 +179,7 @@ class BaseArgumentChainableLiteralTest {
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.notHandled());
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.notHandled());
         assertFalse(testee.handleNamedArgs(namedParams, parsedArgs));
-        
+
         when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
         when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
 
