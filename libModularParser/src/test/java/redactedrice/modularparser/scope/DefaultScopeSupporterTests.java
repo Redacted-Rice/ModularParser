@@ -23,7 +23,7 @@ import redactedrice.modularparser.core.Module;
 
 public class DefaultScopeSupporterTests {
 
-    private static String NAME = "ScopeSupporter";
+    private static String NAME = DefaultScopeSupporter.class.getSimpleName();
     private static String MOD1_NAME = "ScopedParser1";
     private static String MOD2_NAME = "ScopedParser2";
     private static String SCOPE1 = "global";
@@ -46,18 +46,18 @@ public class DefaultScopeSupporterTests {
 
     @Test
     void constructorTest() {
-        testee = new DefaultScopeSupporter(NAME, true);
+        testee = new DefaultScopeSupporter(true);
         assertEquals(NAME, testee.getName());
         assertEquals(true, testee.allowImplicit);
 
-        testee = new DefaultScopeSupporter(NAME, false);
+        testee = new DefaultScopeSupporter(false);
         assertEquals(NAME, testee.getName());
         assertEquals(false, testee.allowImplicit);
     }
 
     @Test
     void handleModuleTest() {
-        testee = new DefaultScopeSupporter(NAME, true);
+        testee = new DefaultScopeSupporter(true);
         testee.setParser(parser);
         testee.scopeOrder.push(SCOPE1);
         testee.scopeOrder.push(SCOPE2);
@@ -82,7 +82,7 @@ public class DefaultScopeSupporterTests {
 
     @Test
     void tryParseLineTest() {
-        testee = spy(new DefaultScopeSupporter(NAME, true));
+        testee = spy(new DefaultScopeSupporter(true));
         testee.setParser(parser);
         testee.scopeOrder.push(SCOPE1);
         testee.scopeOrder.push(SCOPE2);
@@ -118,7 +118,7 @@ public class DefaultScopeSupporterTests {
 
     @Test
     void pushPopRemoveCurrentScopeTest() {
-        testee = spy(new DefaultScopeSupporter(NAME, true));
+        testee = spy(new DefaultScopeSupporter(true));
         testee.setParser(parser);
         testee.handleModule(mod1);
         testee.handleModule(mod2);
@@ -223,7 +223,7 @@ public class DefaultScopeSupporterTests {
         final String UNUSED_SCOPE_LINE = UNUSED_SCOPE + " " + LINE;
 
         // allow implicit
-        testee = new DefaultScopeSupporter(NAME, true);
+        testee = new DefaultScopeSupporter(true);
         testee.setParser(parser);
         testee.scopeOrder.push(SCOPE1);
         testee.scopeOrder.push(SCOPE2);
@@ -250,7 +250,7 @@ public class DefaultScopeSupporterTests {
         assertEquals(UNUSED_SCOPE_LINE, result[1]);
 
         // Now try without implicit
-        testee = new DefaultScopeSupporter(NAME, false);
+        testee = new DefaultScopeSupporter(false);
         testee.setParser(parser);
         testee.scopeOrder.push(SCOPE1);
         testee.scopeOrder.push(SCOPE2);
@@ -275,7 +275,7 @@ public class DefaultScopeSupporterTests {
 
     @Test
     void reservedWordTest() {
-        testee = new DefaultScopeSupporter(NAME, true);
+        testee = new DefaultScopeSupporter(true);
 
         final String WORD1 = "foo";
         final String WORD2 = "bar";

@@ -45,7 +45,7 @@ public class ObjectCreationAndChainingTests {
         parser.addModule(new DefaultReservedWordSupporter());
         parser.addModule(new DefaultConsoleLogHandler());
 
-        DefaultScopeSupporter scope = new DefaultScopeSupporter("BasicScopeHandler", true);
+        DefaultScopeSupporter scope = new DefaultScopeSupporter(true);
         scope.pushScope("global");
         scope.pushScope("file");
         parser.addModule(scope);

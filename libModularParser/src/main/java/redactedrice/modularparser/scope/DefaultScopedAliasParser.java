@@ -15,7 +15,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     protected final Pattern aliasDef;
 
     public DefaultScopedAliasParser() {
-        super("BasicAliasHandler", "alias");
+        super(DefaultScopedAliasParser.class.getSimpleName(), "alias");
         aliasDef = Pattern.compile("^\\s*" + getKeyword() + "\\s+(\\w+)\\s*=\\s*(.+)$");
     }
 

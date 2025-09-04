@@ -37,6 +37,11 @@ public class DefaultLogSupporterTests {
     }
 
     @Test
+    void constructorTest() {
+        assertEquals(DefaultLogSupporter.class.getSimpleName(), testee.getName());
+    }
+
+    @Test
     void handleModuleTest() {
         Module modOther = mock(Module.class);
 

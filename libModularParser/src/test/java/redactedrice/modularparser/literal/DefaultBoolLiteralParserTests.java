@@ -12,7 +12,7 @@ public class DefaultBoolLiteralParserTests {
     @Test
     void constructorTest() {
         DefaultBoolLiteralParser testee = new DefaultBoolLiteralParser();
-        assertEquals("DefaultBoolParser", testee.getName());
+        assertEquals(DefaultBoolLiteralParser.class.getSimpleName(), testee.getName());
     }
 
     @Test

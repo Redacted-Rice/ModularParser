@@ -9,7 +9,7 @@ public class DefaultLineParserSupporter extends BaseSupporter<LineParser>
         implements LineParserSupporter {
 
     public DefaultLineParserSupporter() {
-        super("LineParserSupportModule", LineParser.class);
+        super(DefaultLineParserSupporter.class.getSimpleName(), LineParser.class);
     }
 
     @Override

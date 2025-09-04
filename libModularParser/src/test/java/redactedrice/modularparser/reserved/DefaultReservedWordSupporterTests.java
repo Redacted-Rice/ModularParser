@@ -46,7 +46,7 @@ public class DefaultReservedWordSupporterTests {
 
     @Test
     void constructorTest() {
-        assertEquals("DefaultReservedWordSupporter", testee.getName());
+        assertEquals(DefaultReservedWordSupporter.class.getSimpleName(), testee.getName());
     }
 
     @Test

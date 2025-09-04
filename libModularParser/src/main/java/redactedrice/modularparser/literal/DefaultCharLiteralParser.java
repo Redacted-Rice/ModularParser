@@ -6,7 +6,7 @@ import redactedrice.modularparser.core.Response;
 
 public class DefaultCharLiteralParser extends BaseModule implements LiteralParser {
     public DefaultCharLiteralParser() {
-        super("DefaultCharParser");
+        super(DefaultCharLiteralParser.class.getSimpleName());
     }
 
     @Override
