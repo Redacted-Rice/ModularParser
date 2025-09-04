@@ -73,17 +73,13 @@ class ResponseTests {
         assertEquals("", testee.getError());
     }
 
-    // Suppress unlikely warnings. That is intentionally part of what is being tested
-    @SuppressWarnings("unlikely-arg-type")
     @Test
     void equalsHashCodeTest() {
         final String object = "test obj";
         final String objectSame = "test obj";
-        final String objectDiff = "different obj";
         Response<String> objectStr = Response.is(object);
         Response<Object> objectObj = Response.is(object);
         Response<String> objectSameStr = Response.is(objectSame);
-        Response<String> objectDiffStr = Response.is(objectDiff);
 
         Response<String> notHandledStr = Response.notHandled();
         Response<Object> notHandledObj = Response.notHandled();
@@ -91,7 +87,6 @@ class ResponseTests {
         final String errorMsg = "error";
         Response<String> errorStr = Response.error(errorMsg);
         Response<Object> errorObj = Response.error(errorMsg);
-        Response<String> errorStr2 = Response.error("a different error");
 
         // We are specifically testing the equals fn here so it makes sense to
         // call it instead of true as one side is the "expected" answer persay
@@ -109,7 +104,26 @@ class ResponseTests {
         assertEquals(notHandledStr.hashCode(), notHandledObj.hashCode());
         assertTrue(errorStr.equals(errorObj));// NOSONAR
         assertEquals(errorStr.hashCode(), errorObj.hashCode());
+    }
 
+    // Suppress unlikely warnings. That is intentionally part of what is being tested
+    @SuppressWarnings("unlikely-arg-type")
+    @Test
+    void notEqualsHashCodeTest() {
+        final String object = "test obj";
+        final String objectDiff = "different obj";
+        Response<String> objectStr = Response.is(object);
+        Response<Object> objectObj = Response.is(object);
+        Response<String> objectDiffStr = Response.is(objectDiff);
+
+        Response<String> notHandledStr = Response.notHandled();
+
+        final String errorMsg = "error";
+        Response<String> errorStr = Response.error(errorMsg);
+        Response<String> errorStr2 = Response.error("a different error");
+
+        // We are specifically testing the equals fn here so it makes sense to
+        // call it instead of true as one side is the "expected" answer persay
         assertFalse(objectStr.equals(null));// NOSONAR
         assertFalse(objectStr.equals("different type"));// NOSONAR
         assertFalse(objectObj.equals(objectDiffStr));// NOSONAR

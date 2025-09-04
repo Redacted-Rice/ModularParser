@@ -117,7 +117,7 @@ class DefaultScopeSupporterTests {
     }
 
     @Test
-    void pushPopRemoveCurrentScopeTest() {
+    void pushOnceCurrentScopeTest() {
         testee = spy(new DefaultScopeSupporter(true));
         testee.setParser(parser);
         testee.handleModule(mod1);
@@ -150,8 +150,17 @@ class DefaultScopeSupporterTests {
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
 
         assertEquals(SCOPE1, testee.currentScope());
+    }
 
-        // push second
+    @Test
+    void pushMutlipleCurrentScopeTest() {
+        testee = spy(new DefaultScopeSupporter(true));
+        testee.setParser(parser);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+
+        // push twice
+        assertTrue(testee.pushScope(SCOPE1));
         assertTrue(testee.pushScope(SCOPE2));
         assertEquals(2, testee.scopeOrder.size());
         assertTrue(testee.scopeOrder.contains(SCOPE1));
@@ -168,6 +177,16 @@ class DefaultScopeSupporterTests {
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
 
         assertEquals(SCOPE2, testee.currentScope());
+    }
+
+    @Test
+    void removeCurrentScopeTest() {
+        testee = spy(new DefaultScopeSupporter(true));
+        testee.setParser(parser);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+        assertTrue(testee.pushScope(SCOPE1));
+        assertTrue(testee.pushScope(SCOPE2));
 
         // Remove non-exisitng
         assertFalse(testee.removeScope("badScope"));
@@ -186,25 +205,60 @@ class DefaultScopeSupporterTests {
         assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
 
         assertEquals(SCOPE2, testee.currentScope());
+    }
+
+    @Test
+    void removeReaddCurrentScopeTest() {
+        testee = spy(new DefaultScopeSupporter(true));
+        testee.setParser(parser);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+        assertTrue(testee.pushScope(SCOPE1));
+        assertTrue(testee.pushScope(SCOPE2));
+        assertTrue(testee.removeScope(SCOPE1));
 
         // push it back
         assertTrue(testee.pushScope(SCOPE1));
+        assertEquals(2, testee.scopeOrder.size());
+        assertTrue(testee.scopeOrder.contains(SCOPE1));
+        assertTrue(testee.scopeOrder.contains(SCOPE2));
+
+        assertEquals(2, testee.scopedVals.size());
+        assertTrue(testee.scopedVals.containsKey(SCOPE1));
+        assertTrue(testee.scopedVals.containsKey(SCOPE2));
+        assertEquals(2, testee.ownerMap.get(MOD1_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
+        assertEquals(2, testee.ownerMap.get(MOD2_NAME).size());
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+
         assertEquals(SCOPE1, testee.currentScope());
+    }
+
+    @Test
+    void popCurrentScopeTest() {
+        testee = spy(new DefaultScopeSupporter(true));
+        testee.setParser(parser);
+        testee.handleModule(mod1);
+        testee.handleModule(mod2);
+        assertTrue(testee.pushScope(SCOPE1));
+        assertTrue(testee.pushScope(SCOPE2));
 
         // pop scope
         assertTrue(testee.popScope());
-        assertEquals(SCOPE2, testee.currentScope());
+        assertEquals(SCOPE1, testee.currentScope());
         assertEquals(1, testee.scopeOrder.size());
-        assertTrue(testee.scopeOrder.contains(SCOPE2));
+        assertTrue(testee.scopeOrder.contains(SCOPE1));
 
         assertEquals(1, testee.scopedVals.size());
-        assertTrue(testee.scopedVals.containsKey(SCOPE2));
+        assertTrue(testee.scopedVals.containsKey(SCOPE1));
         assertEquals(1, testee.ownerMap.get(MOD1_NAME).size());
-        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE2));
+        assertTrue(testee.ownerMap.get(MOD1_NAME).containsKey(SCOPE1));
         assertEquals(1, testee.ownerMap.get(MOD2_NAME).size());
-        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE2));
+        assertTrue(testee.ownerMap.get(MOD2_NAME).containsKey(SCOPE1));
 
-        assertEquals(SCOPE2, testee.currentScope());
+        assertEquals(SCOPE1, testee.currentScope());
 
         // Pop last scope
         assertTrue(testee.popScope());
