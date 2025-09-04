@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class LineModifierTests {
+class LineModifierTests {
 
-    final String NAME = "GroupingLineModifierTest";
-    final String START_TOKEN = "(";
-    final String END_TOKEN = ")";
+    static final String NAME = "GroupingLineModifierTest";
+    static final String START_TOKEN = "(";
+    static final String END_TOKEN = ")";
 
     @Test
     void validStartStopTokensTest() {

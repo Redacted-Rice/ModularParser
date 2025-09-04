@@ -4,7 +4,6 @@ package redactedrice.modularparser.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,10 +18,10 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 class ModularParserStatusTests {
-    final String LOGGER_NAME = "TestLogger";
-    final String LOG_FORMAT = "This is %s!";
-    final String LOG_DATA = "a test";
-    final String LOG_FULL = "This is a test!";
+    static final String LOGGER_NAME = "TestLogger";
+    static final String LOG_FORMAT = "This is %s!";
+    static final String LOG_DATA = "a test";
+    static final String LOG_FULL = "This is a test!";
 
     private LogSupporter mockLogger;
     private ModularParser testee;
@@ -53,7 +52,7 @@ class ModularParserStatusTests {
         // Now test with logger
         testee.addModule(mockLogger);
         testee.logOrStdErr(LOG_FORMAT, LOG_DATA);
-        verify(mockLogger).log(eq(LogLevel.ERROR), eq(LOG_FULL));
+        verify(mockLogger).log(LogLevel.ERROR, LOG_FULL);
     }
 
     @Test

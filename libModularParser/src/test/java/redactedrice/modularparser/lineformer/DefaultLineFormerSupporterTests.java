@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.LineFormerSupporter.LineRange;
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLineFormerSupporterTests {
+class DefaultLineFormerSupporterTests {
 
-    final String LINE_1 = "Line 1";
-    final String LINE_2 = "Line 2";
-    final String LINE_3 = "Line 3";
+    static final String LINE_1 = "Line 1";
+    static final String LINE_2 = "Line 2";
+    static final String LINE_3 = "Line 3";
 
     private BufferedReader reader;
     private ModularParser parser;
@@ -54,14 +54,14 @@ public class DefaultLineFormerSupporterTests {
 
         testee.setReader(reader);
         assertEquals(testee.reader, reader);
-        assertEquals(testee.lineNumberStart, 0);
-        assertEquals(testee.lineNumberEnd, 0);
+        assertEquals(0, testee.lineNumberStart);
+        assertEquals(0, testee.lineNumberEnd);
 
         testee.lineNumberStart = 5;
         testee.lineNumberEnd = 8;
         testee.resetReader();
-        assertEquals(testee.lineNumberStart, 0);
-        assertEquals(testee.lineNumberEnd, 0);
+        assertEquals(0, testee.lineNumberStart);
+        assertEquals(0, testee.lineNumberEnd);
         verify(reader).reset();
         verify(parser).resetStatus();
 
@@ -80,8 +80,8 @@ public class DefaultLineFormerSupporterTests {
         testee.setReader(reader);
 
         when(reader.readLine()).thenReturn(LINE_1, LINE_2);
-        assertEquals(testee.getNextLine(), LINE_1);
-        assertEquals(testee.getNextLine(), LINE_2);
+        assertEquals(LINE_1, testee.getNextLine());
+        assertEquals(LINE_2, testee.getNextLine());
 
         when(reader.readLine()).thenAnswer(o -> {
             throw new IOException();
@@ -205,13 +205,13 @@ public class DefaultLineFormerSupporterTests {
         testee.lineNumberStart = 0;
         testee.lineNumberEnd = 0;
         LineRange res = testee.getCurrentLineRange();
-        assertEquals(res.start(), 0);
-        assertEquals(res.end(), 0);
+        assertEquals(0, res.start());
+        assertEquals(0, res.end());
 
         testee.lineNumberStart = 3;
         testee.lineNumberEnd = 5;
         res = testee.getCurrentLineRange();
-        assertEquals(res.start(), 3);
-        assertEquals(res.end(), 5);
+        assertEquals(3, res.start());
+        assertEquals(5, res.end());
     }
 }

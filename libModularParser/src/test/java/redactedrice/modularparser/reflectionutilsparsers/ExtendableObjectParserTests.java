@@ -22,8 +22,8 @@ class ExtendableObjectParserTest {
     private LiteralSupporter literalSupporter;
     private ExtendableObjectParser testee;
 
-    final String NAME = ExtendableObjectParser.class.getSimpleName();
-    final String CHAINED_ARG = "object";
+    static final String NAME = ExtendableObjectParser.class.getSimpleName();
+    static final String CHAINED_ARG = "object";
 
     @BeforeEach
     void setup() {

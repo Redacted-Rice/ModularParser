@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class BaseWordReserverTests {
-    final String NAME = "WordReserver";
-    final String KEYWORD = "alias";
-    final String RESERVED_1 = "print";
-    final String RESERVED_2 = "println";
-    final String RESERVED_3 = "echo";
+    static final String NAME = "WordReserver";
+    static final String KEYWORD = "alias";
+    static final String RESERVED_1 = "print";
+    static final String RESERVED_2 = "println";
+    static final String RESERVED_3 = "echo";
 
     private BaseKeywordReserver testee;
 

@@ -36,15 +36,15 @@ class DefaultScopedVarConstParserTests {
     private ReservedWordSupporter rwSupporter;
     private LiteralSupporter lSupporter;
 
-    final String TESTEE_NAME = "BasicVarConstHandler";
-    final String KEYWORD = "var";
-    final String SCOPE = "global";
-    final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
-    private static String VAR_1 = "print";
-    private static String VAR_2 = "lvar";
-    private static String VAR_3 = "rvar";
-    private static String VAR_1_VAL = "println";
-    private static String VAR_2_VAL = "local var";
+    static final String TESTEE_NAME = "BasicVarConstHandler";
+    static final String KEYWORD = "var";
+    static final String SCOPE = "global";
+    static final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
+    static final String VAR_1 = "print";
+    static final String VAR_2 = "lvar";
+    static final String VAR_3 = "rvar";
+    static final String VAR_1_VAL = "println";
+    static final String VAR_2_VAL = "local var";
 
     @BeforeEach
     void setup() {
@@ -94,7 +94,7 @@ class DefaultScopedVarConstParserTests {
         verify(testee, never()).handleAssignment(any(), any(), any(), any());
 
         // Good assignment
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(false);
         assertTrue(testee.tryParseScoped(SCOPE, "var x = 42", SCOPE));
         verify(testee, never()).handleReassignment(any(), any(), any());
         verify(testee).handleAssignment(any(), any(), any(), any());
@@ -119,14 +119,14 @@ class DefaultScopedVarConstParserTests {
     void tryParseScopedReassignmentTest() {
         doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(false);
         assertFalse(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(true);
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
-        ;
+
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
@@ -167,11 +167,11 @@ class DefaultScopedVarConstParserTests {
     void tryParseScopedAssignmentTest() {
         doNothing().when(testee).addLiteral(any(), any(), any(), anyBoolean());
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(false);
         assertFalse(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(true);
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is(TESTEE_NAME));
         assertTrue(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());

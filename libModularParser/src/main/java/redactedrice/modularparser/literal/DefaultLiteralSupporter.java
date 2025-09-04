@@ -18,11 +18,11 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
 
     @Override
     public void handleModule(Module module) {
-        if (module instanceof LiteralParser) {
-            handlers.add((LiteralParser) module);
+        if (module instanceof LiteralParser parser) {
+            handlers.add(parser);
         }
-        if (module instanceof ChainableLiteralParser) {
-            chainedHandlers.add((ChainableLiteralParser) module);
+        if (module instanceof ChainableLiteralParser chainable) {
+            chainedHandlers.add(chainable);
         }
     }
 

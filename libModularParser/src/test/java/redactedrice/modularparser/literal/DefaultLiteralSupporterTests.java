@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.Response;
 
-public class DefaultLiteralSupporterTests {
+class DefaultLiteralSupporterTests {
 
-    private static String MOD1_NAME = "LiteralParser1";
-    private static String MOD2_NAME = "LiteralParser2";
-    private static String MOD3_NAME = "ChainableLiteralParser1";
-    private static String MOD4_NAME = "ChainableLiteralParser2";
+    static final String MOD1_NAME = "LiteralParser1";
+    static final String MOD2_NAME = "LiteralParser2";
+    static final String MOD3_NAME = "ChainableLiteralParser1";
+    static final String MOD4_NAME = "ChainableLiteralParser2";
 
     private DefaultLiteralSupporter testee;
     LiteralParser mod1;

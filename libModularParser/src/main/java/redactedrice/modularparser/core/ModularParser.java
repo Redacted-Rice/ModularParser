@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
@@ -20,7 +21,7 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 public class ModularParser {
     public enum Status {
         OK, ERROR, ABORT
-    };
+    }
 
     protected Status status = Status.OK;
 
@@ -44,13 +45,13 @@ public class ModularParser {
         module.setParser(this);
 
         // See if its the log supporter
-        if (module instanceof LogSupporter) {
+        if (module instanceof LogSupporter supporter) {
             if (logger != null) {
                 // Unnecessary but seems cleaner to keep the pattern
                 logOrStdErr("Attempted to add a second log supporter!");
                 return false;
             }
-            logger = (LogSupporter) module;
+            logger = supporter;
         }
 
         // Pass all to existing supporters
@@ -59,32 +60,31 @@ public class ModularParser {
         }
 
         // See if its one of our required supporters
-        if (module instanceof LineFormerSupporter) {
+        if (module instanceof LineFormerSupporter supporter) {
             if (lineFormer != null) {
                 logOrStdErr("Attempted to add a second line former!");
                 return false;
             }
-            lineFormer = (LineFormerSupporter) module;
+            lineFormer = supporter;
         }
-        if (module instanceof LineParserSupporter) {
+        if (module instanceof LineParserSupporter supporter) {
             if (lineParser != null) {
                 logOrStdErr("Attempted to add a second line parser!");
                 return false;
             }
-            lineParser = (LineParserSupporter) module;
+            lineParser = supporter;
         }
 
         // If its a supporter, keep track of it and pass it any existing modules
-        if (module instanceof Supporter) {
-            Supporter asSupporter = (Supporter) module;
-            String supporterName = getSupporterInterfaceName(asSupporter);
-            if (supporters.putIfAbsent(supporterName, asSupporter) != null) {
+        if (module instanceof Supporter supporter) {
+            String supporterName = getSupporterInterfaceName(supporter);
+            if (supporters.putIfAbsent(supporterName, supporter) != null) {
                 logOrStdErr("Attempted to add a second supporter for: "
                         + module.getClass().getCanonicalName());
                 return false;
             }
             for (Module existing : modulesOrdered) {
-                asSupporter.handleModule(existing);
+                supporter.handleModule(existing);
             }
         }
 
@@ -105,11 +105,11 @@ public class ModularParser {
     }
 
     public boolean configureModules() {
-        modulesOrdered.forEach(module -> module.setModuleRefs());
+        modulesOrdered.forEach(Module::setModuleRefs);
         List<String> failed = modulesOrdered.stream()
                 .filter(module -> !module.checkModulesCompatibility()).map(Module::getName)
                 .toList();
-        if (failed.size() > 0) {
+        if (!failed.isEmpty()) {
             logOrStdErr("The following modules are incompatibile with at least one other module. "
                     + "Check previous errors for details: " + String.join(", ", failed));
             return false;
@@ -161,7 +161,7 @@ public class ModularParser {
         if (logger != null) {
             logger.log(level, String.format(format, args));
         } else {
-            System.out.println(String.format(format, args));
+            System.out.println(String.format(format, args)); // NOSONAR
         }
     }
 
@@ -202,7 +202,11 @@ public class ModularParser {
 
     public <T> T getSupporterOfType(Class<T> clazz) {
         // Should be only one
-        return modulesOrdered.stream().filter(clazz::isInstance).findFirst().map(clazz::cast).get();
+        Optional<Module> first = modulesOrdered.stream().filter(clazz::isInstance).findFirst();
+        if (first.isEmpty()) {
+            return null;
+        }
+        return clazz.cast(first.get());
     }
 
     public LogSupporter getLogger() {

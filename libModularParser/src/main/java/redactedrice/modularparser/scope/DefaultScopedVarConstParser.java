@@ -70,7 +70,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         }
 
         // Check for collisions with reserved words outside scope supporter
-        if (!ensureWordAvailableOrOwned(scope, key)) {
+        if (!ensureWordAvailableOrOwned(key)) {
             return false;
         }
 
@@ -95,7 +95,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         }
 
         // Check for collisions with reserved words outside scope supporter
-        if (!ensureWordAvailableOrOwned(scope, key)) {
+        if (!ensureWordAvailableOrOwned(key)) {
             return false;
         }
 

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
-public class DefaultConsoleLogHandlerTests {
+class DefaultConsoleLogHandlerTests {
     @Test
     void constructorTest() {
         DefaultConsoleLogHandler testee = new DefaultConsoleLogHandler();

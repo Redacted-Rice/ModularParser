@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class DefaultContinuerLineModifierTests {
+class DefaultContinuerLineModifierTests {
 
-    final String NAME = "GroupingContinuerModifierTest";
-    final String TOKEN = "->";
+    static final String NAME = "GroupingContinuerModifierTest";
+    static final String TOKEN = "->";
 
     @Test
     void constructorTest() {

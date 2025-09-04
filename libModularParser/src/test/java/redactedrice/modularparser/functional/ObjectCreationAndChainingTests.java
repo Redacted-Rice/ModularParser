@@ -29,7 +29,7 @@ import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
-public class ObjectCreationAndChainingTests {
+class ObjectCreationAndChainingTests {
 
     ModularParser parser;
     DefaultLineFormerSupporter reader;
@@ -108,15 +108,15 @@ public class ObjectCreationAndChainingTests {
 
         assertTrue(varParser.isVariable("obj3"));
         SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
-        assertEquals(obj3.intField, 3);
-        assertEquals(obj3.so.intField, 2);
-        assertEquals(obj3.so.so.intField, 1);
+        assertEquals(3, obj3.intField);
+        assertEquals(2, obj3.so.intField);
+        assertEquals(1, obj3.so.so.intField);
 
         assertTrue(varParser.isVariable("obj4"));
         SimpleObject obj4 = (SimpleObject) varParser.getVariableValue("obj4").value();
-        assertEquals(obj4.intField, 4);
-        assertEquals(obj4.so.intField, 5);
-        assertEquals(obj4.so.so.intField, 6);
+        assertEquals(4, obj4.intField);
+        assertEquals(5, obj4.so.intField);
+        assertEquals(6, obj4.so.so.intField);
 
         assertTrue(varParser.isVariable("eo"));
         ExtendableObject eo = (ExtendableObject) varParser.getVariableValue("eo").value();

@@ -19,10 +19,11 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.DefaultContinuerLineModifier;
 
-public class DefaultChainingChainableLiteralParserTests {
+class DefaultChainingChainableLiteralParserTests {
 
-    private static String NAME = "DefaultChainerArrow";
-    private static String TOKEN = "<-";
+    static final String NAME = "DefaultChainerArrow";
+    static final String TOKEN = "<-";
+
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
     private DefaultChainingChainableLiteralParser testee;

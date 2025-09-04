@@ -35,8 +35,8 @@ public class DefaultScopeSupporter extends BaseModule
 
     @Override
     public void handleModule(Module module) {
-        if (module instanceof ScopedParser) {
-            parsers.add((ScopedParser) module);
+        if (module instanceof ScopedParser parser) {
+            parsers.add(parser);
             Map<String, Set<String>> ownerScopeMap = new HashMap<>();
             scopeOrder.stream().forEach(scope -> ownerScopeMap.put(scope, new HashSet<>()));
             ownerMap.put(module.getName(), ownerScopeMap);
@@ -172,7 +172,7 @@ public class DefaultScopeSupporter extends BaseModule
             vars = owned.get(scope);
         } else {
             vars = new HashSet<>();
-            owned.values().forEach(scopeVars -> vars.addAll(scopeVars));
+            owned.values().forEach(vars::addAll);
         }
         return vars;
     }
@@ -194,13 +194,10 @@ public class DefaultScopeSupporter extends BaseModule
         }
 
         OwnedObject obj = scopeMap.get(name);
-        if (obj != null) {
-            if (!obj.owner().equals(owner.getName())) {
-                log(LogLevel.ERROR,
-                        "%s attempted to set value for %s in scope %s that is owned by %s",
-                        owner.getName(), name, scope, obj.owner());
-                return false;
-            }
+        if (obj != null && !obj.owner().equals(owner.getName())) {
+            log(LogLevel.ERROR, "%s attempted to set value for %s in scope %s that is owned by %s",
+                    owner.getName(), name, scope, obj.owner());
+            return false;
         }
         scopeMap.put(name, new OwnedObject(owner.getName(), data));
         ownerMap.get(owner.getName()).get(scope).add(name);

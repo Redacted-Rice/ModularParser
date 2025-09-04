@@ -15,15 +15,15 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultReservedWordSupporterTests {
+class DefaultReservedWordSupporterTests {
 
-    final String MOD_1_NAME = "WordReserver1";
-    final String MOD_2_NAME = "WordReserver2";
+    static final String MOD_1_NAME = "WordReserver1";
+    static final String MOD_2_NAME = "WordReserver2";
 
-    final String RESERVED_1 = "alias";
-    final String RESERVED_2 = "var";
-    final String RESERVED_3 = "const";
-    final String RESERVED_4 = "scope";
+    static final String RESERVED_1 = "alias";
+    static final String RESERVED_2 = "var";
+    static final String RESERVED_3 = "const";
+    static final String RESERVED_4 = "scope";
 
     private ModularParser parser;
     private DefaultReservedWordSupporter testee;

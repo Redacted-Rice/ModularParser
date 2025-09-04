@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLineParserSupporterTests {
+class DefaultLineParserSupporterTests {
 
-    final String LINE_1 = "Line 1";
-    final String LINE_2 = "Line 2";
-    final String LINE_3 = "Line 3";
+    static final String LINE_1 = "Line 1";
+    static final String LINE_2 = "Line 2";
+    static final String LINE_3 = "Line 3";
 
     private ModularParser parser;
     private DefaultLineParserSupporter testee;

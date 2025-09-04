@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLinStartMatcherTests {
+class DefaultLinStartMatcherTests {
 
-    final String NAME = "LineStartMatcher";
-    final String KEYWORD = "print";
+    static final String NAME = "LineStartMatcher";
+    static final String KEYWORD = "print";
 
     private ModularParser parser;
     private BaseLineStartMatcher testee;

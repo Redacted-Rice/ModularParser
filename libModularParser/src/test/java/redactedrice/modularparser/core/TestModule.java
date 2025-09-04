@@ -9,10 +9,10 @@ public class TestModule implements Module {
     }
 
     @Override
-    public void setParser(ModularParser parser) {}
+    public void setParser(ModularParser parser) { /* not needed for testing */}
 
     @Override
-    public void setModuleRefs() {}
+    public void setModuleRefs() { /* not needed for testing */}
 
     @Override
     public boolean checkModulesCompatibility() {

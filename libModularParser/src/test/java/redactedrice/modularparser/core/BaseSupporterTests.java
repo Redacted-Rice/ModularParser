@@ -12,7 +12,7 @@ class BaseSupporterTests {
         }
     }
 
-    final String OBJ_NAME = "Test name";
+    static final String OBJ_NAME = "Test name";
 
     @Test
     void constructorSetterTest() {

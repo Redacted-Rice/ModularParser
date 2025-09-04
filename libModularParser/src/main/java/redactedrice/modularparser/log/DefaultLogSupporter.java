@@ -19,9 +19,8 @@ public class DefaultLogSupporter extends BaseModule implements LogSupporter {
 
     @Override
     public void handleModule(Module module) {
-        if (module instanceof LogHandler) {
-            LogHandler asHandler = (LogHandler) module;
-            handlers.add(asHandler);
+        if (module instanceof LogHandler handler) {
+            handlers.add(handler);
         }
     }
 

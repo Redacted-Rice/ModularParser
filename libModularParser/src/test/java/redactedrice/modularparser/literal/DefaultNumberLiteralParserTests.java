@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser.PrimitiveType;
 
-public class DefaultNumberLiteralParserTests {
+class DefaultNumberLiteralParserTests {
 
     @Test
     void constructorTest() {
