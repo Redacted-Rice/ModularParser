@@ -15,7 +15,8 @@ import redactedrice.modularparser.core.Response;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
         implements ChainableLiteralParser {
-    protected final static Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
+    protected final static Pattern PARAMETERS_PATTERN = Pattern
+            .compile("^\\s*(\\w+)\\s*\\(([^)]*)\\)\\s*$");
     protected final static String ARG_DELIMITER = ",";
     protected final static String ARG_NAME_DELIMITER = " ";
 
