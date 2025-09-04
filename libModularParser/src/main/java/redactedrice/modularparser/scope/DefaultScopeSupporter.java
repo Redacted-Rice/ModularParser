@@ -112,7 +112,6 @@ public class DefaultScopeSupporter extends BaseModule
         return null;
     }
 
-    // TODO move to response
     protected OwnedObject getDataForScopeOrNarrowestScope(String scope, String name) {
         if (scope != null && !scope.isEmpty()) {
             Map<String, OwnedObject> scopeMap = scopedVals.get(scope);
@@ -133,26 +132,24 @@ public class DefaultScopeSupporter extends BaseModule
         return null;
     }
 
-    // TODO: Move to response
     @Override
-    public String getOwner(String scope, String name) {
+    public Response<String> getOwner(String scope, String name) {
         OwnedObject obj = getDataForScopeOrNarrowestScope(scope, name);
         if (obj != null) {
-            return obj.owner();
+            return Response.is(obj.owner());
         }
-        return "";
+        return Response.notHandled();
     }
 
-    // TODO: Move to response
     @Override
-    public String getNarrowestScope(String name) {
+    public Response<String> getNarrowestScope(String name) {
         for (String scopeCheck : scopeOrder) {
             OwnedObject obj = scopedVals.get(scopeCheck).get(name);
             if (obj != null) {
-                return scopeCheck;
+                return Response.is(scopeCheck);
             }
         }
-        return "";
+        return Response.notHandled();
     }
 
     @Override

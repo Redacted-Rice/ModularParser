@@ -60,12 +60,13 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     protected boolean handleReassignment(String scope, String key, String value) {
         // reassignment
         if (scope == null || scope.isEmpty()) { // scope was not specified
-            scope = scopeSupporter.getNarrowestScope(key);
-            if (scope == null) {
+            Response<String> response = scopeSupporter.getNarrowestScope(key);
+            if (!response.wasValueReturned()) {
                 log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", getKeyword(),
                         key, value);
                 return false;
             }
+            scope = response.value();
         }
 
         // Check for collisions with reserved words outside scope supporter
@@ -73,11 +74,11 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             return false;
         }
 
-        String owner = scopeSupporter.getOwner(scope, key);
-        if (owner == null || owner.isEmpty()) {
+        Response<String> owner = scopeSupporter.getOwner(scope, key);
+        if (!owner.wasValueReturned()) {
             log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
                     getKeyword(), key, scope, value);
-        } else if (!owner.equals(getName())) {
+        } else if (!owner.value().equals(getName())) {
             log(LogLevel.ERROR,
                     "Attempted to reassign %s %s in scope %s with %s which is owned by module %s",
                     getKeyword(), key, scope, value, owner);
@@ -98,12 +99,16 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
             return false;
         }
 
-        String owner = scopeSupporter.getOwner(scope, key);
-        if (owner == null || owner.isEmpty()) {
-            addLiteral(value, scope, key, true);
+        Response<String> owner = scopeSupporter.getOwner(scope, key);
+        if (owner.wasValueReturned()) {
+            log(LogLevel.ERROR,
+                    "Attempted to redefine existing %s %s in scope %s with %s owned by %s",
+                    getKeyword(), key, scope, value, owner.value());
+        } else if (owner.wasError()) {
+            log(LogLevel.ERROR, "Encountered error while assigning %s %s in scope %s with %s: %s",
+                    getKeyword(), key, scope, value, owner.getError());
         } else {
-            log(LogLevel.ERROR, "Attempted to redefine existing %s %s in scope %s with %s",
-                    getKeyword(), key, scope, value);
+            addLiteral(value, scope, key, true);
         }
         return true;
     }

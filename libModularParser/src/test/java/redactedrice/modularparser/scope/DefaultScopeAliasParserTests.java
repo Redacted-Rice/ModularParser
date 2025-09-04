@@ -11,6 +11,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -96,11 +97,15 @@ public class DefaultScopeAliasParserTests {
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
 
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("anything");
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is("anything"));
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.error("test"));
+        assertTrue(testee.tryParseScoped("", "alias print = 'println'", SCOPE));
+        verify(scopeSupporter, times(0)).setData(eq(SCOPE), any(), any(), any());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.tryParseScoped("", "alias print = 'println'", SCOPE));
         verify(scopeSupporter).setData(eq(SCOPE), any(), any(), any());
         clearInvocations(scopeSupporter);

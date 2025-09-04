@@ -22,12 +22,16 @@ public interface ScopeSupporter extends Supporter {
     String[] splitScope(String logicalLine);
 
     default boolean doesOwn(Module module, String scope, String name) {
-        return getOwner(scope, name).equals(module.getName());
+        Response<String> owner = getOwner(scope, name);
+        if (!owner.wasValueReturned()) {
+            return false;
+        }
+        return owner.value().equals(module.getName());
     }
 
-    String getOwner(String scope, String name);
+    Response<String> getOwner(String scope, String name);
 
-    String getNarrowestScope(String name);
+    Response<String> getNarrowestScope(String name);
 
     Response<Object> getData(String scope, String name, Module owner);
 
