@@ -1,3 +1,2 @@
-Make more functions return Response 
 SonarQube analysis fixes
 Add some more functional test cases

@@ -124,39 +124,39 @@ class DefaultScopedVarConstParserTests {
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         ;
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
-        ;
+
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("OtherModule");
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is("OtherModule"));
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
         clearInvocations(testee);
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is(TESTEE_NAME));
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
         clearInvocations(testee);
         clearInvocations(scopeSupporter);
 
-        when(scopeSupporter.getNarrowestScope(any())).thenReturn(null);
+        when(scopeSupporter.getNarrowestScope(any())).thenReturn(Response.notHandled());
         assertFalse(testee.handleReassignment("", "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());
         clearInvocations(testee);
 
-        when(scopeSupporter.getNarrowestScope(any())).thenReturn("local");
+        when(scopeSupporter.getNarrowestScope(any())).thenReturn(Response.is("local"));
         assertTrue(testee.handleReassignment(null, "x", "42"));
         verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
         clearInvocations(testee);
@@ -172,21 +172,23 @@ class DefaultScopedVarConstParserTests {
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
 
         when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(TESTEE_NAME);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is(TESTEE_NAME));
         assertTrue(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn(null);
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.error("test"));
+        assertTrue(testee.handleAssignment("", SCOPE, "x", "42"));
+        verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
+        verify(testee, times(2)).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(),
+                any());
+
+        when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.handleAssignment("local", SCOPE, "x", "42"));
         verify(testee).addLiteral(any(), eq("local"), any(), anyBoolean());
 
-        when(scopeSupporter.getOwner(any(), any())).thenReturn("");
-        assertTrue(testee.handleAssignment("", SCOPE, "x", "42"));
-        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
-
         assertTrue(testee.handleAssignment(null, SCOPE, "x", "42"));
-        verify(testee, times(2)).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
+        verify(testee).addLiteral(any(), eq(SCOPE), any(), anyBoolean());
     }
 
     @Test

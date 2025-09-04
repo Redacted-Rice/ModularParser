@@ -79,7 +79,6 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
             // If we added to the line, we need to restart
             if (addedLine) {
                 modifierIdx = -1;
-                continue;
             }
         }
         return logical;

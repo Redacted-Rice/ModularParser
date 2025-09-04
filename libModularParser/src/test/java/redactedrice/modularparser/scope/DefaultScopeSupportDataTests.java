@@ -86,17 +86,25 @@ public class DefaultScopeSupportDataTests {
     @Test
     void getOwnerTest() {
         doReturn(null).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-        assertTrue(testee.getOwner(SCOPE1, VAR1).isEmpty());
+        assertFalse(testee.getOwner(SCOPE1, VAR1).wasValueReturned());
 
         doReturn(OBJ1).when(testee).getDataForScopeOrNarrowestScope(any(), any());
-        assertEquals(MOD1_NAME, testee.getOwner(SCOPE1, VAR1));
+        Response<String> response = testee.getOwner(SCOPE1, VAR1);
+        assertTrue(response.wasValueReturned());
+        assertEquals(MOD1_NAME, response.value());
     }
 
     @Test
     void getNarrowestScopeTest() {
-        assertEquals(SCOPE2, testee.getNarrowestScope(VAR1));
-        assertEquals(SCOPE1, testee.getNarrowestScope(VAR2));
-        assertTrue(testee.getNarrowestScope(UNUSED_VAR).isEmpty());
+        Response<String> response = testee.getNarrowestScope(VAR1);
+        assertTrue(response.wasValueReturned());
+        assertEquals(SCOPE2, response.value());
+
+        response = testee.getNarrowestScope(VAR2);
+        assertTrue(response.wasValueReturned());
+        assertEquals(SCOPE1, response.value());
+
+        assertFalse(testee.getNarrowestScope(UNUSED_VAR).wasValueReturned());
     }
 
     @Test

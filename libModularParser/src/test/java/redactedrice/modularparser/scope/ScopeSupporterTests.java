@@ -66,12 +66,12 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public String getOwner(String scope, String name) {
+        public Response<String> getOwner(String scope, String name) {
             return null;
         }
 
         @Override
-        public String getNarrowestScope(String name) {
+        public Response<String> getNarrowestScope(String name) {
             return null;
         }
 
@@ -101,10 +101,16 @@ public class ScopeSupporterTests {
         ScopeSupporter testee = spy(new ScopeSupporterTester());
         when(testee.getName()).thenReturn(NAME);
 
-        when(testee.getOwner(any(), any())).thenReturn(NAME);
+        when(testee.getOwner(any(), any())).thenReturn(Response.notHandled());
+        assertFalse(testee.doesOwn(testee, "global", "foo"));
+
+        when(testee.getOwner(any(), any())).thenReturn(Response.error("test"));
+        assertFalse(testee.doesOwn(testee, "global", "foo"));
+
+        when(testee.getOwner(any(), any())).thenReturn(Response.is(NAME));
         assertTrue(testee.doesOwn(testee, "global", "foo"));
 
-        when(testee.getOwner(any(), any())).thenReturn("NotMyName");
+        when(testee.getOwner(any(), any())).thenReturn(Response.is("NotMyName"));
         assertFalse(testee.doesOwn(testee, "global", "foo"));
     }
 }
