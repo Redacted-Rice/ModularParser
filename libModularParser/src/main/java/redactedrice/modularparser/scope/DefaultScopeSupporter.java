@@ -28,8 +28,8 @@ public class DefaultScopeSupporter extends BaseModule
     protected final Deque<String> scopeOrder = new ArrayDeque<>();
     protected final boolean allowImplicit;
 
-    public DefaultScopeSupporter(String name, boolean allowImplicit) {
-        super(name);
+    public DefaultScopeSupporter(boolean allowImplicit) {
+        super(DefaultScopeSupporter.class.getSimpleName());
         this.allowImplicit = allowImplicit;
     }
 

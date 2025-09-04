@@ -13,7 +13,7 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
     protected final List<ChainableLiteralParser> chainedHandlers = new ArrayList<>();
 
     public DefaultLiteralSupporter() {
-        super("DefaultLiteralSupportModule");
+        super(DefaultLiteralSupporter.class.getSimpleName());
     }
 
     @Override

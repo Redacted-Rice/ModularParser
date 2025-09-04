@@ -18,7 +18,7 @@ public class DefaultConsoleLogHandlerTests {
     @Test
     void constructorTest() {
         DefaultConsoleLogHandler testee = new DefaultConsoleLogHandler();
-        assertEquals("DefaultConsoleLogSupporter", testee.getName());
+        assertEquals(DefaultConsoleLogHandler.class.getSimpleName(), testee.getName());
         assertTrue(testee.enabledLevels.contains(LogLevel.DEBUG));
         assertTrue(testee.enabledLevels.contains(LogLevel.INFO));
         assertTrue(testee.enabledLevels.contains(LogLevel.WARN));

@@ -14,7 +14,7 @@ public class DefaultLogSupporter extends BaseModule implements LogSupporter {
     protected final List<LogHandler> handlers = new ArrayList<>();
 
     public DefaultLogSupporter() {
-        super("DefaultLogSupporter");
+        super(DefaultLogSupporter.class.getSimpleName());
     }
 
     @Override

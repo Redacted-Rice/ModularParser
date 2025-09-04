@@ -44,7 +44,7 @@ public class DefaultLiteralSupporterTests {
     @Test
     void constructorTest() {
         testee = new DefaultLiteralSupporter();
-        assertEquals("DefaultLiteralSupportModule", testee.getName());
+        assertEquals(DefaultLiteralSupporter.class.getSimpleName(), testee.getName());
     }
 
     @Test

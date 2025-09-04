@@ -18,7 +18,7 @@ public class DefaultNumberLiteralParserTests {
     @Test
     void constructorTest() {
         DefaultNumberLiteralParser testee = new DefaultNumberLiteralParser();
-        assertEquals("DefaultNumberParser", testee.getName());
+        assertEquals(DefaultNumberLiteralParser.class.getSimpleName(), testee.getName());
     }
 
     @Test

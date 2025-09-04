@@ -1,6 +1,7 @@
 package redactedrice.modularparser.lineparser;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +30,11 @@ public class DefaultLineParserSupporterTests {
         testee = new DefaultLineParserSupporter();
         parser = mock(ModularParser.class);
         testee.setParser(parser);
+    }
+
+    @Test
+    void constructorTest() {
+        assertEquals(DefaultLineParserSupporter.class.getSimpleName(), testee.getName());
     }
 
     @Test

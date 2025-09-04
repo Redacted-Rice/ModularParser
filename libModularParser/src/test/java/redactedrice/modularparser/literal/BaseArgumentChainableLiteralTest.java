@@ -46,7 +46,7 @@ class BaseArgumentChainableLiteralTest {
 
     @Test
     void constructorSetModuleRefsTest() {
-        assertEquals("SimpleObjectParser", testee.getName());
+        assertEquals(SimpleObjectLiteralParser.class.getSimpleName(), testee.getName());
         assertEquals("simpleobject", testee.getKeyword());
         assertEquals(CHAINED_ARG, testee.getChainedArg());
         assertEquals(1, testee.getRequiredArgs().length);

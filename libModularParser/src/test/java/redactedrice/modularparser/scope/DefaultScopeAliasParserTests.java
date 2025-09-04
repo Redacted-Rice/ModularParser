@@ -32,7 +32,7 @@ public class DefaultScopeAliasParserTests {
     private ScopeSupporter scopeSupporter;
     private ReservedWordSupporter rwSupporter;
 
-    final String TESTEE_NAME = "BasicAliasHandler";
+    final String TESTEE_NAME = DefaultScopedAliasParser.class.getSimpleName();
     final String SCOPE = "global";
     final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
     private static String ALIAS_1 = "print";

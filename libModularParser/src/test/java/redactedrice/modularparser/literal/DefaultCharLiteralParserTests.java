@@ -12,7 +12,7 @@ public class DefaultCharLiteralParserTests {
     @Test
     void constructorTest() {
         DefaultCharLiteralParser testee = new DefaultCharLiteralParser();
-        assertEquals("DefaultCharParser", testee.getName());
+        assertEquals(DefaultCharLiteralParser.class.getSimpleName(), testee.getName());
     }
 
     @Test

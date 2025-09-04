@@ -11,7 +11,7 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     protected final Set<LogLevel> enabledLevels;
 
     public DefaultConsoleLogHandler() {
-        super("DefaultConsoleLogSupporter");
+        super(DefaultConsoleLogHandler.class.getSimpleName());
         this.enabledLevels = EnumSet.allOf(LogLevel.class);
     }
 

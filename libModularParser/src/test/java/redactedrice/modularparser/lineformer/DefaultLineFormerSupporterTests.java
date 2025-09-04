@@ -39,7 +39,19 @@ public class DefaultLineFormerSupporterTests {
     }
 
     @Test
+    void constructorTest() {
+        assertEquals(DefaultLineFormerSupporter.class.getSimpleName(), testee.getName());
+        assertEquals(0, testee.lineNumberStart);
+        assertEquals(0, testee.lineNumberEnd);
+        assertNull(testee.reader);
+    }
+
+    @Test
     void setResetReaderTest() throws IOException {
+        assertDoesNotThrow(() -> {
+            testee.resetReader();
+        });
+
         testee.setReader(reader);
         assertEquals(testee.reader, reader);
         assertEquals(testee.lineNumberStart, 0);

@@ -6,7 +6,7 @@ import redactedrice.modularparser.core.Response;
 
 public class DefaultNumberLiteralParser extends BaseModule implements LiteralParser {
     public DefaultNumberLiteralParser() {
-        super("DefaultNumberParser");
+        super(DefaultNumberLiteralParser.class.getSimpleName());
     }
 
     protected enum PrimitiveType {

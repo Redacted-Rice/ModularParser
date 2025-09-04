@@ -23,7 +23,6 @@ import redactedrice.modularparser.core.Response;
 
 public class DefaultScopeSupportDataTests {
 
-    private static String NAME = "ScopeSupporter";
     private static String MOD1_NAME = "ScopedParser1";
     private static String MOD2_NAME = "ScopedParser2";
     private static String SCOPE1 = "global";
@@ -49,7 +48,7 @@ public class DefaultScopeSupportDataTests {
         when(mod1.getName()).thenReturn(MOD1_NAME);
         when(mod2.getName()).thenReturn(MOD2_NAME);
 
-        testee = spy(new DefaultScopeSupporter(NAME, true));
+        testee = spy(new DefaultScopeSupporter(true));
         testee.setParser(parser);
         testee.pushScope(SCOPE1);
         testee.pushScope(SCOPE2);

@@ -15,7 +15,7 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
     protected int lineNumberEnd = 0;
 
     public DefaultLineFormerSupporter() {
-        super("LineFormerSupportModule", LineModifier.class);
+        super(DefaultLineFormerSupporter.class.getSimpleName(), LineModifier.class);
     }
 
     public void setReader(BufferedReader reader) {
@@ -25,13 +25,15 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
     }
 
     public void resetReader() {
-        try {
-            reader.reset();
-            lineNumberStart = 0;
-            lineNumberEnd = 0;
-            parser.resetStatus();
-        } catch (IOException e) {
-            log(LogLevel.ERROR, "Failed to reset reader");
+        if (reader != null) {
+            try {
+                reader.reset();
+                lineNumberStart = 0;
+                lineNumberEnd = 0;
+                parser.resetStatus();
+            } catch (IOException e) {
+                log(LogLevel.ERROR, "Failed to reset reader");
+            }
         }
     }
 
