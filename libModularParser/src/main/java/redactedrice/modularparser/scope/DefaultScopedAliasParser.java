@@ -32,8 +32,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
     @Override
     public String modifyLine(String line) {
         String out = line;
-        for (Map.Entry<String, Object> e : scopeSupporter.getAllOwnedData(null, this)
-                .entrySet()) {
+        for (Map.Entry<String, Object> e : scopeSupporter.getAllOwnedData(null, this).entrySet()) {
             out = out.replaceAll("\\b" + Pattern.quote(e.getKey()) + "\\b",
                     Matcher.quoteReplacement((String) e.getValue()));
         }
@@ -76,7 +75,9 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
             val = val.substring(1, val.length() - 1);
         } else if (val.startsWith("\"") || val.endsWith("\"") || val.startsWith("'") ||
                 val.endsWith("'")) {
-            log(LogLevel.ERROR, "Invalid alias definition - name %s mismatched or only one quote: %s", key, val);
+            log(LogLevel.ERROR,
+                    "Invalid alias definition - name %s mismatched or only one quote: %s", key,
+                    val);
             return true;
         }
 

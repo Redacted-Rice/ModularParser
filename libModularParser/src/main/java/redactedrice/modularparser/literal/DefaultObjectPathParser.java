@@ -10,101 +10,101 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ReflectionUtils;
 
-public class DefaultObjectPathParser extends BaseModule
-	     implements ChainableLiteralParser {	
-	 protected static final Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
+public class DefaultObjectPathParser extends BaseModule implements ChainableLiteralParser {
+    protected static final Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
 
-     protected final String chainingCharacter;
-     protected final String argDelimiter;
-     
-	 protected LiteralSupporter literalSupporter;
-	
-	 public DefaultObjectPathParser(String name, String chainingCharacter, String argDelimiter, ModularParser parser) {
-	     super(name);
-	     this.chainingCharacter = chainingCharacter;
-	     this.argDelimiter = argDelimiter;
-	     
-        parser.addModule(new DefaultChainingChainableLiteralParser(name + "Chainer", 
-        		chainingCharacter, true, parser));
-	 }
-	
-	 @Override
-	 public void setModuleRefs() {
-	     literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
-	 }
-	
-	 protected Response<Object> handleWithArgs(Object chained, String literal) {
-		 if (chained == null) {
-			 // Not handled by this
-	         return Response.notHandled();
-		 }
-	     String trimmed = literal.trim();
-	
-	     Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
-	     if (!m.find()) {
-			 // Not handled by this
-	         return Response.notHandled();
-	     }
-	     
-	     String fieldName = m.group(1);
-	     String argsString = m.group(2);
-	     Object[] argsParsed = new Object[] {};
-	     if (!argsString.isBlank()) {
-		     String[] args = argsString.split(argDelimiter);
-		     
-		     // parse args
-		     argsParsed = new Object[args.length];
-		     for (int i = 0; i < args.length; i++) {
-		    	 Response<Object> evaluated = literalSupporter.evaluateLiteral(args[i]);
-		         if (evaluated.wasNotHandled()) {
-		        	 return Response.error("Failed to parsing arg " + i + " of args " + 
-	        			 	literal + ":" + evaluated.getError());
-		         } else if (evaluated.wasError()) {
-		        	 return Response.error("Error parsing arg " + i + " of args " + 
-	        			 	literal + ":" + evaluated.getError());
-		         }
-	    		 argsParsed[i] = evaluated.value();
-		     }
-	     }
-	     
-	     try {
-			return Response.is(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-				| SecurityException | NoSuchFieldException e) {
-			 // Not handled by this but still could be valid for something else
-	         return Response.notHandled();
-		}
-	 }
-	
-	 @Override
-	 public Response<Object> tryParseLiteral(String literal) {
-		 if (literal.contains(chainingCharacter)) {
-			 // If it has the chaining character, we should handle it
-			 Response<Object> ret = literalSupporter.evaluateLiteral(literal);
-			 // It should have been handled
-			 if (ret.wasNotHandled()) {
-				 return Response.error("Failed to parse literal " + literal);
-			 }
-			 return ret;
-		 }
-	     return Response.notHandled();
-	 }
-	
-	 @Override
-	 public Response<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
-		 if (chained == null || literal == null) {
-			 return Response.notHandled();
-		 }
-		 Response<Object> result = handleWithArgs(chained, literal);
-		 if (result.wasHandled()) {
-			 return result;
-		 }
-		 try {
-			return Response.is(ReflectionUtils.getVariable(chained, literal));
-		 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-				| SecurityException | NoSuchFieldException e) {
-			 // fall through to empty return
-		 }
-		 return Response.notHandled();
- }
+    protected final String chainingCharacter;
+    protected final String argDelimiter;
+
+    protected LiteralSupporter literalSupporter;
+
+    public DefaultObjectPathParser(String name, String chainingCharacter, String argDelimiter,
+            ModularParser parser) {
+        super(name);
+        this.chainingCharacter = chainingCharacter;
+        this.argDelimiter = argDelimiter;
+
+        parser.addModule(new DefaultChainingChainableLiteralParser(name + "Chainer",
+                chainingCharacter, true, parser));
+    }
+
+    @Override
+    public void setModuleRefs() {
+        literalSupporter = parser.getSupporterOfType(LiteralSupporter.class);
+    }
+
+    protected Response<Object> handleWithArgs(Object chained, String literal) {
+        if (chained == null) {
+            // Not handled by this
+            return Response.notHandled();
+        }
+        String trimmed = literal.trim();
+
+        Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
+        if (!m.find()) {
+            // Not handled by this
+            return Response.notHandled();
+        }
+
+        String fieldName = m.group(1);
+        String argsString = m.group(2);
+        Object[] argsParsed = new Object[] {};
+        if (!argsString.isBlank()) {
+            String[] args = argsString.split(argDelimiter);
+
+            // parse args
+            argsParsed = new Object[args.length];
+            for (int i = 0; i < args.length; i++) {
+                Response<Object> evaluated = literalSupporter.evaluateLiteral(args[i]);
+                if (evaluated.wasNotHandled()) {
+                    return Response.error("Failed to parsing arg " + i + " of args " + literal + ":"
+                            + evaluated.getError());
+                } else if (evaluated.wasError()) {
+                    return Response.error("Error parsing arg " + i + " of args " + literal + ":"
+                            + evaluated.getError());
+                }
+                argsParsed[i] = evaluated.value();
+            }
+        }
+
+        try {
+            return Response.is(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+            // Not handled by this but still could be valid for something else
+            return Response.notHandled();
+        }
+    }
+
+    @Override
+    public Response<Object> tryParseLiteral(String literal) {
+        if (literal.contains(chainingCharacter)) {
+            // If it has the chaining character, we should handle it
+            Response<Object> ret = literalSupporter.evaluateLiteral(literal);
+            // It should have been handled
+            if (ret.wasNotHandled()) {
+                return Response.error("Failed to parse literal " + literal);
+            }
+            return ret;
+        }
+        return Response.notHandled();
+    }
+
+    @Override
+    public Response<Object> tryEvaluateChainedLiteral(Object chained, String literal) {
+        if (chained == null || literal == null) {
+            return Response.notHandled();
+        }
+        Response<Object> result = handleWithArgs(chained, literal);
+        if (result.wasHandled()) {
+            return result;
+        }
+        try {
+            return Response.is(ReflectionUtils.getVariable(chained, literal));
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+            // fall through to empty return
+        }
+        return Response.notHandled();
+    }
 }

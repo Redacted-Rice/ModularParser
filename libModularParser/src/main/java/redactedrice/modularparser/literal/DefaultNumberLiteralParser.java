@@ -43,8 +43,8 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
                     if (asDouble == asInt) {
                         return Response.is(asInt);
                     } else if (type == PrimitiveType.INT) {
-                        return Response.error("value \"" + number + 
-                        		"\" was specified as an int but failed to be parsed as an int");
+                        return Response.error("value \"" + number
+                                + "\" was specified as an int but failed to be parsed as an int");
                     }
                 }
                 if (type == PrimitiveType.LONG || type == PrimitiveType.UNSPECIFIED) {
@@ -52,8 +52,8 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
                     if (asDouble == asLong) {
                         return Response.is(asLong);
                     } else if (type == PrimitiveType.LONG) {
-                        return Response.error("value \"" + number + 
-                        		"\" was specified as an long but failed to be parsed as an long");
+                        return Response.error("value \"" + number
+                                + "\" was specified as an long but failed to be parsed as an long");
                     }
                 }
                 // Otherwise its a DOUBLE type or its unspecified but not a LONG or INT so it
@@ -61,7 +61,7 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
                 return Response.is(asDouble);
             }
         } catch (NumberFormatException e) {
-        	// Wasn't a number, let other parsers try
+            // Wasn't a number, let other parsers try
             return Response.notHandled();
         }
         return parseAnyNonE(number, type);
@@ -73,42 +73,42 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
             try {
                 return Response.is(Integer.parseInt(number));
             } catch (NumberFormatException e) {
-            	break;
+                break;
             }
         case LONG:
             try {
                 return Response.is(Long.parseLong(number));
             } catch (NumberFormatException e) {
-            	break;
+                break;
             }
         case DOUBLE:
             try {
                 return Response.is(Double.parseDouble(number));
             } catch (NumberFormatException e) {
-            	break;
+                break;
             }
         default:
         case UNSPECIFIED:
             try {
                 return Response.is(Integer.parseInt(number));
             } catch (NumberFormatException e) {
-            	// try next type
+                // try next type
             }
 
             try {
                 return Response.is(Long.parseLong(number));
             } catch (NumberFormatException e) {
-            	// try next type
+                // try next type
             }
 
             try {
                 return Response.is(Double.parseDouble(number));
             } catch (NumberFormatException e) {
-            	// nothing else to try
-            	break;
+                // nothing else to try
+                break;
             }
         }
-    	// Wasn't a number, let other parsers try
+        // Wasn't a number, let other parsers try
         return Response.notHandled();
     }
 }

@@ -77,7 +77,7 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod2);
         testee.handleModule(mod3);
         testee.handleModule(mod4);
-        
+
         assertTrue(testee.evaluateLiteral(null).wasError());
         assertTrue(testee.evaluateLiteral("   ").wasError());
 
@@ -107,7 +107,7 @@ public class DefaultLiteralSupporterTests {
         testee.handleModule(mod2);
         testee.handleModule(mod3);
         testee.handleModule(mod4);
-        
+
         assertTrue(testee.evaluateChainedLiteral("anything", null).wasError());
         assertTrue(testee.evaluateChainedLiteral("anything", "   ").wasError());
 

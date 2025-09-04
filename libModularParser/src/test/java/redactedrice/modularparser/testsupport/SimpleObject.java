@@ -24,28 +24,28 @@ public class SimpleObject {
         }
         return ret;
     }
-    
+
     public SimpleObject getSo() {
-    	return so;
+        return so;
     }
 
     public int getInt() {
-    	return intField;
+        return intField;
     }
 
     public boolean getBool() {
-    	return boolField;
+        return boolField;
     }
 
     public void setInt(int inInt) {
-    	intField = inInt;
+        intField = inInt;
     }
 
-	public int[] getIntArray() {
-		return intArray;
-	}
+    public int[] getIntArray() {
+        return intArray;
+    }
 
-	public void setIntArray(int... intArray) {
-		this.intArray = intArray;
-	}
+    public void setIntArray(int... intArray) {
+        this.intArray = intArray;
+    }
 }

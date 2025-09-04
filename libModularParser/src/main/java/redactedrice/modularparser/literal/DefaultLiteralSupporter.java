@@ -28,10 +28,10 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
 
     @Override
     public Response<Object> evaluateLiteral(String literal) {
-    	if (literal == null || literal.isBlank()) {
-    		return Response.error("Null or empty literal passed");
-    	}
-    	Response<Object> ret;
+        if (literal == null || literal.isBlank()) {
+            return Response.error("Null or empty literal passed");
+        }
+        Response<Object> ret;
         for (LiteralParser lp : handlers) {
             ret = lp.tryParseLiteral(literal);
             if (ret.wasHandled()) {
@@ -43,10 +43,10 @@ public class DefaultLiteralSupporter extends BaseModule implements LiteralSuppor
 
     @Override
     public Response<Object> evaluateChainedLiteral(Object chained, String literal) {
-    	if (literal == null || literal.isBlank()) {
-    		return Response.error("Null or empty literal passed");
-    	}
-    	Response<Object> ret;
+        if (literal == null || literal.isBlank()) {
+            return Response.error("Null or empty literal passed");
+        }
+        Response<Object> ret;
         for (ChainableLiteralParser clp : chainedHandlers) {
             ret = clp.tryEvaluateChainedLiteral(chained, literal);
             if (ret.wasHandled()) {
