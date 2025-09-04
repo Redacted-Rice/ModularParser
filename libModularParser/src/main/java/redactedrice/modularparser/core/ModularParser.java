@@ -44,6 +44,30 @@ public class ModularParser {
 
         module.setParser(this);
 
+        if (!handleSpecialCaseAdds(module)) {
+            return false;
+        }
+
+        // If its a supporter, keep track of it and pass it any existing modules
+        if (module instanceof Supporter supporter) {
+            String supporterName = getSupporterInterfaceName(supporter);
+            if (supporters.putIfAbsent(supporterName, supporter) != null) {
+                logOrStdErr("Attempted to add a second supporter for: "
+                        + module.getClass().getCanonicalName());
+                return false;
+            }
+            for (Module existing : modulesOrdered) {
+                supporter.handleModule(existing);
+            }
+        }
+
+        // Add this module finally
+        index.put(module.getName(), module);
+        modulesOrdered.add(module);
+        return true;
+    }
+
+    protected boolean handleSpecialCaseAdds(Module module) {
         // See if its the log supporter
         if (module instanceof LogSupporter supporter) {
             if (logger != null) {
@@ -74,23 +98,6 @@ public class ModularParser {
             }
             lineParser = supporter;
         }
-
-        // If its a supporter, keep track of it and pass it any existing modules
-        if (module instanceof Supporter supporter) {
-            String supporterName = getSupporterInterfaceName(supporter);
-            if (supporters.putIfAbsent(supporterName, supporter) != null) {
-                logOrStdErr("Attempted to add a second supporter for: "
-                        + module.getClass().getCanonicalName());
-                return false;
-            }
-            for (Module existing : modulesOrdered) {
-                supporter.handleModule(existing);
-            }
-        }
-
-        // Add this module finally
-        index.put(module.getName(), module);
-        modulesOrdered.add(module);
         return true;
     }
 

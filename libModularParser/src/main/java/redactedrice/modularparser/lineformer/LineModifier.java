@@ -23,11 +23,10 @@ public interface LineModifier extends Module {
             if (idx + startLen <= len && line.substring(idx, idx + startLen).equals(startToken)) {
                 balance++;
                 idx += startLen;
-                continue;
-            }
+            } else if (idx + stopLen <= len &&
+                    line.substring(idx, idx + stopLen).equals(endToken)) {
+                // Check for stopToken at current position
 
-            // Check for stopToken at current position
-            if (idx + stopLen <= len && line.substring(idx, idx + stopLen).equals(endToken)) {
                 // Out-of-order stop if no matching start
                 if (balance == 0) {
                     return "Start tokens " + startToken + " and end tokens " + endToken
@@ -35,11 +34,10 @@ public interface LineModifier extends Module {
                 }
                 balance--;
                 idx += stopLen;
-                continue;
+            } else {
+                // Advance by one character otherwise
+                idx++;
             }
-
-            // Advance by one character otherwise
-            idx++;
         }
 
         // If incomplete pairs are disallowed, require all starts to be closed

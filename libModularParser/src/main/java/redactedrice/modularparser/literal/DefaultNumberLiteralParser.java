@@ -37,24 +37,10 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
             if (number.contains("e") || number.contains("E")) {
                 // First parse it as a double to handle any E values
                 double asDouble = Double.parseDouble(number);
-                // Then check if its an int or a long and return those first if it is
-                if (type == PrimitiveType.INT || type == PrimitiveType.UNSPECIFIED) {
-                    int asInt = (int) asDouble;
-                    if (asDouble == asInt) {
-                        return Response.is(asInt);
-                    } else if (type == PrimitiveType.INT) {
-                        return Response.error("value \"" + number
-                                + "\" was specified as an int but failed to be parsed as an int");
-                    }
-                }
-                if (type == PrimitiveType.LONG || type == PrimitiveType.UNSPECIFIED) {
-                    long asLong = (long) asDouble;
-                    if (asDouble == asLong) {
-                        return Response.is(asLong);
-                    } else if (type == PrimitiveType.LONG) {
-                        return Response.error("value \"" + number
-                                + "\" was specified as an long but failed to be parsed as an long");
-                    }
+
+                Response<Object> asIntOrLong = tryConvertToIntOrLong(asDouble, type, number);
+                if (asIntOrLong.wasHandled()) {
+                    return asIntOrLong;
                 }
                 // Otherwise its a DOUBLE type or its unspecified but not a LONG or INT so it
                 // must be a double
@@ -65,6 +51,30 @@ public class DefaultNumberLiteralParser extends BaseModule implements LiteralPar
             return Response.notHandled();
         }
         return parseAnyNonE(number, type);
+    }
+
+    protected Response<Object> tryConvertToIntOrLong(double asDouble, PrimitiveType type,
+            String numberStr) {
+        // Then check if its an int or a long and return those first if it is
+        if (type == PrimitiveType.INT || type == PrimitiveType.UNSPECIFIED) {
+            int asInt = (int) asDouble;
+            if (asDouble == asInt) {
+                return Response.is(asInt);
+            } else if (type == PrimitiveType.INT) {
+                return Response.error("value \"" + numberStr
+                        + "\" was specified as an int but failed to be parsed as an int");
+            }
+        }
+        if (type == PrimitiveType.LONG || type == PrimitiveType.UNSPECIFIED) {
+            long asLong = (long) asDouble;
+            if (asDouble == asLong) {
+                return Response.is(asLong);
+            } else if (type == PrimitiveType.LONG) {
+                return Response.error("value \"" + numberStr
+                        + "\" was specified as an long but failed to be parsed as an long");
+            }
+        }
+        return Response.notHandled();
     }
 
     protected Response<Object> parseAnyNonE(String number, PrimitiveType type) {
