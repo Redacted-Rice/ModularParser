@@ -8,7 +8,7 @@ import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
 public class ExtendableObjectParser extends BaseArgumentChainableLiteral {
-    private final static String[] argsOrdered = new String[] {"object"};
+    private static final String[] argsOrdered = new String[] {"object"};
 
     public ExtendableObjectParser() {
         super(ExtendableObjectParser.class.getSimpleName(), "ExtendableObject", argsOrdered[0],

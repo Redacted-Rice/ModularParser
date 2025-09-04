@@ -20,11 +20,10 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
 class BaseScopedParserTests {
-    final String NAME = "ScopedParser";
-    final String SCOPE = "global";
-    final String KEYWORD = "var";
-    final String VAR_NAME = "bar";
-    final String SCOPE_NAME = "ScopeSupporter";
+    static final String NAME = "ScopedParser";
+    static final String KEYWORD = "var";
+    static final String VAR_NAME = "bar";
+    static final String SCOPE_NAME = "ScopeSupporter";
 
     private BaseScopedKeywordParser testee;
     private ModularParser parser;
@@ -83,14 +82,14 @@ class BaseScopedParserTests {
     @Test
     void ensureWordAvailableOrOwnedTest() {
         when(rwSupporter.getReservedWordOwner(any())).thenReturn(null);
-        assertTrue(testee.ensureWordAvailableOrOwned(SCOPE, VAR_NAME));
+        assertTrue(testee.ensureWordAvailableOrOwned(VAR_NAME));
 
         when(rwSupporter.getReservedWordOwner(any())).thenReturn("DifferentOwner");
         when(scopeSupporter.getName()).thenReturn(SCOPE_NAME);
-        assertFalse(testee.ensureWordAvailableOrOwned(SCOPE, VAR_NAME));
+        assertFalse(testee.ensureWordAvailableOrOwned(VAR_NAME));
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any());
 
         when(rwSupporter.getReservedWordOwner(any())).thenReturn(SCOPE_NAME);
-        assertTrue(testee.ensureWordAvailableOrOwned(SCOPE, VAR_NAME));
+        assertTrue(testee.ensureWordAvailableOrOwned(VAR_NAME));
     }
 }

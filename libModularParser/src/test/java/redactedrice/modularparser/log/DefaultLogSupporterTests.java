@@ -14,10 +14,10 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 
-public class DefaultLogSupporterTests {
+class DefaultLogSupporterTests {
 
-    private static String MOD1_NAME = "LogHandler1";
-    private static String MOD2_NAME = "LogHandler2";
+    static final String MOD1_NAME = "LogHandler1";
+    static final String MOD2_NAME = "LogHandler2";
 
     private ModularParser parser;
     private DefaultLogSupporter testee;
@@ -59,24 +59,24 @@ public class DefaultLogSupporterTests {
         testee.handleModule(mod1);
         testee.handleModule(mod2);
 
-        final String LOG_MESSAGE = "This is a test log";
-        testee.log(LogLevel.INFO, LOG_MESSAGE);
-        verify(mod1).add(LogLevel.INFO, LOG_MESSAGE);
-        verify(mod2).add(LogLevel.INFO, LOG_MESSAGE);
+        final String logMessage = "This is a test log";
+        testee.log(LogLevel.INFO, logMessage);
+        verify(mod1).add(LogLevel.INFO, logMessage);
+        verify(mod2).add(LogLevel.INFO, logMessage);
     }
 
     @Test
     void appendStackTraceTest() {
-        final String LOG_MESSAGE = "This is a test log";
-        final String ERROR_MSG = "Test error";
-        final Throwable ERROR = new StackOverflowError(ERROR_MSG);
+        final String logMessage = "This is a test log";
+        final String errorMsg = "Test error";
+        final Throwable error = new StackOverflowError(errorMsg);
 
-        String result = testee.appendStackTrace(LOG_MESSAGE, ERROR);
+        String result = testee.appendStackTrace(logMessage, error);
 
-        assertTrue(result.startsWith(LOG_MESSAGE));
+        assertTrue(result.startsWith(logMessage));
         assertTrue(result.contains("Stack Trace:"));
         assertTrue(result.contains("StackOverflowError"));
-        assertTrue(result.contains(ERROR_MSG));
+        assertTrue(result.contains(errorMsg));
         assertTrue(result.contains(
                 "at redactedrice.modularparser.log.DefaultLogSupporterTests.appendStackTraceTest"));
     }

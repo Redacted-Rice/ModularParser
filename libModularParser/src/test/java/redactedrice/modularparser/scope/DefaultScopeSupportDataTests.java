@@ -21,18 +21,18 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 
-public class DefaultScopeSupportDataTests {
+class DefaultScopeSupportDataTests {
 
-    private static String MOD1_NAME = "ScopedParser1";
-    private static String MOD2_NAME = "ScopedParser2";
-    private static String SCOPE1 = "global";
-    private static String SCOPE2 = "file";
-    private static String VAR1 = "x";
-    private static String VAR2 = "y";
-    private static String UNUSED_VAR = "unused";
-    private static OwnedObject OBJ1 = new OwnedObject(MOD1_NAME, 1);
-    private static OwnedObject OBJ2 = new OwnedObject(MOD2_NAME, 2);
-    private static OwnedObject OBJ3 = new OwnedObject(MOD2_NAME, 3);
+    static final String MOD1_NAME = "ScopedParser1";
+    static final String MOD2_NAME = "ScopedParser2";
+    static final String SCOPE1 = "global";
+    static final String SCOPE2 = "file";
+    static final String VAR1 = "x";
+    static final String VAR2 = "y";
+    static final String UNUSED_VAR = "unused";
+    static final OwnedObject OBJ1 = new OwnedObject(MOD1_NAME, 1);
+    static final OwnedObject OBJ2 = new OwnedObject(MOD2_NAME, 2);
+    static final OwnedObject OBJ3 = new OwnedObject(MOD2_NAME, 3);
 
     private ModularParser parser;
     private DefaultScopeSupporter testee;

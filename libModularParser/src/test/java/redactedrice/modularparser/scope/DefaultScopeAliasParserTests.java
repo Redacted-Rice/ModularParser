@@ -26,21 +26,21 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.reserved.ReservedWordSupporter;
 
-public class DefaultScopeAliasParserTests {
+class DefaultScopeAliasParserTests {
 
     private ModularParser parser;
     private DefaultScopedAliasParser testee;
     private ScopeSupporter scopeSupporter;
     private ReservedWordSupporter rwSupporter;
 
-    final String TESTEE_NAME = DefaultScopedAliasParser.class.getSimpleName();
-    final String SCOPE = "global";
-    final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
-    private static String ALIAS_1 = "print";
-    private static String ALIAS_2 = "lvar";
-    private static String ALIAS_3 = "rvar";
-    private static String ALIAS_1_VAL = "println";
-    private static String ALIAS_2_VAL = "local var";
+    static final String TESTEE_NAME = DefaultScopedAliasParser.class.getSimpleName();
+    static final String SCOPE = "global";
+    static final String SCOPE_SUPPORTER_NAME = "TestScopeSupporter";
+    static final String ALIAS_1 = "print";
+    static final String ALIAS_2 = "lvar";
+    static final String ALIAS_3 = "rvar";
+    static final String ALIAS_1_VAL = "println";
+    static final String ALIAS_2_VAL = "local var";
 
     @BeforeEach
     void setup() {
@@ -93,10 +93,10 @@ public class DefaultScopeAliasParserTests {
         assertTrue(testee.tryParseScoped(SCOPE, "alias 6bad = println", SCOPE));
         verify(scopeSupporter, never()).setData(any(), any(), any(), any());
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(false);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(false);
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
 
-        when(testee.ensureWordAvailableOrOwned(any(), any())).thenReturn(true);
+        when(testee.ensureWordAvailableOrOwned(any())).thenReturn(true);
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is("anything"));
         assertTrue(testee.tryParseScoped(SCOPE, "alias print = println", SCOPE));
         verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any());

@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class DefaultSingleLineCommentLineModifierTests {
+class DefaultSingleLineCommentLineModifierTests {
 
-    final String NAME = "SingleLineCommentLineModifierTest";
-    final String TOKEN = "//";
+    static final String NAME = "SingleLineCommentLineModifierTest";
+    static final String TOKEN = "//";
 
     @Test
     void constructorTest() {

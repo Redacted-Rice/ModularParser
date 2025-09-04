@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,17 +21,17 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 
 class ModularParserTests {
 
-    final String LOGGER_NAME = "TestLogger";
-    final String PLAIN_MODULE_NAME = "TestModule3";
-    final String PLAIN_MODULE_2_NAME = "TestModule2";
-    final String PLAIN_SUPPORTER_NAME = "TestSupporter";
-    final String PLAIN_SUPPORTER_2_NAME = "TestSupporter2";
-    final String LFS_NAME = "TestLineFormer";
-    final String LPS_NAME = "TestLineParser";
+    static final String LOGGER_NAME = "TestLogger";
+    static final String PLAIN_MODULE_NAME = "TestModule3";
+    static final String PLAIN_MODULE_2_NAME = "TestModule2";
+    static final String PLAIN_SUPPORTER_NAME = "TestSupporter";
+    static final String PLAIN_SUPPORTER_2_NAME = "TestSupporter2";
+    static final String LFS_NAME = "TestLineFormer";
+    static final String LPS_NAME = "TestLineParser";
 
-    private interface NonCriticalSupporter extends Supporter {};
+    private interface NonCriticalSupporter extends Supporter {}
 
-    private interface NonCriticalSupporterExt extends NonCriticalSupporter {};
+    private interface NonCriticalSupporterExt extends NonCriticalSupporter {}
 
     private LogSupporter logger;
     private ModularParser testee;
@@ -71,7 +70,7 @@ class ModularParserTests {
         Module module = mock(Module.class);
         when(module.getName()).thenReturn(PLAIN_MODULE_NAME);
         assertTrue(testee.addModule(module));
-        verify(logger).handleModule(eq(module));
+        verify(logger).handleModule(module);
 
         assertEquals(2, testee.index.size());
         assertEquals(2, testee.modulesOrdered.size());
@@ -91,7 +90,7 @@ class ModularParserTests {
         NonCriticalSupporter supporter = mock(NonCriticalSupporter.class);
         when(supporter.getName()).thenReturn(PLAIN_SUPPORTER_NAME);
         assertTrue(testee.addModule(supporter));
-        verify(logger).handleModule(eq(supporter));
+        verify(logger).handleModule(supporter);
 
         assertEquals(2, testee.index.size());
         assertEquals(2, testee.modulesOrdered.size());
@@ -112,15 +111,15 @@ class ModularParserTests {
         LineParserSupporter lps = mock(LineParserSupporter.class);
         when(lps.getName()).thenReturn(LPS_NAME);
         assertTrue(testee.addModule(lps));
-        verify(logger).handleModule(eq(lps));
-        verify(lps).handleModule(eq(logger));
+        verify(logger).handleModule(lps);
+        verify(lps).handleModule(logger);
 
         LineFormerSupporter lfs = mock(LineFormerSupporter.class);
         when(lfs.getName()).thenReturn(LFS_NAME);
         assertTrue(testee.addModule(lfs));
-        verify(logger).handleModule(eq(lfs));
-        verify(lps).handleModule(eq(lfs));
-        verify(lfs).handleModule(eq(logger));
+        verify(logger).handleModule(lfs);
+        verify(lps).handleModule(lfs);
+        verify(lfs).handleModule(logger);
 
         assertEquals(3, testee.index.size());
         assertEquals(3, testee.modulesOrdered.size());
@@ -263,7 +262,7 @@ class ModularParserTests {
         assertEquals(module2, mod);
 
         List<Module> mods = testee.getModulesOfType(Module.class);
-        assertEquals(mods.size(), 3);
+        assertEquals(3, mods.size());
 
         List<TestModule> testMods = testee.getModulesOfType(TestModule.class);
         assertEquals(1, testMods.size());
@@ -278,8 +277,9 @@ class ModularParserTests {
         when(supporter2.getName()).thenReturn(PLAIN_SUPPORTER_2_NAME);
 
         testee.addModule(supporter1);
-        testee.addModule(supporter2);
+        assertNull(testee.getSupporterOfType(NonCriticalSupporterExt.class));
 
+        testee.addModule(supporter2);
         assertEquals(supporter1, testee.getSupporterOfType(NonCriticalSupporter.class));
         assertEquals(supporter2, testee.getSupporterOfType(NonCriticalSupporterExt.class));
     }

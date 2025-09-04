@@ -32,7 +32,7 @@ class BaseArgumentChainableLiteralTest {
     private LiteralSupporter literalSupporter;
     private BaseArgumentChainableLiteral testee;
 
-    final String CHAINED_ARG = "so";
+    static final String CHAINED_ARG = "so";
 
     @BeforeEach
     void setup() {
@@ -93,32 +93,32 @@ class BaseArgumentChainableLiteralTest {
 
     @Test
     void tryParseLiteralTest() {
-        final Response<Object> EXPECTED = Response.is("Object");
-        doReturn(EXPECTED).when(testee).tryEvaluateObject(any());
+        final Response<Object> expected = Response.is("Object");
+        doReturn(expected).when(testee).tryEvaluateObject(any());
 
         doReturn(false).when(testee).handleObjectLiteral(any(), any());
         assertEquals(Response.notHandled(), testee.tryParseLiteral("anything"));
         verify(testee, never()).tryEvaluateObject(any());
 
         doReturn(true).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(EXPECTED, testee.tryParseLiteral("anything"));
+        assertEquals(expected, testee.tryParseLiteral("anything"));
         verify(testee).tryEvaluateObject(any());
     }
 
     @Test
     void tryEvaluateChainedLiteral() {
-        final Object BASE_OBJ = "BaseObj";
-        final Response<Object> EXPECTED = Response.is("Object");
-        doReturn(EXPECTED).when(testee).tryEvaluateObject(any());
+        final Object baseObj = "BaseObj";
+        final Response<Object> expected = Response.is("Object");
+        doReturn(expected).when(testee).tryEvaluateObject(any());
 
         doReturn(false).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(Response.notHandled(), testee.tryEvaluateChainedLiteral(BASE_OBJ, "anything"));
+        assertEquals(Response.notHandled(), testee.tryEvaluateChainedLiteral(baseObj, "anything"));
         verify(testee, never()).tryEvaluateObject(any());
 
         doReturn(true).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(EXPECTED, testee.tryEvaluateChainedLiteral(BASE_OBJ, "anything"));
+        assertEquals(expected, testee.tryEvaluateChainedLiteral(baseObj, "anything"));
         verify(testee).tryEvaluateObject(
-                argThat(map -> map.get(CHAINED_ARG).equals(BASE_OBJ) && map.size() == 1));
+                argThat(map -> map.get(CHAINED_ARG).equals(baseObj) && map.size() == 1));
     }
 
     @Test

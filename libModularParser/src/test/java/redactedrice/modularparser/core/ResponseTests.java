@@ -73,6 +73,8 @@ class ResponseTests {
         assertEquals("", testee.getError());
     }
 
+    // Suppress unlikely warnings. That is intentionally part of what is being tested
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     void equalsHashCodeTest() {
         final String object = "test obj";
@@ -91,38 +93,40 @@ class ResponseTests {
         Response<Object> errorObj = Response.error(errorMsg);
         Response<String> errorStr2 = Response.error("a different error");
 
-        assertTrue(objectStr.equals(objectStr));
+        // We are specifically testing the equals fn here so it makes sense to
+        // call it instead of true as one side is the "expected" answer persay
+        assertTrue(objectStr.equals(objectStr));// NOSONAR
         assertEquals(objectStr.hashCode(), objectStr.hashCode());
-        assertTrue(objectStr.equals(objectObj));
+        assertTrue(objectStr.equals(objectObj));// NOSONAR
         assertEquals(objectStr.hashCode(), objectObj.hashCode());
-        assertTrue(objectObj.equals(objectStr));
+        assertTrue(objectObj.equals(objectStr));// NOSONAR
         assertEquals(objectObj.hashCode(), objectStr.hashCode());
-        assertTrue(objectStr.equals(objectSameStr));
+        assertTrue(objectStr.equals(objectSameStr));// NOSONAR
         assertEquals(objectStr.hashCode(), objectSameStr.hashCode());
-        assertTrue(objectSameStr.equals(objectObj));
+        assertTrue(objectSameStr.equals(objectObj));// NOSONAR
         assertEquals(objectSameStr.hashCode(), objectObj.hashCode());
-        assertTrue(notHandledStr.equals(notHandledObj));
+        assertTrue(notHandledStr.equals(notHandledObj));// NOSONAR
         assertEquals(notHandledStr.hashCode(), notHandledObj.hashCode());
-        assertTrue(errorStr.equals(errorObj));
+        assertTrue(errorStr.equals(errorObj));// NOSONAR
         assertEquals(errorStr.hashCode(), errorObj.hashCode());
 
-        assertFalse(objectStr.equals(null));
-        assertFalse(objectStr.equals("different type"));
-        assertFalse(objectObj.equals(objectDiffStr));
+        assertFalse(objectStr.equals(null));// NOSONAR
+        assertFalse(objectStr.equals("different type"));// NOSONAR
+        assertFalse(objectObj.equals(objectDiffStr));// NOSONAR
         assertNotEquals(objectObj.hashCode(), objectDiffStr.hashCode());
-        assertFalse(errorStr.equals(errorStr2));
+        assertFalse(errorStr.equals(errorStr2));// NOSONAR
         assertNotEquals(errorStr.hashCode(), errorStr2.hashCode());
-        assertFalse(objectStr.equals(notHandledStr));
+        assertFalse(objectStr.equals(notHandledStr));// NOSONAR
         assertNotEquals(objectStr.hashCode(), notHandledStr.hashCode());
-        assertFalse(objectStr.equals(errorStr));
+        assertFalse(objectStr.equals(errorStr));// NOSONAR
         assertNotEquals(objectStr.hashCode(), errorStr.hashCode());
-        assertFalse(notHandledStr.equals(objectStr));
+        assertFalse(notHandledStr.equals(objectStr));// NOSONAR
         assertNotEquals(notHandledStr.hashCode(), objectStr.hashCode());
-        assertFalse(notHandledStr.equals(errorStr));
+        assertFalse(notHandledStr.equals(errorStr));// NOSONAR
         assertNotEquals(notHandledStr.hashCode(), errorStr.hashCode());
-        assertFalse(errorStr.equals(objectStr));
+        assertFalse(errorStr.equals(objectStr));// NOSONAR
         assertNotEquals(errorStr.hashCode(), objectStr.hashCode());
-        assertFalse(errorStr.equals(notHandledStr));
+        assertFalse(errorStr.equals(notHandledStr));// NOSONAR
         assertNotEquals(errorStr.hashCode(), notHandledStr.hashCode());
     }
 

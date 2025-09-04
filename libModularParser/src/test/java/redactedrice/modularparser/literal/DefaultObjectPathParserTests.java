@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.doReturn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,9 @@ class DefaultObjectPathParserTest {
     private LiteralSupporter literalSupporter;
     private DefaultObjectPathParser testee;
 
-    final String NAME = "DefaultObjectPathParser";
-    final String CHAIN_STR = ".";
-    final String ARG_SEPERATOR = ",";
+    static final String NAME = "DefaultObjectPathParser";
+    static final String CHAIN_STR = ".";
+    static final String ARG_SEPERATOR = ",";
 
     @BeforeEach
     void setup() {

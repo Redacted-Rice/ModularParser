@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 
-public class ReservedWordSupporterTests {
+class ReservedWordSupporterTests {
 
     private class ReservedWordSupporterTester implements ReservedWordSupporter {
         @Override
-        public void handleModule(Module module) {}
+        public void handleModule(Module module) { /* not needed for testing */}
 
         @Override
         public String getName() {
@@ -26,10 +26,10 @@ public class ReservedWordSupporterTests {
         }
 
         @Override
-        public void setParser(ModularParser parser) {}
+        public void setParser(ModularParser parser) { /* not needed for testing */}
 
         @Override
-        public void setModuleRefs() {}
+        public void setModuleRefs() { /* not needed for testing */}
 
         @Override
         public boolean checkModulesCompatibility() {

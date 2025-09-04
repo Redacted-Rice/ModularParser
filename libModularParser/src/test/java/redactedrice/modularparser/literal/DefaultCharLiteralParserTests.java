@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.Response;
 
-public class DefaultCharLiteralParserTests {
+class DefaultCharLiteralParserTests {
 
     @Test
     void constructorTest() {

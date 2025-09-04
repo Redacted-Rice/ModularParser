@@ -16,13 +16,13 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 import redactedrice.modularparser.core.Response;
 
-public class ScopeSupporterTests {
+class ScopeSupporterTests {
 
-    private static String NAME = "ScopeSupporter";
+    static final String NAME = "ScopeSupporter";
 
     private class ScopeSupporterTester implements ScopeSupporter {
         @Override
-        public void handleModule(Module module) {}
+        public void handleModule(Module module) { /* not needed for testing */}
 
         @Override
         public String getName() {
@@ -30,10 +30,10 @@ public class ScopeSupporterTests {
         }
 
         @Override
-        public void setParser(ModularParser parser) {}
+        public void setParser(ModularParser parser) { /* not needed for testing */}
 
         @Override
-        public void setModuleRefs() {}
+        public void setModuleRefs() { /* not needed for testing */}
 
         @Override
         public boolean checkModulesCompatibility() {

@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultGroupingLineModifierTests {
+class DefaultGroupingLineModifierTests {
 
-    final String NAME = "GroupingLineModifierTest";
-    final String START_TOKEN = "(";
-    final String END_TOKEN = ")";
+    static final String NAME = "GroupingLineModifierTest";
+    static final String START_TOKEN = "(";
+    static final String END_TOKEN = ")";
 
     @Test
     void constructorTest() {

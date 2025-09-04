@@ -13,11 +13,11 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 
-public class DefaultMultiLineCommentLineModifierTests {
+class DefaultMultiLineCommentLineModifierTests {
 
-    final String NAME = "SingleLineCommentLineModifierTest";
-    final String START_TOKEN = "/*";
-    final String END_TOKEN = "*/";
+    static final String NAME = "SingleLineCommentLineModifierTest";
+    static final String START_TOKEN = "/*";
+    static final String END_TOKEN = "*/";
 
     @Test
     void constructorTest() {

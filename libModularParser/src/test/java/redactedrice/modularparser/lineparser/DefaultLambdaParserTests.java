@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 
-public class DefaultLambdaParserTests {
+class DefaultLambdaParserTests {
 
-    final String NAME = "LambdaParserTest";
-    final String KEYWORD = "print";
+    static final String NAME = "LambdaParserTest";
+    static final String KEYWORD = "print";
 
     private ModularParser parser;
     private DefaultLambdaParserFn fn;

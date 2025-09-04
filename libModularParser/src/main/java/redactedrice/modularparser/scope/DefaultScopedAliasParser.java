@@ -57,7 +57,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
         }
 
         // Check for collisions with reserved words outside scope supporter
-        if (!ensureWordAvailableOrOwned(scope, key)) {
+        if (!ensureWordAvailableOrOwned(key)) {
             return true;
         }
 

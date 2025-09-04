@@ -21,19 +21,17 @@ public abstract class BaseScopedKeywordParser extends BaseKeywordReserver implem
     }
 
     public static boolean isValidName(String name) {
-        return name != null && name.matches("^[a-zA-Z_][a-zA-Z0-9_]*$");
+        return name != null && name.matches("^[a-zA-Z_]\\w*$");
     }
 
-    public boolean ensureWordAvailableOrOwned(String scope, String name) {
+    public boolean ensureWordAvailableOrOwned(String name) {
         // Check for collisions with reserved words. We get all since we are reserving
         // them exclusively we can't share them
         String reservedOwner = reservedWordSupporter.getReservedWordOwner(name);
-        if (reservedOwner != null) {
-            if (!reservedOwner.equals(scopeSupporter.getName())) {
-                log(LogLevel.ERROR, "Name '%s' is reserved by '%s' and cannot be shared!", name,
-                        reservedOwner);
-                return false;
-            }
+        if (reservedOwner != null && !reservedOwner.equals(scopeSupporter.getName())) {
+            log(LogLevel.ERROR, "Name '%s' is reserved by '%s' and cannot be shared!", name,
+                    reservedOwner);
+            return false;
         }
         return true;
     }

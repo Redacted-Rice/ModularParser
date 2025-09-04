@@ -15,7 +15,7 @@ public class DefaultCharLiteralParser extends BaseModule implements LiteralParse
 
         // Double-quoted string
         if (trimmed.length() >= 2 && trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-            String body = trimmed.substring(1, trimmed.length() - 1).replaceAll("\\\"", "\"");
+            String body = trimmed.substring(1, trimmed.length() - 1).replace("\\\"", "\"");
             return Response.is(body);
         }
 

@@ -21,13 +21,13 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Module;
 
-public class DefaultScopeSupporterTests {
+class DefaultScopeSupporterTests {
 
-    private static String NAME = DefaultScopeSupporter.class.getSimpleName();
-    private static String MOD1_NAME = "ScopedParser1";
-    private static String MOD2_NAME = "ScopedParser2";
-    private static String SCOPE1 = "global";
-    private static String SCOPE2 = "file";
+    static final String NAME = DefaultScopeSupporter.class.getSimpleName();
+    static final String MOD1_NAME = "ScopedParser1";
+    static final String MOD2_NAME = "ScopedParser2";
+    static final String SCOPE1 = "global";
+    static final String SCOPE2 = "file";
 
     private ModularParser parser;
     private DefaultScopeSupporter testee;

@@ -61,7 +61,8 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
                             modifier.getName(), logical);
                     return null;
                 }
-                logical += raw;
+                // We need it each loop so no real benefit of using StringBuilder
+                logical += raw; // NOSONAR
             }
             if (!isValid) {
                 log(LogLevel.ERROR,

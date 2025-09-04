@@ -24,9 +24,9 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     public void add(LogLevel level, String log) {
         if (enabled(level)) {
             if (level.ordinal() >= LogLevel.ERROR.ordinal()) {
-                System.err.println(format(level, log));
+                System.err.println(format(level, log)); // NOSONAR
             } else {
-                System.out.println(format(level, log));
+                System.out.println(format(level, log)); // NOSONAR
             }
         }
     }
