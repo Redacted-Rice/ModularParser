@@ -49,15 +49,17 @@ public class DefaultChainingChainableLiteralParserTests {
 
     @Test
     void tryParseLiteralTest() {
-    	doReturn(Response.notHandled()).when(testee).tryEvaluateInternal(any(), eq(false), eq(null));
+        doReturn(Response.notHandled()).when(testee).tryEvaluateInternal(any(), eq(false),
+                eq(null));
         assertTrue(testee.tryParseLiteral("anything").wasNotHandled());
 
     }
 
     @Test
     void tryEvaluateChainedLiteral() {
-    	final Object chained = "Something";
-    	doReturn(Response.notHandled()).when(testee).tryEvaluateInternal(any(), eq(true), eq(chained));
+        final Object chained = "Something";
+        doReturn(Response.notHandled()).when(testee).tryEvaluateInternal(any(), eq(true),
+                eq(chained));
         assertTrue(testee.tryEvaluateChainedLiteral(chained, "anything").wasNotHandled());
     }
 
@@ -76,24 +78,29 @@ public class DefaultChainingChainableLiteralParserTests {
         assertTrue(testee.tryEvaluateInternal(line, false, null).wasError());
         when(literalSupporter.evaluateLiteral(rhs)).thenReturn(Response.error("test"));
         assertTrue(testee.tryEvaluateInternal(line, false, null).wasError());
-        
+
         when(literalSupporter.evaluateLiteral(rhs)).thenReturn(Response.is(rhsObject));
         when(literalSupporter.evaluateChainedLiteral(rhsObject, lhs))
                 .thenReturn(Response.is(lhsObject));
         assertEquals(Response.is(lhsObject), testee.tryEvaluateInternal(line, false, null));
 
         // Bad second response
-        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs))).thenReturn(Response.notHandled());
+        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs)))
+                .thenReturn(Response.notHandled());
         assertTrue(testee.tryEvaluateInternal(line, false, null).wasError());
-        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs))).thenReturn(Response.error("test"));
+        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs)))
+                .thenReturn(Response.error("test"));
         assertTrue(testee.tryEvaluateInternal(line, false, null).wasError());
-        
+
         // Try with a queue instead of a stack
         testee = spy(new DefaultChainingChainableLiteralParser(NAME, "->", true, parser));
         testee.setParser(parser);
         testee.setModuleRefs();
-        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs))).thenReturn(Response.is(lhsObject));
-        when(literalSupporter.evaluateChainedLiteral(lhsObject, rhs)).thenReturn(Response.is(rhsObject));
-        assertEquals(Response.is(rhsObject), testee.tryEvaluateInternal("line with -> a continuer", true, "anything"));
+        when(literalSupporter.evaluateChainedLiteral(any(), eq(lhs)))
+                .thenReturn(Response.is(lhsObject));
+        when(literalSupporter.evaluateChainedLiteral(lhsObject, rhs))
+                .thenReturn(Response.is(rhsObject));
+        assertEquals(Response.is(rhsObject),
+                testee.tryEvaluateInternal("line with -> a continuer", true, "anything"));
     }
 }

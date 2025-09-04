@@ -42,18 +42,18 @@ public class ScopeSupporterTests {
 
         @Override
         public boolean pushScope(String scope) {
-			return false;
-		}
+            return false;
+        }
 
         @Override
         public boolean popScope() {
-			return false;
-		}
+            return false;
+        }
 
         @Override
         public boolean removeScope(String scope) {
-			return false;
-		}
+            return false;
+        }
 
         @Override
         public String currentScope() {

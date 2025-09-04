@@ -34,7 +34,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     public boolean tryParseScoped(String scope, String logicalLine, String defaultScope) {
         Matcher m = matcher.matcher(logicalLine);
         if (!m.matches()) {
-        	return literalSupporter.evaluateLiteral(logicalLine).wasHandled();
+            return literalSupporter.evaluateLiteral(logicalLine).wasHandled();
         }
 
         if (m.group(1) == null && !reassignmentAllowed) {
@@ -52,18 +52,18 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (m.group(1) == null) {
             handleReassignment(scope, key, m.group(3));
         } else {
-        	handleAssignment(scope, defaultScope, key, m.group(3));
+            handleAssignment(scope, defaultScope, key, m.group(3));
         }
         return true;
     }
-    
+
     protected boolean handleReassignment(String scope, String key, String value) {
-    	// reassignment
+        // reassignment
         if (scope == null || scope.isEmpty()) { // scope was not specified
             scope = scopeSupporter.getNarrowestScope(key);
             if (scope == null) {
-                log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s",
-                        getKeyword(), key, value);
+                log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", getKeyword(),
+                        key, value);
                 return false;
             }
         }
@@ -86,8 +86,9 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         }
         return true;
     }
-    
-    protected boolean handleAssignment(String scope, String defaultScope, String key, String value) {
+
+    protected boolean handleAssignment(String scope, String defaultScope, String key,
+            String value) {
         if (scope == null || scope.isEmpty()) { // scope was not specified
             scope = defaultScope;
         }
@@ -112,7 +113,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (obj.wasHandled()) {
             if (scopeSupporter.setData(scopeName, name, this, obj.value())) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
-                        (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName, obj.value());
+                        (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName,
+                        obj.value());
             }
         } else {
             log(LogLevel.ERROR, "For %s %s cannot parse value: %s", getKeyword(), name, literal);

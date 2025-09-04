@@ -77,8 +77,10 @@ public class DefaultNumberLiteralParserTests {
         assertTrue(testee.parseWithType("4.2E-1", PrimitiveType.INT).wasError());
         assertTrue(testee.parseWithType("42E9", PrimitiveType.INT).wasError());
         assertTrue(testee.parseWithType("4.2E-1", PrimitiveType.LONG).wasError());
-        assertEquals(Response.notHandled(), testee.parseWithType("4E4.2", PrimitiveType.UNSPECIFIED));
-        assertEquals(Response.notHandled(), testee.parseWithType("Some String", PrimitiveType.UNSPECIFIED));
+        assertEquals(Response.notHandled(),
+                testee.parseWithType("4E4.2", PrimitiveType.UNSPECIFIED));
+        assertEquals(Response.notHandled(),
+                testee.parseWithType("Some String", PrimitiveType.UNSPECIFIED));
     }
 
     @Test
