@@ -62,8 +62,9 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (scope == null || scope.isEmpty()) { // scope was not specified
             Response<String> response = scopeSupporter.getNarrowestScope(key);
             if (!response.wasValueReturned()) {
-                log(LogLevel.ERROR, "Attempted to reassign undefined %s %s with %s", getKeyword(),
-                        key, value);
+                log(LogLevel.ERROR,
+                        "Failed to find scope for %s %s with %s. Most likely var was not defined",
+                        getKeyword(), key, value);
                 return false;
             }
             scope = response.getValue();
@@ -80,8 +81,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                     getKeyword(), key, scope, value);
         } else if (!owner.getValue().equals(getName())) {
             log(LogLevel.ERROR,
-                    "Attempted to reassign %s %s in scope %s with %s which is owned by module %s",
-                    getKeyword(), key, scope, value, owner);
+                    "Attempted to reassign value of %s in scope %s with %s which is owned by module %s",
+                    key, scope, value, owner);
         } else {
             addLiteral(value, scope, key, false);
         }
@@ -102,8 +103,8 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         Response<String> owner = scopeSupporter.getOwner(scope, key);
         if (owner.wasValueReturned()) {
             log(LogLevel.ERROR,
-                    "Attempted to redefine existing %s %s in scope %s with %s owned by %s",
-                    getKeyword(), key, scope, value, owner.getValue());
+                    "Attempted to redefine existing value %s in scope %s with %s owned by %s", key,
+                    scope, value, owner.getValue());
         } else if (owner.wasError()) {
             log(LogLevel.ERROR, "Encountered error while assigning %s %s in scope %s with %s: %s",
                     getKeyword(), key, scope, value, owner.getError());
