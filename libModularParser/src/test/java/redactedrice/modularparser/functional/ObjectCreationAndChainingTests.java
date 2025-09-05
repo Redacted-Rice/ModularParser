@@ -76,13 +76,13 @@ class ObjectCreationAndChainingTests {
         parser.parse();
 
         assertTrue(varParser.isVariable("so"));
-        SimpleObject so = (SimpleObject) varParser.getVariableValue("so").value();
+        SimpleObject so = (SimpleObject) varParser.getVariableValue("so").getValue();
         assertEquals(1, so.intField);
         assertTrue(so.boolField);
         assertEquals("so1", so.strField);
 
         assertTrue(varParser.isVariable("eo"));
-        ExtendableObject eo = (ExtendableObject) varParser.getVariableValue("eo").value();
+        ExtendableObject eo = (ExtendableObject) varParser.getVariableValue("eo").getValue();
         assertEquals("5", eo.getObject());
     }
 
@@ -107,19 +107,19 @@ class ObjectCreationAndChainingTests {
         parser.parse();
 
         assertTrue(varParser.isVariable("obj3"));
-        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
+        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").getValue();
         assertEquals(3, obj3.intField);
         assertEquals(2, obj3.so.intField);
         assertEquals(1, obj3.so.so.intField);
 
         assertTrue(varParser.isVariable("obj4"));
-        SimpleObject obj4 = (SimpleObject) varParser.getVariableValue("obj4").value();
+        SimpleObject obj4 = (SimpleObject) varParser.getVariableValue("obj4").getValue();
         assertEquals(4, obj4.intField);
         assertEquals(5, obj4.so.intField);
         assertEquals(6, obj4.so.so.intField);
 
         assertTrue(varParser.isVariable("eo"));
-        ExtendableObject eo = (ExtendableObject) varParser.getVariableValue("eo").value();
+        ExtendableObject eo = (ExtendableObject) varParser.getVariableValue("eo").getValue();
         assertEquals(7, ((SimpleObject) eo.getObject()).intField);
     }
 
@@ -143,17 +143,17 @@ class ObjectCreationAndChainingTests {
         parser.parse();
 
         assertTrue(varParser.isVariable("obj3"));
-        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").value();
+        SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").getValue();
         assertEquals(3, obj3.intField);
         assertEquals(2, obj3.so.intField);
         assertEquals(5, obj3.so.so.intField);
 
         assertTrue(varParser.isVariable("intField"));
-        int intField = (int) varParser.getVariableValue("intField").value();
+        int intField = (int) varParser.getVariableValue("intField").getValue();
         assertEquals(1, intField);
 
         assertTrue(varParser.isVariable("boolField"));
-        boolean boolField = (boolean) varParser.getVariableValue("boolField").value();
+        boolean boolField = (boolean) varParser.getVariableValue("boolField").getValue();
         assertTrue(boolField);
     }
 }

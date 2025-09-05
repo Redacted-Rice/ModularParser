@@ -18,7 +18,7 @@ class ResponseTests {
         assertTrue(testee.wasHandled());
         assertTrue(testee.wasValueReturned());
         assertFalse(testee.wasError());
-        assertEquals(testObj, testee.value());
+        assertEquals(testObj, testee.getValue());
         assertTrue(testee.getError().isEmpty());
 
         // Test with null too
@@ -28,7 +28,7 @@ class ResponseTests {
         assertTrue(testee.wasHandled());
         assertTrue(testee.wasValueReturned());
         assertFalse(testee.wasError());
-        assertNull(testee.value());
+        assertNull(testee.getValue());
         assertTrue(testee.getError().isEmpty());
     }
 
@@ -39,7 +39,7 @@ class ResponseTests {
         assertFalse(testee.wasHandled());
         assertFalse(testee.wasValueReturned());
         assertFalse(testee.wasError());
-        assertNull(testee.value());
+        assertNull(testee.getValue());
         assertTrue(testee.getError().isEmpty());
     }
 
@@ -51,7 +51,7 @@ class ResponseTests {
         assertTrue(testee.wasHandled());
         assertFalse(testee.wasValueReturned());
         assertTrue(testee.wasError());
-        assertNull(testee.value());
+        assertNull(testee.getValue());
         assertEquals(errorString, testee.getError());
 
         // Test an empty error string too
@@ -60,7 +60,7 @@ class ResponseTests {
         assertTrue(testee.wasHandled());
         assertFalse(testee.wasValueReturned());
         assertTrue(testee.wasError());
-        assertNull(testee.value());
+        assertNull(testee.getValue());
         assertEquals("", testee.getError());
 
         // Test a null error
@@ -69,7 +69,7 @@ class ResponseTests {
         assertTrue(testee.wasHandled());
         assertFalse(testee.wasValueReturned());
         assertTrue(testee.wasError());
-        assertNull(testee.value());
+        assertNull(testee.getValue());
         assertEquals("", testee.getError());
     }
 
@@ -150,5 +150,25 @@ class ResponseTests {
         assertEquals("Response(not handled)", Response.notHandled().toString());
         assertEquals("Response(error='')", Response.error("").toString());
         assertEquals("Response(error='an error')", Response.error("an error").toString());
+    }
+    
+    @Test
+    void castTest() {
+    	String obj = "stringObj";
+    	Response<Object> testee = Response.is(obj);
+    	Response<String> casted = testee.convert(String.class);
+    	assertTrue(casted.wasValueReturned());
+    	assertEquals(obj, casted.getValue());
+    	
+    	assertNull(Response.is(null).convert(String.class).getValue());
+    	assertTrue(Response.notHandled().convert(Integer.class).wasNotHandled());
+    	assertTrue(testee.convert(Integer.class).wasError());
+
+    	String error = "test";
+    	testee = Response.error(error);
+    	casted = testee.convert(String.class);
+    	assertTrue(casted.wasError());
+    	assertEquals(error, casted.getError());
+    	
     }
 }

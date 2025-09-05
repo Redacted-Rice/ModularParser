@@ -26,7 +26,7 @@ public interface ScopeSupporter extends Supporter {
         if (!owner.wasValueReturned()) {
             return false;
         }
-        return owner.value().equals(module.getName());
+        return owner.getValue().equals(module.getName());
     }
 
     Response<String> getOwner(String scope, String name);

@@ -91,18 +91,18 @@ class DefaultScopeSupportDataTests {
         doReturn(OBJ1).when(testee).getDataForScopeOrNarrowestScope(any(), any());
         Response<String> response = testee.getOwner(SCOPE1, VAR1);
         assertTrue(response.wasValueReturned());
-        assertEquals(MOD1_NAME, response.value());
+        assertEquals(MOD1_NAME, response.getValue());
     }
 
     @Test
     void getNarrowestScopeTest() {
         Response<String> response = testee.getNarrowestScope(VAR1);
         assertTrue(response.wasValueReturned());
-        assertEquals(SCOPE2, response.value());
+        assertEquals(SCOPE2, response.getValue());
 
         response = testee.getNarrowestScope(VAR2);
         assertTrue(response.wasValueReturned());
-        assertEquals(SCOPE1, response.value());
+        assertEquals(SCOPE1, response.getValue());
 
         assertFalse(testee.getNarrowestScope(UNUSED_VAR).wasValueReturned());
     }

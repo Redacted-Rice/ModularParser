@@ -53,6 +53,6 @@ class ExtendableObjectParserTest {
         Map<String, Object> args = Map.of("object", obj);
         Response<Object> result = testee.tryEvaluateObject(args);
         assertTrue(result.wasValueReturned());
-        assertEquals(obj, ((ExtendableObject) result.value()).getObject());
+        assertEquals(obj, ((ExtendableObject) result.getValue()).getObject());
     }
 }

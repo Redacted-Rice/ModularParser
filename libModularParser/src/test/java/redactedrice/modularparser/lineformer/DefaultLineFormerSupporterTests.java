@@ -153,7 +153,7 @@ class DefaultLineFormerSupporterTests {
         doReturn(LINE_2).when(testee).getNextLine();
         Response<String> response = testee.gatherLine(modifier, LINE_1);
         assertTrue(response.wasValueReturned());
-        assertEquals(LINE_1 + LINE_2, response.value());
+        assertEquals(LINE_1 + LINE_2, response.getValue());
 
         when(modifier.lineContinuersValid(any(), anyBoolean())).thenReturn(false);
         assertTrue(testee.gatherLine(modifier, LINE_1).wasError());

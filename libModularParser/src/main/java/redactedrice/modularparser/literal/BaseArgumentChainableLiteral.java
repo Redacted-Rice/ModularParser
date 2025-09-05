@@ -168,9 +168,9 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
                 return false;
             }
             if (requiredIdx < requiredArgs.length) {
-                parsedArgs.put(requiredArgs[requiredIdx++], parsed.value());
+                parsedArgs.put(requiredArgs[requiredIdx++], parsed.getValue());
             } else if (optionalIdx < optionalArgs.length) {
-                parsedArgs.put(optionalArgs[optionalIdx++], parsed.value());
+                parsedArgs.put(optionalArgs[optionalIdx++], parsed.getValue());
             } else {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
@@ -187,7 +187,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
                 log(LogLevel.ERROR, "Failed to parse %s arg %s ", entry.getKey(), entry.getValue());
                 return false;
             }
-            parsedArgs.put(entry.getKey(), parsed.value());
+            parsedArgs.put(entry.getKey(), parsed.getValue());
         }
         return true;
     }

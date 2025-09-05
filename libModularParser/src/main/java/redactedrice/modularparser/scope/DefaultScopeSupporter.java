@@ -109,7 +109,7 @@ public class DefaultScopeSupporter extends BaseModule
         } else if (allowImplicit) {
             return new String[] {"", logicalLine};
         }
-        return null;
+        return new String[] {};
     }
 
     protected OwnedObject getDataForScopeOrNarrowestScope(String scope, String name) {
