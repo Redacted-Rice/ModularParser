@@ -50,12 +50,23 @@ class DefaultCacheLogHandlerTests {
     }
 
     @Test
-    void enable_shouldToggleLevel() {
+    void enableEnableAll() {
         testee.enable(LogLevel.INFO, false);
         assertFalse(testee.enabled(LogLevel.INFO));
 
         testee.enable(LogLevel.INFO, true);
         assertTrue(testee.enabled(LogLevel.INFO));
+
+        testee.enableAll(false);
+        assertFalse(testee.enabled(LogLevel.DEBUG));
+        assertFalse(testee.enabled(LogLevel.INFO));
+        assertFalse(testee.enabled(LogLevel.ERROR));
+
+        testee.enableAll(true);
+        assertTrue(testee.enabled(LogLevel.DEBUG));
+        assertTrue(testee.enabled(LogLevel.INFO));
+        assertTrue(testee.enabled(LogLevel.ERROR));
+
     }
 
     @Test
