@@ -24,9 +24,9 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
     public void add(LogLevel level, String log) {
         if (enabled(level)) {
             if (level.ordinal() >= LogLevel.ERROR.ordinal()) {
-                System.err.println(format(level, log)); // NOSONAR
+                System.err.println(LogHandler.defaultFormat(level, log)); // NOSONAR
             } else {
-                System.out.println(format(level, log)); // NOSONAR
+                System.out.println(LogHandler.defaultFormat(level, log)); // NOSONAR
             }
         }
     }
@@ -43,9 +43,5 @@ public class DefaultConsoleLogHandler extends BaseModule implements LogHandler {
         } else {
             enabledLevels.remove(level);
         }
-    }
-
-    private String format(LogLevel level, String message) {
-        return "[" + String.format("%-5s", level.name()) + "] " + message;
     }
 }
