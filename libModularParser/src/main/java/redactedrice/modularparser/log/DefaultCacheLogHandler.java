@@ -20,9 +20,7 @@ public class DefaultCacheLogHandler extends BaseModule implements LogHandler {
     public DefaultCacheLogHandler() {
         super(DefaultCacheLogHandler.class.getSimpleName());
         // Default: enable all levels
-        for (LogLevel level : LogLevel.values()) {
-            enabledLevels.put(level, true);
-        }
+        enableAll(true);
     }
 
     @Override
@@ -40,6 +38,12 @@ public class DefaultCacheLogHandler extends BaseModule implements LogHandler {
     @Override
     public void enable(LogLevel level, boolean enabled) {
         enabledLevels.put(level, enabled);
+    }
+
+    public void enableAll(boolean enable) {
+        for (LogLevel level : LogLevel.values()) {
+            enabledLevels.put(level, enable);
+        }
     }
 
     public List<String> getLogs() {

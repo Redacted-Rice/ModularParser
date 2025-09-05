@@ -10,6 +10,7 @@ import java.io.StringReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
@@ -20,7 +21,7 @@ import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
 import redactedrice.modularparser.literal.DefaultObjectPathParser;
-import redactedrice.modularparser.log.DefaultConsoleLogHandler;
+import redactedrice.modularparser.log.DefaultCacheLogHandler;
 import redactedrice.modularparser.reflectionutilsparsers.ExtendableObjectParser;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
@@ -34,6 +35,7 @@ class ObjectCreationAndChainingTests {
     ModularParser parser;
     DefaultLineFormerSupporter reader;
     DefaultScopedVarConstParser varParser;
+    DefaultCacheLogHandler logger;
 
     @BeforeEach
     void setup() {
@@ -43,7 +45,12 @@ class ObjectCreationAndChainingTests {
         parser.addModule(new DefaultLineParserSupporter());
         parser.addModule(new DefaultLiteralSupporter());
         parser.addModule(new DefaultReservedWordSupporter());
-        parser.addModule(new DefaultConsoleLogHandler());
+
+        logger = new DefaultCacheLogHandler();
+        logger.enableAll(false);
+        logger.enable(LogLevel.ERROR, true);
+        logger.enable(LogLevel.ABORT, true);
+        parser.addModule(logger);
 
         DefaultScopeSupporter scope = new DefaultScopeSupporter(true);
         scope.pushScope("global");
@@ -73,7 +80,8 @@ class ObjectCreationAndChainingTests {
 
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
-        parser.parse();
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
 
         assertTrue(varParser.isVariable("so"));
         SimpleObject so = (SimpleObject) varParser.getVariableValue("so").getValue();
@@ -104,7 +112,8 @@ class ObjectCreationAndChainingTests {
 
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
-        parser.parse();
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
 
         assertTrue(varParser.isVariable("obj3"));
         SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").getValue();
@@ -140,7 +149,8 @@ class ObjectCreationAndChainingTests {
 
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
-        parser.parse();
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
 
         assertTrue(varParser.isVariable("obj3"));
         SimpleObject obj3 = (SimpleObject) varParser.getVariableValue("obj3").getValue();

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.comment.DefaultMutliLineCommentLineModifier;
 import redactedrice.modularparser.comment.DefaultSingleLineCommentLineModifier;
+import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
@@ -20,7 +21,7 @@ import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
-import redactedrice.modularparser.log.DefaultConsoleLogHandler;
+import redactedrice.modularparser.log.DefaultCacheLogHandler;
 import redactedrice.modularparser.log.DefaultLogSupporter;
 import redactedrice.modularparser.reflectionutilsparsers.ExtendableObjectParser;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
@@ -33,6 +34,7 @@ class BasicParserTests {
     DefaultLineFormerSupporter reader;
     DefaultScopedVarConstParser varParser;
     DefaultScopedVarConstParser constParser;
+    DefaultCacheLogHandler logger;
 
     @BeforeEach
     void setup() {
@@ -43,11 +45,16 @@ class BasicParserTests {
         parser.addModule(new DefaultLiteralSupporter());
         parser.addModule(new DefaultReservedWordSupporter());
         parser.addModule(new DefaultLogSupporter());
-        parser.addModule(new DefaultConsoleLogHandler()); // TODO: Add testing log handler
-        
-        parser.addModule(new DefaultSingleLineCommentLineModifier("DoubleSlashComments", "//"));
-        parser.addModule(new DefaultMutliLineCommentLineModifier("MutlilineSlashStarComments", "/*", "*/"));
 
+        logger = new DefaultCacheLogHandler();
+        logger.enableAll(false);
+        logger.enable(LogLevel.ERROR, true);
+        logger.enable(LogLevel.ABORT, true);
+        parser.addModule(logger);
+
+        parser.addModule(new DefaultSingleLineCommentLineModifier("DoubleSlashComments", "//"));
+        parser.addModule(
+                new DefaultMutliLineCommentLineModifier("MutlilineSlashStarComments", "/*", "*/"));
         DefaultScopeSupporter scope = new DefaultScopeSupporter(true);
         scope.pushScope("global");
         scope.pushScope("file");
@@ -61,7 +68,8 @@ class BasicParserTests {
         parser.addModule(new DefaultBoolLiteralParser());
         parser.addModule(new SimpleObjectLiteralParser());
         parser.addModule(new ExtendableObjectParser());
-        varParser = new DefaultScopedVarConstParser("BasicVarHandler", true, "var");;
+        varParser = new DefaultScopedVarConstParser("BasicVarHandler", true, "var");
+
         parser.addModule(varParser);
         constParser = new DefaultScopedVarConstParser("BasicConstHandler", false, "const");
         parser.addModule(constParser);
@@ -69,6 +77,7 @@ class BasicParserTests {
 
     @Test
     void basicVarManipulationTests() {
+
         parser.configureModules();
 
         String script = """
@@ -91,37 +100,43 @@ class BasicParserTests {
 
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
-        parser.parse();
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
 
         assertEquals(Integer.class, varParser.getVariableValue("testInt").getValue().getClass());
         assertEquals(0, varParser.getVariableValue("testInt").convert(Integer.class).getValue());
-        
-        assertEquals(Double.class, constParser.getVariableValue("testDouble").getValue().getClass());
-        assertEquals(8.0, constParser.getVariableValue("testDouble").convert(Double.class).getValue());
+
+        assertEquals(Double.class,
+                constParser.getVariableValue("testDouble").getValue().getClass());
+        assertEquals(8.0,
+                constParser.getVariableValue("testDouble").convert(Double.class).getValue());
 
         assertEquals(Long.class, varParser.getVariableValue("testLong").getValue().getClass());
         assertEquals(42L, varParser.getVariableValue("testLong").convert(Long.class).getValue());
-        
-        assertEquals(String.class, constParser.getVariableValue("testString").getValue().getClass());
-        assertEquals("test", constParser.getVariableValue("testString").convert(String.class).getValue());
+
+        assertEquals(String.class,
+                constParser.getVariableValue("testString").getValue().getClass());
+        assertEquals("test",
+                constParser.getVariableValue("testString").convert(String.class).getValue());
 
         assertEquals(Boolean.class, varParser.getVariableValue("testBool").getValue().getClass());
         assertTrue(varParser.getVariableValue("testBool").convert(Boolean.class).getValue());
 
         assertEquals(Character.class, varParser.getVariableValue("testChar").getValue().getClass());
-        assertEquals('\t', varParser.getVariableValue("testChar").convert(Character.class).getValue());
-        
+        assertEquals('\t',
+                varParser.getVariableValue("testChar").convert(Character.class).getValue());
+
         assertEquals(Integer.class, varParser.getVariableValue("testInt2").getValue().getClass());
         assertEquals(5, varParser.getVariableValue("testInt2").convert(Integer.class).getValue());
-        
+
         assertEquals(Integer.class, constParser.getVariableValue("testInt3").getValue().getClass());
         assertEquals(5, constParser.getVariableValue("testInt3").convert(Integer.class).getValue());
-        
+
         assertEquals(Double.class, varParser.getVariableValue("testDouble2").getValue().getClass());
-        assertEquals(8.0, varParser.getVariableValue("testDouble2").convert(Double.class).getValue());
+        assertEquals(8.0,
+                varParser.getVariableValue("testDouble2").convert(Double.class).getValue());
 
         assertEquals(Long.class, varParser.getVariableValue("testLong2").getValue().getClass());
         assertEquals(200L, varParser.getVariableValue("testLong2").convert(Long.class).getValue());
-
     }
 }
