@@ -2,6 +2,7 @@ package redactedrice.modularparser.functional;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -138,5 +139,43 @@ class BasicParserTests {
 
         assertEquals(Long.class, varParser.getVariableValue("testLong2").getValue().getClass());
         assertEquals(200L, varParser.getVariableValue("testLong2").convert(Long.class).getValue());
+    }
+
+    @Test
+    void badVarManipulationTests() {
+        parser.configureModules();
+
+        String script = """
+                /* basic test cases for creating variables */
+                const constDouble = 8d
+                const badInt = 5.3i
+                constDouble = 5.3
+                unusedVal = 5.3
+                """;
+
+        // Run parser
+        reader.setReader(new BufferedReader(new StringReader(script)));
+        assertFalse(parser.parse());
+        assertFalse(logger.getLogs().isEmpty());
+
+        assertEquals(Double.class,
+                constParser.getVariableValue("constDouble").getValue().getClass());
+        assertEquals(8.0,
+                constParser.getVariableValue("constDouble").convert(Double.class).getValue());
+
+        assertTrue(constParser.getVariableValue("badInt").wasNotHandled());
+        assertTrue(constParser.getVariableValue("unusedVal").wasNotHandled());
+        assertTrue(varParser.getVariableValue("unusedVal").wasNotHandled());
+
+        String logs = logger.getLogsCombined();
+        assertTrue(logs
+                .contains("[ERROR] BasicConstHandler: For const badInt cannot parse value: 5.3i"));
+        assertTrue(logs.contains("[ERROR] ModularParser: First Error Signaled"));
+        assertTrue(logs
+                .contains("[ERROR] BasicVarHandler: Attempted to reassign value of constDouble"));
+        assertTrue(logs.contains(
+                "[ERROR] BasicVarHandler: Failed to find scope for var unusedVal with 5.3. Most likely var was not defined"));
+        assertTrue(logs.contains("[ERROR] ModularParser: Failed to parser some lines! See"));
+
     }
 }

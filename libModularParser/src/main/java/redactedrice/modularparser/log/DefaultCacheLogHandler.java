@@ -50,6 +50,21 @@ public class DefaultCacheLogHandler extends BaseModule implements LogHandler {
         return new ArrayList<>(logs);
     }
 
+    public String getLogsCombined() {
+        StringBuilder combined = new StringBuilder();
+        // Use the build in iterator in queue instead of converting to a array or similar
+        boolean foundOne = false;
+        for (String log : logs) {
+            if (!foundOne) {
+                foundOne = true;
+            } else {
+                combined.append('\n');
+            }
+            combined.append(log);
+        }
+        return combined.toString();
+    }
+
     public void clear() {
         logs.clear();
     }

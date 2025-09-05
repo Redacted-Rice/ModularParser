@@ -141,7 +141,7 @@ class DefaultScopedVarConstParserTests {
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is("OtherModule"));
         assertTrue(testee.handleReassignment(SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
         clearInvocations(testee);
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is(TESTEE_NAME));
@@ -175,13 +175,12 @@ class DefaultScopedVarConstParserTests {
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.is(TESTEE_NAME));
         assertTrue(testee.handleAssignment(SCOPE, SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any());
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.error("test"));
         assertTrue(testee.handleAssignment("", SCOPE, "x", "42"));
         verify(testee, never()).addLiteral(any(), any(), any(), anyBoolean());
-        verify(testee, times(2)).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(),
-                any());
+        verify(testee).log(eq(LogLevel.ERROR), anyString(), any(), any(), any(), any(), any());
 
         when(scopeSupporter.getOwner(any(), any())).thenReturn(Response.notHandled());
         assertTrue(testee.handleAssignment("local", SCOPE, "x", "42"));

@@ -39,6 +39,8 @@ class DefaultCacheLogHandlerTests {
         assertEquals("[INFO ] First", logs.get(0));
         assertEquals("[DEBUG] Second", logs.get(1));
         assertEquals("[ERROR] Third", logs.get(2));
+
+        assertEquals("[INFO ] First\n[DEBUG] Second\n[ERROR] Third", testee.getLogsCombined());
     }
 
     @Test
