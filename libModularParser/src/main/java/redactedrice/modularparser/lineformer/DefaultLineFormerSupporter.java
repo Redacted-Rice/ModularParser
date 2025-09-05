@@ -57,7 +57,7 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
                 if (gathered.wasError()) {
                     return null;
                 } else if (gathered.wasValueReturned()) {
-                    logical = gathered.value();
+                    logical = gathered.getValue();
                 }
                 // Modify the line and restart if needed
                 logical = modifier.modifyLine(logical);
@@ -123,7 +123,6 @@ public class DefaultLineFormerSupporter extends BaseSupporter<LineModifier>
             lineNumberEnd++;
             return reader.readLine();
         } catch (IOException e) {
-            // TODO: Separate out expected case from failures?
             lineNumberEnd--;
             return null;
         }

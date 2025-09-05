@@ -64,7 +64,7 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
         Response<String> wordOwner = scopeSupporter.getOwner(scope, name);
         if (wordOwner.wasValueReturned()) {
             log(LogLevel.ERROR, "Alias '%s' already defined in scope '%s' by '%s'!", name, scope,
-                    wordOwner.value());
+                    wordOwner.getValue());
             return true;
         } else if (wordOwner.wasError()) {
             log(LogLevel.ERROR, "Alias '%s' error retrieving owner in scope '%s': %s", name, scope,
@@ -99,9 +99,8 @@ public class DefaultScopedAliasParser extends BaseScopedKeywordParser implements
         return scopeSupporter.getData(null, alias, this).wasHandled();
     }
 
-    public Response<Object> getAliasValue(String alias) {
-        // TODO: Aliases are only strings
-        return scopeSupporter.getData(null, alias, this);
+    public Response<String> getAliasValue(String alias) {
+        return scopeSupporter.getData(null, alias, this).convert(String.class);
     }
 
     public Set<String> getAliases() {

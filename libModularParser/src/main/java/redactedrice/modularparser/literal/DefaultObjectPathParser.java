@@ -63,7 +63,7 @@ public class DefaultObjectPathParser extends BaseModule implements ChainableLite
                     return Response.error("Error parsing arg " + i + " of args " + literal + ":"
                             + evaluated.getError());
                 }
-                argsParsed[i] = evaluated.value();
+                argsParsed[i] = evaluated.getValue();
             }
         }
 

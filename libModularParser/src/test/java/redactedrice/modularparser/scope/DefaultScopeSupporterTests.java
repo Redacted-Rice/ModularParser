@@ -320,11 +320,11 @@ class DefaultScopeSupporterTests {
         assertEquals(LINE, result[1]);
 
         result = testee.splitScope(LINE);
-        assertNull(result);
+        assertEquals(0, result.length);
 
         // None existent scope - will be returned null
         result = testee.splitScope(UNUSED_SCOPE_LINE);
-        assertNull(result);
+        assertEquals(0, result.length);
     }
 
     @Test

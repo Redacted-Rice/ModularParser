@@ -66,7 +66,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
                         key, value);
                 return false;
             }
-            scope = response.value();
+            scope = response.getValue();
         }
 
         // Check for collisions with reserved words outside scope supporter
@@ -78,7 +78,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (!owner.wasValueReturned()) {
             log(LogLevel.ERROR, "Attempted to reassign non-existing %s %s in scope %s with %s",
                     getKeyword(), key, scope, value);
-        } else if (!owner.value().equals(getName())) {
+        } else if (!owner.getValue().equals(getName())) {
             log(LogLevel.ERROR,
                     "Attempted to reassign %s %s in scope %s with %s which is owned by module %s",
                     getKeyword(), key, scope, value, owner);
@@ -103,7 +103,7 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
         if (owner.wasValueReturned()) {
             log(LogLevel.ERROR,
                     "Attempted to redefine existing %s %s in scope %s with %s owned by %s",
-                    getKeyword(), key, scope, value, owner.value());
+                    getKeyword(), key, scope, value, owner.getValue());
         } else if (owner.wasError()) {
             log(LogLevel.ERROR, "Encountered error while assigning %s %s in scope %s with %s: %s",
                     getKeyword(), key, scope, value, owner.getError());
@@ -116,10 +116,10 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     protected void addLiteral(String literal, String scopeName, String name, boolean assignment) {
         Response<Object> obj = literalSupporter.evaluateLiteral(literal);
         if (obj.wasHandled()) {
-            if (scopeSupporter.setData(scopeName, name, this, obj.value())) {
+            if (scopeSupporter.setData(scopeName, name, this, obj.getValue())) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
                         (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName,
-                        obj.value());
+                        obj.getValue());
             }
         } else {
             log(LogLevel.ERROR, "For %s %s cannot parse value: %s", getKeyword(), name, literal);

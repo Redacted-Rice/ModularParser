@@ -66,7 +66,7 @@ public class DefaultChainingChainableLiteralParser extends BaseModule
         } else if (evaluated.wasError()) {
             return Response.error("Error parsing first literal:" + evaluated.getError());
         }
-        evaluated = literalSupporter.evaluateChainedLiteral(evaluated.value(), evalSecond);
+        evaluated = literalSupporter.evaluateChainedLiteral(evaluated.getValue(), evalSecond);
         if (evaluated.wasNotHandled()) {
             return Response.error("Failed to parse second literal " + evalSecond);
         } else if (evaluated.wasError()) {

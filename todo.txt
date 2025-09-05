@@ -1,2 +1,1 @@
-SonarQube analysis fixes
 Add some more functional test cases

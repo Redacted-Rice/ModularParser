@@ -82,11 +82,26 @@ public final class Response<T> {
         return error;
     }
 
-    public T value() {
+    public T getValue() {
         return val;
     }
 
     public String getError() {
         return errorStr;
+    }
+    
+    public <T2> Response<T2> convert(Class<T2> clazz) {
+    	if (wasNotHandled()) {
+    		return Response.notHandled();
+    	} else if (wasError()) {
+    		return Response.error(errorStr);
+    	}
+    	if (val == null) {
+    		return Response.is(null);
+    	}
+    	if (clazz.isInstance(val)) {
+			return Response.is(clazz.cast(val));
+		}
+    	return Response.error("Bad cast type");
     }
 }
