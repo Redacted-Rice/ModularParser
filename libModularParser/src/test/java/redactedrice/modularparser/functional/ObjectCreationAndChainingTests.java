@@ -2,6 +2,7 @@ package redactedrice.modularparser.functional;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -165,5 +166,28 @@ class ObjectCreationAndChainingTests {
         assertTrue(varParser.isVariable("boolField"));
         boolean boolField = (boolean) varParser.getVariableValue("boolField").getValue();
         assertTrue(boolField);
+    }
+
+    @Test
+    void nestedConstructors() {
+        parser.configureModules();
+
+        String script = """
+                var so1 = SimpleObject(1, true, "so1", SimpleObject(2, true, "so2", SimpleObject(3, true, "so3")))
+                """;
+
+        // Run parser
+        reader.setReader(new BufferedReader(new StringReader(script)));
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
+
+        assertTrue(varParser.isVariable("so1"));
+        SimpleObject so1 = (SimpleObject) varParser.getVariableValue("so1").getValue();
+        assertEquals(1, so1.intField);
+        assertTrue(so1.boolField);
+        assertEquals("so1", so1.strField);
+        assertEquals(2, so1.so.intField);
+        assertEquals(3, so1.so.so.intField);
+        assertNull(so1.so.so.so);
     }
 }

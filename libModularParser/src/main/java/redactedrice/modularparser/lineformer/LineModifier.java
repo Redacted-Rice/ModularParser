@@ -10,42 +10,4 @@ public interface LineModifier extends Module {
 
     public String modifyLine(String line);
 
-    public static String validStartStopTokens(String line, String startToken, String endToken,
-            boolean isComplete) {
-        int balance = 0;
-        int idx = 0;
-        int len = line.length();
-        int startLen = startToken.length();
-        int stopLen = endToken.length();
-
-        while (idx < len) {
-            // Check for startToken at current position
-            if (idx + startLen <= len && line.substring(idx, idx + startLen).equals(startToken)) {
-                balance++;
-                idx += startLen;
-            } else if (idx + stopLen <= len &&
-                    line.substring(idx, idx + stopLen).equals(endToken)) {
-                // Check for stopToken at current position
-
-                // Out-of-order stop if no matching start
-                if (balance == 0) {
-                    return "Start tokens " + startToken + " and end tokens " + endToken
-                            + " are out of order";
-                }
-                balance--;
-                idx += stopLen;
-            } else {
-                // Advance by one character otherwise
-                idx++;
-            }
-        }
-
-        // If incomplete pairs are disallowed, require all starts to be closed
-        if (!isComplete || (balance == 0)) {
-            return "";
-        } else {
-            return "Mismatched number of Start tokens " + startToken + " and end tokens "
-                    + endToken;
-        }
-    }
 }

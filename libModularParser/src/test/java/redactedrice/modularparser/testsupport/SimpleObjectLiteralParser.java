@@ -4,6 +4,7 @@ package redactedrice.modularparser.testsupport;
 import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
+import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 
 public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
@@ -11,8 +12,12 @@ public class SimpleObjectLiteralParser extends BaseArgumentChainableLiteral {
             "so"};
 
     public SimpleObjectLiteralParser() {
-        super(SimpleObjectLiteralParser.class.getSimpleName(), "SimpleObject", argsOrdered[3],
-                new String[] {argsOrdered[0]},
+        this(null);
+    }
+
+    public SimpleObjectLiteralParser(Grouper grouper) {
+        super(SimpleObjectLiteralParser.class.getSimpleName(), "SimpleObject", grouper,
+                argsOrdered[3], new String[] {argsOrdered[0]},
                 new String[] {argsOrdered[1], argsOrdered[2], argsOrdered[3]},
                 new Object[] {false, "", null});
     }

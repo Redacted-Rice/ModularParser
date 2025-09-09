@@ -14,12 +14,15 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
+import redactedrice.modularparser.lineformer.Grouper;
+import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
 class ExtendableObjectParserTest {
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
+    private Grouper grouper;
     private ExtendableObjectParser testee;
 
     static final String NAME = ExtendableObjectParser.class.getSimpleName();
@@ -29,10 +32,23 @@ class ExtendableObjectParserTest {
     void setup() {
         parser = mock(ModularParser.class);
         literalSupporter = mock(LiteralSupporter.class);
+        grouper = mock(Grouper.class);
+
         when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(literalSupporter);
-        testee = spy(new ExtendableObjectParser());
+        testee = spy(new ExtendableObjectParser(grouper));
         testee.setParser(parser);
         testee.setModuleRefs();
+    }
+
+    @Test
+    void defaultGrouperTest() {
+        BaseArgumentChainableLiteral.setDefaultGrouper(grouper);
+        assertEquals(grouper, BaseArgumentChainableLiteral.getDefaultGrouper());
+        ExtendableObjectParser defaultGrouper = new ExtendableObjectParser();
+        assertEquals(grouper, defaultGrouper.getGrouper());
+
+        // Set it back to null for other tests and test that constructor ensures not null
+        BaseArgumentChainableLiteral.setDefaultGrouper(null);
     }
 
     @Test
