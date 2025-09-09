@@ -3,6 +3,8 @@ package redactedrice.modularparser.literal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
+import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 
@@ -30,6 +33,7 @@ class BaseArgumentChainableLiteralTest {
 
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
+    private Grouper grouper;
     private BaseArgumentChainableLiteral testee;
 
     static final String CHAINED_ARG = "so";
@@ -38,10 +42,28 @@ class BaseArgumentChainableLiteralTest {
     void setup() {
         parser = mock(ModularParser.class);
         literalSupporter = mock(LiteralSupporter.class);
+        grouper = mock(Grouper.class);
+
         when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(literalSupporter);
-        testee = spy(new SimpleObjectLiteralParser());
+        testee = spy(new SimpleObjectLiteralParser(grouper));
         testee.setParser(parser);
         testee.setModuleRefs();
+    }
+
+    @Test
+    void defaultGrouperTest() {
+        // Ensure default is null to keep order of tests from mattering
+        BaseArgumentChainableLiteral.setDefaultGrouper(null);
+        assertNull(BaseArgumentChainableLiteral.getDefaultGrouper());
+
+        BaseArgumentChainableLiteral.setDefaultGrouper(grouper);
+        assertEquals(grouper, BaseArgumentChainableLiteral.getDefaultGrouper());
+        BaseArgumentChainableLiteral defaultGrouper = new SimpleObjectLiteralParser();
+        assertEquals(grouper, defaultGrouper.getGrouper());
+
+        // Set it back to null for other tests and test that constructor ensures not null
+        BaseArgumentChainableLiteral.setDefaultGrouper(null);
+        assertThrows(IllegalArgumentException.class, SimpleObjectLiteralParser::new);
     }
 
     @Test
@@ -63,24 +85,30 @@ class BaseArgumentChainableLiteralTest {
 
         Map<String, Object> parsedArgs = new HashMap<>();
         assertFalse(testee.handleObjectLiteral(null, parsedArgs));
+        assertFalse(testee.handleObjectLiteral("oneWordNotMatching", parsedArgs));
         assertFalse(testee.handleObjectLiteral("not matching", parsedArgs));
-        assertFalse(testee.handleObjectLiteral("WrongKeyword(\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("WrongKeyword (\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("simpleobject", parsedArgs));
 
+        when(grouper.getIfCompleteGroup(any())).thenReturn(Response.notHandled());
+        assertFalse(testee.handleObjectLiteral("simpleobject (\"doesn't matter\")", parsedArgs));
+
+        when(grouper.getIfCompleteGroup(any())).thenReturn(Response.is("\"doesn't matter\""));
         doReturn(false).when(testee).parseArgs(any(), any(), any());
-        assertFalse(testee.handleObjectLiteral("SimpleObject(\"doesn't matter\")", parsedArgs));
-        assertFalse(testee.handleObjectLiteral("simpleobject(\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("simpleobject (\"doesn't matter\")", parsedArgs));
 
         doReturn(true).when(testee).parseArgs(any(), any(), any());
         doReturn(false).when(testee).handlePositionalArgs(any(), any());
-        assertFalse(testee.handleObjectLiteral("SimpleObject(\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
 
         // Not required args
         doReturn(true).when(testee).handlePositionalArgs(any(), any());
         doReturn(true).when(testee).handleNamedArgs(any(), any());
-        assertFalse(testee.handleObjectLiteral("SimpleObject(\"doesn't matter\")", parsedArgs));
+        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
 
         parsedArgs = new HashMap<>(Map.of("intVal", 42, "strVal", "something"));
-        assertTrue(testee.handleObjectLiteral("SimpleObject(\"doesn't matter\")", parsedArgs));
+        assertTrue(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
         assertEquals(4, parsedArgs.size());
         assertEquals(42, parsedArgs.get("intVal"));
         assertEquals("something", parsedArgs.get("strVal"));

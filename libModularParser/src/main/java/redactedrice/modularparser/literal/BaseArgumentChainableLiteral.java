@@ -6,33 +6,54 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.Response;
+import redactedrice.modularparser.lineformer.Grouper;
 
 public abstract class BaseArgumentChainableLiteral extends BaseModule
         implements ChainableLiteralParser {
-    protected static final Pattern PARAMETERS_PATTERN = Pattern
-            .compile("^\\s*(\\w+)\\s*\\(([^)]*)\\)\\s*$");
     protected static final String ARG_DELIMITER = ",";
     protected static final String ARG_NAME_DELIMITER = " ";
+    protected static Grouper defaultGrouper;
 
     protected final String keyword;
     protected final String chainedArg;
+    private final Grouper grouper;
     protected final String[] requiredArgs;
     protected final String[] optionalArgs;
     protected final Object[] optionalDefaults;
 
     protected LiteralSupporter literalSupporter;
 
+    public static Grouper getDefaultGrouper() {
+        return defaultGrouper;
+    }
+
+    public static void setDefaultGrouper(Grouper defaultGrouper) {
+        BaseArgumentChainableLiteral.defaultGrouper = defaultGrouper;
+    }
+
     protected BaseArgumentChainableLiteral(String name, String keyword, String chainedArg,
             String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
+        this(name, keyword, null, chainedArg, requiredArgs, optionalArgs, optionalDefaults);
+    }
+
+    protected BaseArgumentChainableLiteral(String name, String keyword, Grouper grouper,
+            String chainedArg, String[] requiredArgs, String[] optionalArgs,
+            Object[] optionalDefaults) {
         super(name);
+        if (grouper == null) {
+            if (defaultGrouper == null) {
+                throw new IllegalArgumentException(
+                        "Grouper cannot be null. It must be passed or the default grouper must be set");
+            }
+            grouper = defaultGrouper;
+        }
         this.keyword = keyword.toLowerCase();
         this.chainedArg = chainedArg;
+        this.grouper = grouper;
         this.requiredArgs = requiredArgs;
         this.optionalArgs = optionalArgs;
         this.optionalDefaults = optionalDefaults;
@@ -45,6 +66,10 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
 
     public String getKeyword() {
         return keyword;
+    }
+
+    public Grouper getGrouper() {
+        return grouper;
     }
 
     public String getChainedArg() {
@@ -71,19 +96,18 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
         if (literal == null) {
             return false;
         }
-        String trimmed = literal.trim();
 
-        Matcher m = PARAMETERS_PATTERN.matcher(trimmed);
-        if (!m.find()) {
+        // Split on the first whitespace
+        String[] words = literal.trim().split("(?<=\\S)\\s+", 2);
+        if (words.length != 2 || !words[0].toLowerCase().equals(keyword)) {
             return false;
         }
 
-        String objName = m.group(1);
-        String[] args = m.group(2).split(ARG_DELIMITER);
-
-        if (!objName.toLowerCase().equals(keyword)) {
+        Response<String> argsGrouped = getGrouper().getIfCompleteGroup(words[1]);
+        if (!argsGrouped.wasValueReturned()) {
             return false;
         }
+        String[] args = argsGrouped.getValue().split(ARG_DELIMITER);
 
         List<String> positionalParams = new LinkedList<>();
         Map<String, String> namedParams = new HashMap<>();
@@ -193,5 +217,4 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     }
 
     public abstract Response<Object> tryEvaluateObject(Map<String, Object> args);
-
 }

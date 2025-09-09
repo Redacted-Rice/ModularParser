@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 
 import redactedrice.modularparser.core.ModularParser;
+import redactedrice.modularparser.core.Response;
 
 class DefaultGroupingLineModifierTests {
 
@@ -38,12 +39,16 @@ class DefaultGroupingLineModifierTests {
         boolean isComplete = true;
         assertTrue(testee.lineContinuersValid("1 (2) 3", isComplete));
         assertTrue(testee.lineContinuersValid("()(1 (2) )3", isComplete));
+        assertTrue(testee.lineContinuersValid("1 (2( 3) )(4) 5", isComplete));
+        assertTrue(testee.lineContinuersValid("0 ((1 (2) )3)", isComplete));
         assertFalse(testee.lineContinuersValid("1 (2 (3)", isComplete));
         assertFalse(testee.lineContinuersValid("1 )(2) (3", isComplete));
 
         isComplete = false;
         assertTrue(testee.lineContinuersValid("1 (2) 3", isComplete));
         assertTrue(testee.lineContinuersValid("()(1 (2) )3", isComplete));
+        assertTrue(testee.lineContinuersValid("1 (2( 3) )(4) 5", isComplete));
+        assertTrue(testee.lineContinuersValid("0 ((1 (2) )3)", isComplete));
         assertTrue(testee.lineContinuersValid("1 (2 (3)", isComplete));
         assertFalse(testee.lineContinuersValid("1 )(2) (3", isComplete));
     }
@@ -90,5 +95,31 @@ class DefaultGroupingLineModifierTests {
         assertEquals("0 (1 2) 0", testee.modifyLine("0(1\n2)0"));
         assertEquals("0 (1 (2 (3) 2) 1) 0", testee.modifyLine("0(1(2(3)2)1)0"));
         assertEquals("0 (1 2) 0", testee.modifyLine("0   ( 1\n\t 2)\t\t0"));
+    }
+
+    @Test
+    void getIfCompleteGroupTest() {
+        boolean removeTokens = true;
+        DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
+                END_TOKEN, removeTokens);
+        ModularParser parser = mock(ModularParser.class);
+        testee.setParser(parser);
+
+        assertFalse(testee.getIfCompleteGroup("1 (2) 3").wasHandled());
+        assertFalse(testee.getIfCompleteGroup("(1 (2) 3").wasHandled());
+        assertFalse(testee.getIfCompleteGroup("1 2 (3)").wasHandled());
+        assertFalse(testee.getIfCompleteGroup("(1) 2 3").wasHandled());
+
+        Response<String> res = testee.getIfCompleteGroup("(1 2 3)");
+        assertTrue(res.wasHandled());
+        assertEquals("1 2 3", res.getValue());
+
+        res = testee.getIfCompleteGroup("(1 (2 3))");
+        assertTrue(res.wasHandled());
+        assertEquals("1 (2 3)", res.getValue());
+
+        res = testee.getIfCompleteGroup("( )");
+        assertTrue(res.wasHandled());
+        assertEquals(" ", res.getValue());
     }
 }

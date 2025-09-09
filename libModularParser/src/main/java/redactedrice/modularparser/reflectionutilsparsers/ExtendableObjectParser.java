@@ -4,6 +4,7 @@ package redactedrice.modularparser.reflectionutilsparsers;
 import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
+import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
@@ -11,8 +12,12 @@ public class ExtendableObjectParser extends BaseArgumentChainableLiteral {
     private static final String[] argsOrdered = new String[] {"object"};
 
     public ExtendableObjectParser() {
-        super(ExtendableObjectParser.class.getSimpleName(), "ExtendableObject", argsOrdered[0],
-                new String[] {argsOrdered[0]}, new String[] {}, new Object[] {});
+        this(null);
+    }
+
+    public ExtendableObjectParser(Grouper grouper) {
+        super(ExtendableObjectParser.class.getSimpleName(), "ExtendableObject", grouper,
+                argsOrdered[0], new String[] {argsOrdered[0]}, new String[] {}, new Object[] {});
     }
 
     @Override

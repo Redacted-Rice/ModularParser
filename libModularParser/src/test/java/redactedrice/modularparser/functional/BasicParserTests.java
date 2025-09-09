@@ -17,7 +17,9 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
+import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.lineparser.DefaultLineParserSupporter;
+import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
@@ -61,8 +63,10 @@ class BasicParserTests {
         scope.pushScope("file");
         parser.addModule(scope);
 
-        parser.addModule(
-                new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
+        Grouper parenGrouper = new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")",
+                false);
+        BaseArgumentChainableLiteral.setDefaultGrouper(parenGrouper);
+        parser.addModule(parenGrouper);
 
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());

@@ -1,12 +1,16 @@
 package redactedrice.modularparser.lineformer;
 
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Response;
 
-public class DefaultGroupingLineModifier extends BaseModule implements LineModifier {
+// This is for grouping like typically done with ()
+// This is not for scoping like is done with {} or indentations
+public class DefaultGroupingLineModifier extends BaseModule implements LineModifier, Grouper {
     protected static final Pattern NEWLINE_PATTERN = Pattern.compile("\\s*\\R\\s*");
 
     protected final String startToken;
@@ -27,9 +31,9 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
 
     @Override
     public boolean lineContinuersValid(String line, boolean isComplete) {
-        String error = LineModifier.validStartStopTokens(line, startToken, endToken, isComplete);
-        if (!error.isEmpty()) {
-            log(LogLevel.ERROR, error);
+        Optional<String> error = validStartStopTokens(line, isComplete);
+        if (error.isPresent()) {
+            log(LogLevel.ERROR, error.get());
             return false;
         }
         return true;
@@ -57,7 +61,20 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
         return line;
     }
 
-    public static int countOccurrences(String str, String sub) {
+    @Override
+    public Response<String> getIfCompleteGroup(String line) {
+        Response<String[]> response = tryGetFirstGroup(line, true, true);
+        // If we got a completed response and the pre and post match are blank,
+        // we have a complete group
+        if (response.wasValueReturned() && response.getValue()[2] != null &&
+                response.getValue()[0].isBlank() && response.getValue()[2].isBlank()) {
+            return Response.is(response.getValue()[1]);
+        }
+
+        return Response.notHandled();
+    }
+
+    protected int countOccurrences(String str, String sub) {
         int count = 0;
         int index = 0;
 
@@ -67,5 +84,97 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
         }
 
         return count;
+    }
+
+    protected Response<String[]> tryGetFirstGroup(String line, boolean isComplete,
+            boolean stripTokens) {
+        int balance = 0;
+        int startIdx = -1;
+        int idx = 0;
+        int len = line.length();
+        int startLen = startToken.length();
+        int stopLen = endToken.length();
+
+        while (idx < len) {
+            if (idx + startLen <= len && line.substring(idx, idx + startLen).equals(startToken)) {
+                if (balance == 0) {
+                    startIdx = idx; // mark the beginning of the first complete match
+                }
+                balance++;
+                idx += startLen;
+            } else if (idx + stopLen <= len &&
+                    line.substring(idx, idx + stopLen).equals(endToken)) {
+                balance--;
+                idx += stopLen;
+
+                if (balance == 0) {
+                    return makeCompleteResponse(line, startIdx, idx, stripTokens);
+                } else if (balance < 0) {
+                    return Response.error("Start tokens " + startToken + " and end tokens "
+                            + endToken + " are out of order");
+                }
+            } else {
+                idx++;
+            }
+        }
+        return makeNotCompleteResponse(line, isComplete, balance, startIdx);
+    }
+
+    protected Optional<String> validStartStopTokens(String line, boolean isComplete) {
+        Response<String[]> response = tryGetFirstGroup(line, isComplete, false);
+
+        if (response.wasValueReturned()) {
+            if (response.getValue()[1] == null) {
+                // no tokens. Its valid
+                return Optional.empty();
+            }
+
+            // Had some tokens but they weren't complete
+            if (response.getValue()[2] == null) {
+                return Optional.empty();
+            }
+
+            // Have a complete set of tokens
+            if (response.getValue()[2].isEmpty()) {
+                // No more trailing, we are good
+                return Optional.empty();
+            } else {
+                // otherwise, check for another pair in the trailing
+                return validStartStopTokens(response.getValue()[2], isComplete);
+            }
+        } else if (response.wasNotHandled()) {
+            // Shouldn't hit this
+            return Optional.of("Internal logic error");
+        }
+        // Malformed tokens
+        return Optional.of(response.getError());
+    }
+
+    protected Response<String[]> makeCompleteResponse(String line, int startIdx, int endIdx,
+            boolean stripTokens) {
+        String preMatch = line.substring(0, startIdx);
+        String matched;
+        if (!stripTokens) {
+            matched = line.substring(startIdx, endIdx);
+        } else {
+            matched = line.substring(startToken.length(), endIdx - endToken.length());
+        }
+        String postMatch = line.substring(endIdx);
+        return Response.is(new String[] {preMatch, matched, postMatch});
+    }
+
+    protected Response<String[]> makeNotCompleteResponse(String line, boolean isComplete,
+            int balance, int startIdx) {
+        if (!isComplete || balance == 0) {
+            if (startIdx < 0) {
+                return Response.is(new String[] {line, null, null});
+            }
+            String preMatch = line.substring(0, startIdx);
+            String match = line.substring(startIdx);
+            return Response.is(new String[] {preMatch, match, null});
+        } else {
+            return Response.error("Mismatched number of Start tokens " + startToken
+                    + " and end tokens " + endToken);
+        }
     }
 }
