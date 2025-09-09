@@ -15,6 +15,7 @@ import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
+import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.lineparser.DefaultLineParserSupporter;
 import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultChainingChainableLiteralParser;
@@ -58,14 +59,16 @@ class ObjectCreationAndChainingTests {
         scope.pushScope("file");
         parser.addModule(scope);
 
-        parser.addModule(
-                new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")", false));
+        Grouper parenGrouper = new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")",
+                false);
+        // Don't set as static default to prevent interfering with other tests
+        parser.addModule(parenGrouper);
 
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
         parser.addModule(new DefaultBoolLiteralParser());
-        parser.addModule(new SimpleObjectLiteralParser());
-        parser.addModule(new ExtendableObjectParser());
+        parser.addModule(new SimpleObjectLiteralParser(parenGrouper));
+        parser.addModule(new ExtendableObjectParser(parenGrouper));
         varParser = new DefaultScopedVarConstParser("BasicVarHandler", true, "var");
         parser.addModule(varParser);
     }

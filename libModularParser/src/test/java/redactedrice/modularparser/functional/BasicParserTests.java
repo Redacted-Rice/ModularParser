@@ -19,14 +19,12 @@ import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
 import redactedrice.modularparser.lineformer.DefaultLineFormerSupporter;
 import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.lineparser.DefaultLineParserSupporter;
-import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.modularparser.literal.DefaultBoolLiteralParser;
 import redactedrice.modularparser.literal.DefaultCharLiteralParser;
 import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
 import redactedrice.modularparser.log.DefaultCacheLogHandler;
 import redactedrice.modularparser.log.DefaultLogSupporter;
-import redactedrice.modularparser.reflectionutilsparsers.ExtendableObjectParser;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
 import redactedrice.modularparser.scope.DefaultScopedVarConstParser;
@@ -65,14 +63,13 @@ class BasicParserTests {
 
         Grouper parenGrouper = new DefaultGroupingLineModifier("BasicParenthesisModule", "(", ")",
                 false);
-        BaseArgumentChainableLiteral.setDefaultGrouper(parenGrouper);
+        // Don't set as static default to prevent interfering with other tests
         parser.addModule(parenGrouper);
 
         parser.addModule(new DefaultNumberLiteralParser());
         parser.addModule(new DefaultCharLiteralParser());
         parser.addModule(new DefaultBoolLiteralParser());
-        parser.addModule(new SimpleObjectLiteralParser());
-        parser.addModule(new ExtendableObjectParser());
+        parser.addModule(new SimpleObjectLiteralParser(parenGrouper));
         varParser = new DefaultScopedVarConstParser("BasicVarHandler", true, "var");
 
         parser.addModule(varParser);

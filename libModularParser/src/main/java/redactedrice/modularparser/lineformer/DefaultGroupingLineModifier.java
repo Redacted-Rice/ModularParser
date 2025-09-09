@@ -62,31 +62,17 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
     }
 
     @Override
-    public Response<String> getIfCompleteGroup(String line) {
-        Response<String[]> response = tryGetFirstGroup(line, true, true);
-        // If we got a completed response and the pre and post match are blank,
-        // we have a complete group
-        if (response.wasValueReturned() && response.getValue()[2] != null &&
-                response.getValue()[0].isBlank() && response.getValue()[2].isBlank()) {
-            return Response.is(response.getValue()[1]);
+    public Response<String[]> tryGetNextGroup(String line, boolean stripTokens) {
+        Response<String[]> response = tryGetGroupHelper(line, true, true);
+        // If we got a completed response return it
+        if (response.wasValueReturned() && response.getValue()[2] != null) {
+            return response;
         }
-
+        // Otherwise return not handled
         return Response.notHandled();
     }
 
-    protected int countOccurrences(String str, String sub) {
-        int count = 0;
-        int index = 0;
-
-        while ((index = str.indexOf(sub, index)) != -1) {
-            count++;
-            index += sub.length(); // move past the current match
-        }
-
-        return count;
-    }
-
-    protected Response<String[]> tryGetFirstGroup(String line, boolean isComplete,
+    protected Response<String[]> tryGetGroupHelper(String line, boolean isComplete,
             boolean stripTokens) {
         int balance = 0;
         int startIdx = -1;
@@ -120,8 +106,48 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
         return makeNotCompleteResponse(line, isComplete, balance, startIdx);
     }
 
+    protected Response<String[]> makeCompleteResponse(String line, int startIdx, int endIdx,
+            boolean stripTokens) {
+        String preMatch = line.substring(0, startIdx);
+        String matched;
+        if (!stripTokens) {
+            matched = line.substring(startIdx, endIdx);
+        } else {
+            matched = line.substring(startToken.length(), endIdx - endToken.length());
+        }
+        String postMatch = line.substring(endIdx);
+        return Response.is(new String[] {preMatch, matched, postMatch});
+    }
+
+    protected Response<String[]> makeNotCompleteResponse(String line, boolean isComplete,
+            int balance, int startIdx) {
+        if (!isComplete || balance == 0) {
+            if (startIdx < 0) {
+                return Response.is(new String[] {line, null, null});
+            }
+            String preMatch = line.substring(0, startIdx);
+            String match = line.substring(startIdx);
+            return Response.is(new String[] {preMatch, match, null});
+        } else {
+            return Response.error("Mismatched number of Start tokens " + startToken
+                    + " and end tokens " + endToken);
+        }
+    }
+
+    protected int countOccurrences(String str, String sub) {
+        int count = 0;
+        int index = 0;
+
+        while ((index = str.indexOf(sub, index)) != -1) {
+            count++;
+            index += sub.length(); // move past the current match
+        }
+
+        return count;
+    }
+
     protected Optional<String> validStartStopTokens(String line, boolean isComplete) {
-        Response<String[]> response = tryGetFirstGroup(line, isComplete, false);
+        Response<String[]> response = tryGetGroupHelper(line, isComplete, false);
 
         if (response.wasValueReturned()) {
             if (response.getValue()[1] == null) {
@@ -150,31 +176,18 @@ public class DefaultGroupingLineModifier extends BaseModule implements LineModif
         return Optional.of(response.getError());
     }
 
-    protected Response<String[]> makeCompleteResponse(String line, int startIdx, int endIdx,
-            boolean stripTokens) {
-        String preMatch = line.substring(0, startIdx);
-        String matched;
-        if (!stripTokens) {
-            matched = line.substring(startIdx, endIdx);
-        } else {
-            matched = line.substring(startToken.length(), endIdx - endToken.length());
+    @Override
+    public boolean isEmptyGroup(String string) {
+        String trimmed = string.trim();
+        if (!trimmed.startsWith(startToken) || !trimmed.endsWith(endToken)) {
+            return false;
         }
-        String postMatch = line.substring(endIdx);
-        return Response.is(new String[] {preMatch, matched, postMatch});
+        return trimmed.substring(startToken.length(), trimmed.length() - endToken.length())
+                .isBlank();
     }
 
-    protected Response<String[]> makeNotCompleteResponse(String line, boolean isComplete,
-            int balance, int startIdx) {
-        if (!isComplete || balance == 0) {
-            if (startIdx < 0) {
-                return Response.is(new String[] {line, null, null});
-            }
-            String preMatch = line.substring(0, startIdx);
-            String match = line.substring(startIdx);
-            return Response.is(new String[] {preMatch, match, null});
-        } else {
-            return Response.error("Mismatched number of Start tokens " + startToken
-                    + " and end tokens " + endToken);
-        }
+    @Override
+    public boolean hasOpenGroup(String line) {
+        return lineHasOpenModifier(line);
     }
 }
