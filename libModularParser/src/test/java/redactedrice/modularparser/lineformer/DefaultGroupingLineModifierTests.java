@@ -3,6 +3,7 @@ package redactedrice.modularparser.lineformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -54,7 +55,7 @@ class DefaultGroupingLineModifierTests {
     }
 
     @Test
-    void lineHasOpenModifierTest() {
+    void lineHasOpenModifierHasOpenGroupTest() {
         boolean removeTokens = true;
         DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
                 END_TOKEN, removeTokens);
@@ -62,17 +63,30 @@ class DefaultGroupingLineModifierTests {
         assertTrue(testee.lineHasOpenModifier("(1(2)"));
         assertTrue(testee.lineHasOpenModifier("(1"));
         assertTrue(testee.lineHasOpenModifier("(1)(1(2)1)0(1(2)1"));
+        assertTrue(testee.lineHasOpenModifier("somestuff (1)(1(2)1)0(1(2)1 other stuff"));
+        assertTrue(testee.hasOpenGroup("(1(2)"));
+        assertTrue(testee.hasOpenGroup("(1"));
+        assertTrue(testee.hasOpenGroup("(1)(1(2)1)0(1(2)1"));
+        assertTrue(testee.hasOpenGroup("somestuff (1)(1(2)1)0(1(2)1 other stuff"));
 
         assertFalse(testee.lineHasOpenModifier("1"));
         assertFalse(testee.lineHasOpenModifier("(1)"));
         assertFalse(testee.lineHasOpenModifier("(1(2(3)2(3)))"));
+        assertFalse(testee.lineHasOpenModifier("some stuff (1(2(3)2(3)))otherstuff"));
+        assertFalse(testee.hasOpenGroup("1"));
+        assertFalse(testee.hasOpenGroup("(1)"));
+        assertFalse(testee.hasOpenGroup("(1(2(3)2(3)))"));
+        assertFalse(testee.hasOpenGroup("some stuff (1(2(3)2(3)))otherstuff"));
 
         assertFalse(testee.lineHasOpenModifier(")"));
         assertFalse(testee.lineHasOpenModifier("())))(("));
+        assertFalse(testee.hasOpenGroup(")"));
+        assertFalse(testee.hasOpenGroup("())))(("));
 
         // This does not handle validity just if the count
         // is right
         assertFalse(testee.lineHasOpenModifier("))(("));
+        assertFalse(testee.hasOpenGroup("))(("));
     }
 
     @Test
@@ -98,28 +112,57 @@ class DefaultGroupingLineModifierTests {
     }
 
     @Test
-    void getIfCompleteGroupTest() {
+    void tryGetNextGroupTest() {
+
+    }
+
+    @Test
+    void isEmptyGroupTest() {
+
+    }
+
+    @Test
+    void tryGetGroupHelperTest() {
         boolean removeTokens = true;
-        DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
-                END_TOKEN, removeTokens);
+        DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, "<<", ">>",
+                removeTokens);
         ModularParser parser = mock(ModularParser.class);
         testee.setParser(parser);
 
-        assertFalse(testee.getIfCompleteGroup("1 (2) 3").wasHandled());
-        assertFalse(testee.getIfCompleteGroup("(1 (2) 3").wasHandled());
-        assertFalse(testee.getIfCompleteGroup("1 2 (3)").wasHandled());
-        assertFalse(testee.getIfCompleteGroup("(1) 2 3").wasHandled());
+        assertTrue(testee.tryGetGroupHelper("bad >> << order", true, true).wasError());
 
-        Response<String> res = testee.getIfCompleteGroup("(1 2 3)");
+        Response<String[]> res = testee.tryGetGroupHelper("pretext <<1 2 3 >> post text", true,
+                true);
         assertTrue(res.wasHandled());
-        assertEquals("1 2 3", res.getValue());
+        assertEquals("pretext", res.getValue()[0]);
+        assertEquals("1 2 3", res.getValue()[1]);
+        assertEquals("post text", res.getValue()[2]);
 
-        res = testee.getIfCompleteGroup("(1 (2 3))");
+        res = testee.tryGetGroupHelper("pretext <<1 2 3 >> post text <<with>> group", true, false);
         assertTrue(res.wasHandled());
-        assertEquals("1 (2 3)", res.getValue());
+        assertEquals("pretext", res.getValue()[0]);
+        assertEquals("<<1 2 3 >>", res.getValue()[1]);
+        assertEquals("post text <<with>> group", res.getValue()[2]);
 
-        res = testee.getIfCompleteGroup("( )");
+        res = testee.tryGetGroupHelper("pretext <<group with subgroup <<1 2 3>>>> post text", true,
+                true);
         assertTrue(res.wasHandled());
-        assertEquals(" ", res.getValue());
+        assertEquals("pretext", res.getValue()[0]);
+        assertEquals("group with subgroup <<1 2 3>>", res.getValue()[1]);
+        assertEquals("post text", res.getValue()[2]);
+
+        res = testee.tryGetGroupHelper("no parens", true, false);
+        assertTrue(res.wasHandled());
+        assertEquals("no parens", res.getValue()[0]);
+        assertNull(res.getValue()[1]);
+        assertNull(res.getValue()[2]);
+
+        assertTrue(testee.tryGetGroupHelper("not << closed ", true, false).wasError());
+
+        res = testee.tryGetGroupHelper("not << closed ", false, false);
+        assertTrue(res.wasHandled());
+        assertEquals("not", res.getValue()[0]);
+        assertEquals("<< closed ", res.getValue()[1]);
+        assertNull(res.getValue()[2]);
     }
 }
