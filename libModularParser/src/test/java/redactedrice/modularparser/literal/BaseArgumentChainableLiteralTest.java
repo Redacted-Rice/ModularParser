@@ -11,8 +11,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -51,7 +49,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void defaultGrouperTest() {
+    void defaultGrouper() {
         // Ensure default is null to keep order of tests from mattering
         BaseArgumentChainableLiteral.setDefaultGrouper(null);
         assertNull(BaseArgumentChainableLiteral.getDefaultGrouper());
@@ -67,7 +65,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void constructorSetModuleRefsTest() {
+    void constructor_setModuleRefs() {
         assertEquals(SimpleObjectLiteralParser.class.getSimpleName(), testee.getName());
         assertEquals("simpleobject", testee.getKeyword());
         assertEquals(grouper, testee.getGrouper());
@@ -78,16 +76,20 @@ class BaseArgumentChainableLiteralTest {
         assertEquals(literalSupporter, testee.getLiteralSupporter());
     }
 
-    // Failing
     @Test
-    void handleObjectLiteralTest() {
+    void handleObjectLiteral() {
         Map<String, Object> parsedArgs = new HashMap<>();
+        // null/empty literal
         assertFalse(testee.handleObjectLiteral(null, parsedArgs));
+        assertFalse(testee.handleObjectLiteral("   ", parsedArgs));
+
+        // Not matching literal
         assertFalse(testee.handleObjectLiteral("oneWordNotMatching", parsedArgs));
         assertFalse(testee.handleObjectLiteral("not matching", parsedArgs));
         assertFalse(testee.handleObjectLiteral("WrongKeyword (\"doesn't matter\")", parsedArgs));
         assertFalse(testee.handleObjectLiteral("simpleobject", parsedArgs));
 
+        // Failed to get grouper
         when(grouper.tryGetNextGroup(any(), anyBoolean())).thenReturn(Response.notHandled());
         assertFalse(testee.handleObjectLiteral("simpleobject (\"doesn't matter\")", parsedArgs));
         when(grouper.tryGetNextGroup(any(), anyBoolean()))
@@ -97,35 +99,44 @@ class BaseArgumentChainableLiteralTest {
                 .thenReturn(Response.is(new String[] {"also not empty", "\"doesn't matter\"", ""}));
         assertFalse(testee.handleObjectLiteral("simpleobject (\"doesn't matter\")", parsedArgs));
 
+        // Bad args - out of order
         when(grouper.tryGetNextGroup(any(), anyBoolean()))
-                .thenReturn(Response.is(new String[] {"", "\"doesn't matter\"", ""}));
-        // when(testee.parseArgs(any(), any(), any())).thenReturn(false);
-        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
-        assertFalse(testee.handleObjectLiteral("simpleobject (\"doesn't matter\")", parsedArgs));
+                .thenReturn(Response.is(new String[] {"", "intVal 5, false", ""}));
+        assertFalse(testee.handleObjectLiteral("simpleobject (intVal 5, false)", parsedArgs));
 
-        // when(testee.parseArgs(any(), any(), any())).thenReturn(true);
-        // when(testee.handlePositionalArgs(any(), any())).thenReturn(false);
-        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
+        // Fail to parse a positional arg
+        when(grouper.tryGetNextGroup(any(), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"", "5", ""}));
+        when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
+        assertFalse(testee.handleObjectLiteral("SimpleObject (5)", parsedArgs));
 
-        // Not required args
-        // when(testee.handlePositionalArgs(any(), any())).thenReturn(true);
-        // when(testee.handleNamedArgs(any(), any())).thenReturn(false);
-        assertFalse(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
+        // Fail to parse a named arg
+        when(grouper.tryGetNextGroup(any(), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"", "intVal 5", ""}));
+        assertFalse(testee.handleObjectLiteral("SimpleObject (intVal 5)", parsedArgs));
 
-        parsedArgs = new HashMap<>(Map.of("intVal", 42, "strVal", "something"));
-        assertTrue(testee.handleObjectLiteral("SimpleObject (\"doesn't matter\")", parsedArgs));
+        // Missing required args
+        when(grouper.tryGetNextGroup(any(), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"", "", ""}));
+        assertFalse(testee.handleObjectLiteral("SimpleObject ()", parsedArgs));
+
+        // Good case - has required args
+        parsedArgs.clear(); // ensure its clear before testing
+        when(grouper.tryGetNextGroup(any(), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"", "5, strVal \"something\"", ""}));
+        when(literalSupporter.evaluateLiteral("5")).thenReturn(Response.is(5));
+        when(literalSupporter.evaluateLiteral("\"something\""))
+                .thenReturn(Response.is("something"));
+        assertTrue(testee.handleObjectLiteral("SimpleObject (5, boolVal true)", parsedArgs));
         assertEquals(4, parsedArgs.size());
-        assertEquals(42, parsedArgs.get("intVal"));
+        assertEquals(5, parsedArgs.get("intVal"));
         assertEquals("something", parsedArgs.get("strVal"));
-        assertEquals(false, parsedArgs.get("boolVal"));
-        assertEquals(null, parsedArgs.get("so"));
-
-        assertTrue(testee.handleObjectLiteral(
-                "SIMpleObjeCT  (\"spaces and mixed cases should work too\")", parsedArgs));
+        assertEquals(false, parsedArgs.get("boolVal")); // default arg
+        assertNull(parsedArgs.get("so")); // default arg
     }
 
     @Test
-    void tryParseLiteralTest() {
+    void tryParseLiteral() {
         assertEquals(Response.notHandled(), testee.tryParseLiteral("anything"));
 
         when(grouper.tryGetNextGroup(any(), anyBoolean()))
@@ -137,25 +148,26 @@ class BaseArgumentChainableLiteralTest {
         assertEquals(1, ((SimpleObject) res.getValue()).intField);
     }
 
-    // Failing
     @Test
-    void tryEvaluateChainedLiteralTest() {
-        final Object baseObj = "BaseObj";
-        final Response<Object> expected = Response.is("Object");
-        // doReturn(expected).when(testee).tryEvaluateObject(any());
+    void tryEvaluateChainedLiteral() {
+        final SimpleObject baseObj = new SimpleObject(1, true, "baseSo", null);
 
-        // doReturn(false).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(Response.notHandled(), testee.tryEvaluateChainedLiteral(baseObj, "anything"));
-        verify(testee, never()).tryEvaluateObject(any());
+        assertEquals(Response.notHandled(),
+                testee.tryEvaluateChainedLiteral(baseObj, "something invalid"));
 
-        // doReturn(true).when(testee).handleObjectLiteral(any(), any());
-        assertEquals(expected, testee.tryEvaluateChainedLiteral(baseObj, "anything"));
-        verify(testee).tryEvaluateObject(
-                argThat(map -> map.get(CHAINED_ARG).equals(baseObj) && map.size() == 1));
+        when(grouper.tryGetNextGroup(any(), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"", "5", ""}));
+        when(grouper.hasOpenGroup(any())).thenReturn(false);
+        when(grouper.isEmptyGroup(any())).thenReturn(false);
+        when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.is(5));
+        Response<Object> res = testee.tryEvaluateChainedLiteral(baseObj, "SimpleObject (5)");
+        assertTrue(res.wasValueReturned());
+        assertEquals(5, ((SimpleObject) res.getValue()).getInt());
+        assertEquals(baseObj, ((SimpleObject) res.getValue()).getSo());
     }
 
     @Test
-    void parseArgsTest() {
+    void parseArgs() {
         when(grouper.hasOpenGroup(any())).thenReturn(false);
         when(grouper.hasOpenGroup("SimpleObject (3")).thenReturn(true);
         when(grouper.hasOpenGroup("so SimpleObject (2")).thenReturn(true);
@@ -200,7 +212,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void tryAddParamLiteralTest() {
+    void tryAddParam_literal() {
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
         assertTrue(testee.tryAddParam("2", "", positional, named, true).wasError());
@@ -230,7 +242,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void tryAddParamObjectTest() {
+    void tryAddParam_object() {
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
         assertTrue(testee.tryAddParam("SimpleObject", "(5, false)", positional, named, true)
@@ -272,7 +284,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void handlePositionalArgsTest() {
+    void handlePositionalArgs() {
         List<String> positionalParams = List.of("42", "f", "something");
 
         Map<String, Object> parsedArgs = new HashMap<>();
@@ -301,7 +313,7 @@ class BaseArgumentChainableLiteralTest {
     }
 
     @Test
-    void handleNamedArgsTest() {
+    void handleNamedArgs() {
         Map<String, String> namedParams = Map.of("intVal", "42", "strVal", "something");
 
         Map<String, Object> parsedArgs = new HashMap<>();

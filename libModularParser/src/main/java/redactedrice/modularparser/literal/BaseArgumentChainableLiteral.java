@@ -93,7 +93,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
     }
 
     protected boolean handleObjectLiteral(String literal, Map<String, Object> parsedArgs) {
-        if (literal == null) {
+        if (literal == null || literal.isEmpty()) {
             return false;
         }
 
