@@ -113,12 +113,42 @@ class DefaultGroupingLineModifierTests {
 
     @Test
     void tryGetNextGroupTest() {
+        boolean removeTokens = true;
+        DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
+                END_TOKEN, removeTokens);
+        ModularParser parser = mock(ModularParser.class);
+        testee.setParser(parser);
 
+        assertTrue(testee.tryGetNextGroup("bad )( order", true).wasNotHandled());
+        assertTrue(testee.tryGetNextGroup("an ( open line", true).wasNotHandled());
+        assertTrue(testee.tryGetNextGroup("no groupers", true).wasNotHandled());
+
+        Response<String[]> res = testee.tryGetNextGroup("pretext (1 2 3) post text", true);
+        assertTrue(res.wasHandled());
+        assertEquals("pretext", res.getValue()[0]);
+        assertEquals("1 2 3", res.getValue()[1]);
+        assertEquals("post text", res.getValue()[2]);
+
+        res = testee.tryGetNextGroup("pretext (1 2 3) post text", false);
+        assertTrue(res.wasHandled());
+        assertEquals("pretext", res.getValue()[0]);
+        assertEquals("(1 2 3)", res.getValue()[1]);
+        assertEquals("post text", res.getValue()[2]);
     }
 
     @Test
     void isEmptyGroupTest() {
+        boolean removeTokens = true;
+        DefaultGroupingLineModifier testee = new DefaultGroupingLineModifier(NAME, START_TOKEN,
+                END_TOKEN, removeTokens);
 
+        assertTrue(testee.isEmptyGroup("()"));
+        assertTrue(testee.isEmptyGroup("\t  () \n"));
+        assertTrue(testee.isEmptyGroup("(  \t\n)"));
+
+        assertFalse(testee.isEmptyGroup("(something)"));
+        assertFalse(testee.isEmptyGroup("uhoh()"));
+        assertFalse(testee.isEmptyGroup("()uhoh"));
     }
 
     @Test
