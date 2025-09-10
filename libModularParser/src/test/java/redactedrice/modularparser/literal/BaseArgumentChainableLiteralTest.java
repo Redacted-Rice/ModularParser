@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -156,25 +157,118 @@ class BaseArgumentChainableLiteralTest {
     @Test
     void parseArgsTest() {
         when(grouper.hasOpenGroup(any())).thenReturn(false);
-        String args = "42, f, strVal \"something\"";
+        when(grouper.hasOpenGroup("SimpleObject (3")).thenReturn(true);
+        when(grouper.hasOpenGroup("so SimpleObject (2")).thenReturn(true);
+        when(grouper.isEmptyGroup("()")).thenReturn(true);
+        when(grouper.tryGetNextGroup(
+                argThat(str -> str != null && str.startsWith("SimpleObject (3, true)")),
+                anyBoolean()))
+                .thenReturn(Response.is(new String[] {"SimpleObject ", "(3, true)",
+                        "strVal \"something\", so SimpleObject (2, false)"}));
+        when(grouper.tryGetNextGroup(eq("so SimpleObject (2, false)"), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"so SimpleObject ", "(2, false)", ""}));
 
+        String args = "42, SimpleObject (), SimpleObject (3, true), strVal \"something\", so SimpleObject (2, false)";
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
         assertTrue(testee.parseArgs(args, positional, named));
-        assertEquals(2, positional.size());
-        assertTrue(positional.contains("42"));
-        assertTrue(positional.contains("f"));
-        assertEquals(1, named.size());
+        assertEquals(3, positional.size());
+        assertEquals("42", positional.get(0));
+        assertEquals("SimpleObject ()", positional.get(1));
+        assertEquals("SimpleObject (3, true)", positional.get(2));
         assertEquals("\"something\"", named.get("strVal"));
+        assertEquals("SimpleObject (2, false)", named.get("so"));
+        positional.clear();
+        named.clear();
+
+        args = "42, 3";
+        assertTrue(testee.parseArgs(args, positional, named));
+        assertEquals(2, positional.size());
+        assertEquals("42", positional.get(0));
+        assertEquals("3", positional.get(1));
+        assertTrue(named.isEmpty());
+        positional.clear();
+        named.clear();
 
         assertFalse(testee.parseArgs("intVal 42,, ,f", positional, named));
         assertFalse(testee.parseArgs("intVal 42, boolVal f, \"some string\"", positional, named));
         assertFalse(testee.parseArgs("intVal 42, boolVal f, \"some string", positional, named));
+        assertFalse(testee.parseArgs("intVal 42, SimpleObject (3, true)", positional, named));
+
+        when(grouper.tryGetNextGroup(any(), anyBoolean())).thenReturn(Response.notHandled());
+        assertFalse(testee.parseArgs("so SimpleObject (2, false)", positional, named));
     }
 
     @Test
-    void tryAddParamTest() {
-        // TODO: Add tests here
+    void tryAddParamLiteralTest() {
+        List<String> positional = new ArrayList<>();
+        Map<String, String> named = new HashMap<>();
+        assertTrue(testee.tryAddParam("2", "", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("'2'", "", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("\"string\"", "", positional, named, true).wasError());
+
+        when(grouper.isEmptyGroup(any())).thenReturn(false);
+        Response<Boolean> res = testee.tryAddParam("intVal 2", "", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("2", named.get("intVal"));
+        named.clear();
+
+        res = testee.tryAddParam("intVal 2", "", positional, named, true);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("2", named.get("intVal"));
+        named.clear();
+
+        res = testee.tryAddParam("2", "", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertFalse(res.getValue());
+        assertEquals("2", positional.get(0));
+        assertTrue(named.isEmpty());
+    }
+
+    @Test
+    void tryAddParamObjectTest() {
+        List<String> positional = new ArrayList<>();
+        Map<String, String> named = new HashMap<>();
+        assertTrue(testee.tryAddParam("SimpleObject", "(5, false)", positional, named, true)
+                .wasError());
+        when(grouper.isEmptyGroup(any())).thenReturn(true);
+        assertTrue(testee.tryAddParam("SimpleObject ()", "", positional, named, true).wasError());
+
+        when(grouper.isEmptyGroup(any())).thenReturn(false);
+        Response<Boolean> res = testee.tryAddParam("so SimpleObject", "(2)", positional, named,
+                false);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("SimpleObject(2)", named.get("so"));
+        named.clear();
+
+        res = testee.tryAddParam("so SimpleObject", "(2)", positional, named, true);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("SimpleObject(2)", named.get("so"));
+        named.clear();
+
+        res = testee.tryAddParam("SimpleObject", "(2)", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertFalse(res.getValue());
+        assertEquals("SimpleObject(2)", positional.get(0));
+        assertTrue(named.isEmpty());
+        positional.clear();
+
+        // Can only ever be an unnamed in this case
+        when(grouper.isEmptyGroup(any())).thenReturn(true);
+        res = testee.tryAddParam("SimpleObject ()", "", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertFalse(res.getValue());
+        assertEquals("SimpleObject ()", positional.get(0));
+        assertTrue(named.isEmpty());
+        positional.clear();
     }
 
     @Test

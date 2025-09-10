@@ -174,8 +174,8 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
                     return false;
                 }
                 String[] foundGroup = group.getValue();
-                Response<Boolean> wasNamed = tryAddParam(foundGroup[0], foundGroup[1],
-                        positionalParams, namedParams, hasFoundNamed);
+                Response<Boolean> wasNamed = tryAddParam(foundGroup[0].trim(),
+                        " " + foundGroup[1].trim(), positionalParams, namedParams, hasFoundNamed);
                 if (wasNamed.wasError()) {
                     log(LogLevel.ERROR, wasNamed.getError());
                     return false;
@@ -217,7 +217,7 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             if (hasFoundNamed) {
                 return Response.error("Found positional literal arg after a named arg was used");
             }
-            positionalParams.add(arg);
+            positionalParams.add(arg + restOfParam);
             return Response.is(false);
         } else {
             // Otherwise the group is a later arg and this is named
