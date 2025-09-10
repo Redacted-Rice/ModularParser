@@ -193,4 +193,33 @@ class ObjectCreationAndChainingTests {
         assertEquals(3, so1.so.so.intField);
         assertNull(so1.so.so.so);
     }
+
+    @Test
+    void mixedChaining() {
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "<-",
+                false, parser));
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueArrowChainer", "->",
+                true, parser));
+        parser.addModule(new DefaultObjectPathParser("BasicOjectPathParser", ".", ",", parser));
+        parser.configureModules();
+
+        String script = """
+                var intVal = SimpleObject(1).intField
+                var intVal2 = SimpleObject(2) -> SimpleObject(3).getSo().intField
+                var eo = SimpleObject(4) <- SimpleObject(5).getSo().intField -> ExtendableObject()
+                """;
+        // TODO: should throw an error in this case. Why isn't it?
+        // Run parser
+        reader.setReader(new BufferedReader(new StringReader(script)));
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
+
+        assertTrue(varParser.isVariable("intVal"));
+        assertEquals(1, varParser.getVariableValue("intVal").getValue());
+        assertTrue(varParser.isVariable("intVal2"));
+        assertEquals(2, varParser.getVariableValue("intVal2").getValue());
+        assertTrue(varParser.isVariable("eo"));
+        assertEquals(5,
+                ((ExtendableObject) varParser.getVariableValue("eo").getValue()).getObject());
+    }
 }
