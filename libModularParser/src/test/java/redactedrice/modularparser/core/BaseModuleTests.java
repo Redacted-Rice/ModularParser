@@ -7,8 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +28,7 @@ class BaseModuleTests {
     }
 
     @Test
-    void constructorSetterTest() {
+    void constructor_setters() {
         BaseModuleTester testee = new BaseModuleTester(OBJ_NAME);
         assertEquals(OBJ_NAME, testee.getName());
         assertNull(testee.parser);
@@ -39,13 +41,13 @@ class BaseModuleTests {
     }
 
     @Test
-    void checkModulesCompatibilityTest() {
+    void checkModulesCompatibility() {
         BaseModule testee = new BaseModuleTester(OBJ_NAME);
         assertTrue(testee.checkModulesCompatibility());
     }
 
     @Test
-    void basicLogMessageTest() {
+    void log() {
         final String testLog = "Test log";
         final String expectedLog = OBJ_NAME + ": " + testLog;
 
@@ -65,7 +67,7 @@ class BaseModuleTests {
     }
 
     @Test
-    void logFormatTest() {
+    void log_format() {
         final String testLog = "Test %d log";
         final int INT_VAL = 2;
         final String TEST_FORMATTED_LOG = "Test " + INT_VAL + " log";
@@ -87,7 +89,7 @@ class BaseModuleTests {
     }
 
     @Test
-    void logErrorTest() {
+    void log_error() {
         final String testLog = "Test log";
         final String testStackTrace = "line 2: Some Trace";
         final String logWithTrace = testLog + ". Trace:\n" + testStackTrace;
@@ -113,22 +115,71 @@ class BaseModuleTests {
     }
 
     @Test
-    void logNotifyTest() {
+    void log_notifyNullLogger() {
         final String testLog = "Test log";
 
         ModularParser parser = mock(ModularParser.class);
         BaseModule testee = new BaseModuleTester(OBJ_NAME);
         testee.setParser(parser);
 
+        // Try all variations without a logger. These should still notify of error
+        testee.log(LogLevel.ERROR, testLog);
+        verify(parser).notifyError();
+        testee.log(LogLevel.ERROR, true, testLog);
+        verify(parser, times(2)).notifyError();
+        testee.log(LogLevel.ERROR, "%s", testLog);
+        verify(parser, times(3)).notifyError();
+        testee.log(LogLevel.ERROR, true, "%s", testLog);
+        verify(parser, times(4)).notifyError();
+        testee.log(LogLevel.ERROR, new RuntimeException(), testLog);
+        verify(parser, times(5)).notifyError();
+        testee.log(LogLevel.ERROR, true, new RuntimeException(), testLog);
+        verify(parser, times(6)).notifyError();
+        clearInvocations(parser);
+
+        // Now try all variations with notify false
+        testee.log(LogLevel.ERROR, false, testLog);
+        verify(parser, never()).notifyError();
+        testee.log(LogLevel.ERROR, false, "%s", testLog);
+        verify(parser, never()).notifyError();
+        testee.log(LogLevel.ERROR, false, new RuntimeException(), testLog);
+        verify(parser, never()).notifyError();
+    }
+
+    @Test
+    void log_notifyValidLogger() {
+        final String testLog = "Test log";
+
+        ModularParser parser = mock(ModularParser.class);
+        BaseModule testee = new BaseModuleTester(OBJ_NAME);
+        testee.setParser(parser);
         LogSupporter logger = mock(LogSupporter.class);
         when(parser.getLogger()).thenReturn(logger);
 
-        testee.log(LogLevel.ERROR, false, testLog);
-        verify(parser, never()).notifyError();
-
+        // Test all variations of log
         testee.log(LogLevel.ERROR, testLog);
         verify(parser).notifyError();
+        testee.log(LogLevel.ERROR, true, testLog);
+        verify(parser, times(2)).notifyError();
+        testee.log(LogLevel.ERROR, "%s", testLog);
+        verify(parser, times(3)).notifyError();
+        testee.log(LogLevel.ERROR, true, "%s", testLog);
+        verify(parser, times(4)).notifyError();
+        testee.log(LogLevel.ERROR, new RuntimeException(), testLog);
+        verify(parser, times(5)).notifyError();
+        testee.log(LogLevel.ERROR, true, new RuntimeException(), testLog);
+        verify(parser, times(6)).notifyError();
+        clearInvocations(parser);
 
+        // Now try all variations with notify false
+        testee.log(LogLevel.ERROR, false, testLog);
+        verify(parser, never()).notifyError();
+        testee.log(LogLevel.ERROR, false, "%s", testLog);
+        verify(parser, never()).notifyError();
+        testee.log(LogLevel.ERROR, false, new RuntimeException(), testLog);
+        verify(parser, never()).notifyError();
+
+        // Try an abort
         testee.log(LogLevel.ABORT, testLog);
         verify(parser).notifyAbort();
     }

@@ -116,14 +116,16 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
 
     protected void addLiteral(String literal, String scopeName, String name, boolean assignment) {
         Response<Object> obj = literalSupporter.evaluateLiteral(literal);
-        if (obj.wasHandled()) {
+        if (obj.wasValueReturned()) {
             if (scopeSupporter.setData(scopeName, name, this, obj.getValue())) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
                         (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName,
                         obj.getValue());
             }
         } else {
-            log(LogLevel.ERROR, "For %s %s cannot parse value: %s", getKeyword(), name, literal);
+            log(LogLevel.ERROR, "For %s %s cannot parse value \"%s\". %s", getKeyword(), name,
+                    literal,
+                    obj.wasError() ? "Error: " + obj.getError() : "literal was not handled");
         }
     }
 
