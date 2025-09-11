@@ -53,9 +53,7 @@ public abstract class BaseModule implements Module {
     }
 
     public void log(LogLevel level, boolean notifyOnError, String format, Object... args) {
-        if (parser.getLogger() != null) {
-            log(level, notifyOnError, String.format(format, args));
-        }
+        log(level, notifyOnError, String.format(format, args));
     }
 
     public void log(LogLevel level, Throwable error, String message) {
@@ -63,8 +61,10 @@ public abstract class BaseModule implements Module {
     }
 
     public void log(LogLevel level, boolean notifyOnError, Throwable error, String message) {
+        String logTrace = "";
         if (parser.getLogger() != null) {
-            log(level, notifyOnError, parser.getLogger().appendStackTrace(message, error));
+            logTrace = parser.getLogger().appendStackTrace(message, error);
         }
+        log(level, notifyOnError, logTrace);
     }
 }
