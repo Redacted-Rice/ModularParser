@@ -165,8 +165,10 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             // Split on arg separators
             String[] argPopped = args.split(ARG_DELIMITER, 2);
             // If it has an open group, then we need to parse it differently instead
-            if (grouper.hasOpenGroup(argPopped[0])) {
-                // Get the next group
+            String arg = argPopped[0];
+            String restOfParams = "";
+            if (grouper.hasOpenGroup(arg)) {
+                // Get the next group and break it by that instead
                 Response<String[]> group = grouper.tryGetNextGroup(args, false);
                 if (!group.wasValueReturned()) {
                     log(LogLevel.ERROR,
@@ -174,33 +176,26 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
                     return false;
                 }
                 String[] foundGroup = group.getValue();
-                Response<Boolean> wasNamed = tryAddParam(foundGroup[0].trim(),
-                        " " + foundGroup[1].trim(), positionalParams, namedParams, hasFoundNamed);
-                if (wasNamed.wasError()) {
-                    log(LogLevel.ERROR, wasNamed.getError());
-                    return false;
-                } else if (!hasFoundNamed) {
-                    hasFoundNamed = wasNamed.getValue();
-                }
+                arg = foundGroup[0];
+                restOfParams = " " + foundGroup[1].trim();
                 args = group.getValue()[2].trim();
             } else {
                 // Its not an open group meaning its a standard arg or a object/function with
-                // no params
-                Response<Boolean> wasNamed = tryAddParam(argPopped[0], "", positionalParams,
-                        namedParams, hasFoundNamed);
-                if (wasNamed.wasError()) {
-                    log(LogLevel.ERROR, wasNamed.getError());
-                    return false;
-                } else if (!hasFoundNamed) {
-                    hasFoundNamed = wasNamed.getValue();
-                }
+                // no params. We can use the existing break and just need to update the args
                 args = argPopped.length > 1 ? argPopped[1].trim() : "";
             }
+            Response<Boolean> wasNamed = tryAddParam(arg.trim(), restOfParams, positionalParams,
+                    namedParams, hasFoundNamed);
+            if (wasNamed.wasError()) {
+                log(LogLevel.ERROR, wasNamed.getError());
+                return false;
+            }
+            hasFoundNamed = hasFoundNamed || wasNamed.getValue();
         }
         return true;
     }
 
-    protected Response<Boolean> tryAddParam(String arg, String restOfParam,
+    protected Response<Boolean> tryAddParam(String arg, String restOfParams,
             List<String> positionalParams, Map<String, String> namedParams, boolean hasFoundNamed) {
         // Split on the arg <-> name splitter
         String[] tryNameSplit = arg.split(ARG_NAME_DELIMITER, 2);
@@ -217,11 +212,11 @@ public abstract class BaseArgumentChainableLiteral extends BaseModule
             if (hasFoundNamed) {
                 return Response.error("Found positional literal arg after a named arg was used");
             }
-            positionalParams.add(arg + restOfParam);
+            positionalParams.add(arg + restOfParams);
             return Response.is(false);
         } else {
             // Otherwise the group is a later arg and this is named
-            namedParams.put(tryNameSplit[0], tryNameSplit[1] + restOfParam);
+            namedParams.put(tryNameSplit[0], tryNameSplit[1] + restOfParams);
             return Response.is(true);
         }
     }
