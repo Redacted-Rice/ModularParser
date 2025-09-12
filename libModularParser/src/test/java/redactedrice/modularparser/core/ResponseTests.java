@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class ResponseTests {
     @Test
-    void validResponseTest() {
+    void valueReturned() {
         String testObj = "test string";
         Response<String> testee = Response.is(testObj);
         assertFalse(testee.wasNotHandled());
@@ -33,7 +33,7 @@ class ResponseTests {
     }
 
     @Test
-    void notHandledResponseTest() {
+    void notHandled() {
         Response<Object> testee = Response.notHandled();
         assertTrue(testee.wasNotHandled());
         assertFalse(testee.wasHandled());
@@ -44,7 +44,7 @@ class ResponseTests {
     }
 
     @Test
-    void errorResponseTest() {
+    void error() {
         String errorString = "error string";
         Response<Object> testee = Response.error(errorString);
         assertFalse(testee.wasNotHandled());
@@ -74,7 +74,7 @@ class ResponseTests {
     }
 
     @Test
-    void equalsHashCodeTest() {
+    void equals_hashCode() {
         final String object = "test obj";
         final String objectSame = "test obj";
         Response<String> objectStr = Response.is(object);
@@ -109,7 +109,7 @@ class ResponseTests {
     // Suppress unlikely warnings. That is intentionally part of what is being tested
     @SuppressWarnings("unlikely-arg-type")
     @Test
-    void notEqualsHashCodeTest() {
+    void equals_hashCode_notEqual() {
         final String object = "test obj";
         final String objectDiff = "different obj";
         Response<String> objectStr = Response.is(object);
@@ -145,30 +145,56 @@ class ResponseTests {
     }
 
     @Test
-    void toStringTest() {
+    void string() {
         assertEquals("Response(val=test object)", Response.is("test object").toString());
         assertEquals("Response(not handled)", Response.notHandled().toString());
         assertEquals("Response(error='')", Response.error("").toString());
         assertEquals("Response(error='an error')", Response.error("an error").toString());
     }
-    
-    @Test
-    void castTest() {
-    	String obj = "stringObj";
-    	Response<Object> testee = Response.is(obj);
-    	Response<String> casted = testee.convert(String.class);
-    	assertTrue(casted.wasValueReturned());
-    	assertEquals(obj, casted.getValue());
-    	
-    	assertNull(Response.is(null).convert(String.class).getValue());
-    	assertTrue(Response.notHandled().convert(Integer.class).wasNotHandled());
-    	assertTrue(testee.convert(Integer.class).wasError());
 
-    	String error = "test";
-    	testee = Response.error(error);
-    	casted = testee.convert(String.class);
-    	assertTrue(casted.wasError());
-    	assertEquals(error, casted.getError());
-    	
+    @Test
+    void convert() {
+        String obj = "stringObj";
+        Response<Object> testee = Response.is(obj);
+        Response<String> casted = testee.convert(String.class);
+        assertTrue(casted.wasValueReturned());
+        assertEquals(obj, casted.getValue());
+
+        assertNull(Response.is(null).convert(String.class).getValue());
+        assertTrue(Response.notHandled().convert(Integer.class).wasNotHandled());
+        assertTrue(testee.convert(Integer.class).wasError());
+
+        String error = "test";
+        testee = Response.error(error);
+        casted = testee.convert(String.class);
+        assertTrue(casted.wasError());
+        assertEquals(error, casted.getError());
+    }
+
+    @Test
+    void combineErrors() {
+        Response<Integer> resp1 = Response.is(1);
+        Response<String> resp2 = Response.is("test");
+        Response<Boolean> resp3 = Response.is(false);
+
+        String error1 = "first errror";
+        String error2 = "second errror";
+        String error3 = "third errror";
+        Response<Integer> eResp1 = Response.error(error1);
+        Response<String> eResp2 = Response.error(error2);
+        Response<Boolean> eResp3 = Response.error(error3);
+
+        Response<Object> result = Response.combineErrors(eResp1, eResp2, eResp3);
+        assertTrue(result.wasError());
+        assertEquals(error1 + '\n' + error2 + '\n' + error3, result.getError());
+
+        result = Response.combineErrors(eResp1, resp1);
+        assertTrue(result.wasError());
+
+        result = Response.combineErrors(Response.error(""), resp1);
+        assertTrue(result.wasError());
+
+        result = Response.combineErrors(resp1, resp2, resp3);
+        assertFalse(result.wasError());
     }
 }
