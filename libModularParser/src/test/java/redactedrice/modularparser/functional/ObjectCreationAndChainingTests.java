@@ -11,6 +11,8 @@ import java.io.StringReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import redactedrice.modularparser.comment.DefaultMutliLineCommentLineModifier;
+import redactedrice.modularparser.comment.DefaultSingleLineCommentLineModifier;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.lineformer.DefaultGroupingLineModifier;
@@ -71,6 +73,10 @@ class ObjectCreationAndChainingTests {
         parser.addModule(new ExtendableObjectParser(parenGrouper));
         varParser = new DefaultScopedVarConstParser("BasicVarHandler", true, "var");
         parser.addModule(varParser);
+
+        parser.addModule(new DefaultSingleLineCommentLineModifier("DoubleSlashComments", "//"));
+        parser.addModule(
+                new DefaultMutliLineCommentLineModifier("MutlilineSlashStarComments", "/*", "*/"));
     }
 
     @Test
@@ -206,9 +212,17 @@ class ObjectCreationAndChainingTests {
         String script = """
                 var intVal = SimpleObject(1).intField
                 var intVal2 = SimpleObject(2) -> SimpleObject(3).getSo().intField
-                var eo = SimpleObject(4) <- SimpleObject(5).getSo().intField -> ExtendableObject()
+                
+                /* Processed as ExtendableObject(4) <- [ [ SimpleObject(5, so [ SimpleObject(4) ]).getSo() ] -> SimpleObject(6) ]
+                 * So 4 is created and passed to 5. 4 is then pulled from 5 and passed to 6. 6 is then passed to eo
+                 * So the result is an eo with so 6 that contains so 4 */
+                var eo = ExtendableObject() <- SimpleObject(5, so SimpleObject(4)).getSo() -> SimpleObject(6)
+                
+                /* this is another case that seems odd but does work.
+                 * since <- is added first, it is processed first. This then means that this becomes equivalent to
+                 * SimpleObject(2) -> SimpleObject(1) -> ExtendableObject() */
+                var eo2 = SimpleObject(1) -> ExtendableObject() <- SimpleObject(2)
                 """;
-        // TODO: should throw an error in this case. Why isn't it?
         // Run parser
         reader.setReader(new BufferedReader(new StringReader(script)));
         assertTrue(parser.parse());
@@ -219,7 +233,39 @@ class ObjectCreationAndChainingTests {
         assertTrue(varParser.isVariable("intVal2"));
         assertEquals(2, varParser.getVariableValue("intVal2").getValue());
         assertTrue(varParser.isVariable("eo"));
-        assertEquals(5,
-                ((ExtendableObject) varParser.getVariableValue("eo").getValue()).getObject());
+        SimpleObject eoSo = (SimpleObject) ((ExtendableObject) varParser.getVariableValue("eo")
+                .getValue()).getObject();
+        assertEquals(6, eoSo.getInt());
+        assertEquals(4, eoSo.getSo().getInt());
+        assertTrue(varParser.isVariable("eo2"));
+        SimpleObject eo2So = (SimpleObject) ((ExtendableObject) varParser.getVariableValue("eo2")
+                .getValue()).getObject();
+        assertEquals(1, eo2So.getInt());
+        assertEquals(2, eo2So.getSo().getInt());
+    }
+
+    @Test
+    void mixedChaining_orderMattersSome() {
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicQueueArrowChainer", "->",
+                true, parser));
+        parser.addModule(new DefaultChainingChainableLiteralParser("BasicStackArrowChainer", "<-",
+                false, parser));
+        parser.configureModules();
+
+        String script = """
+                // If we add them in a different order, we get a different result
+                // ordered added is effectively operator precedence. In thise case it
+                // become effectively
+                // ExtendableObject() <- SimpleObject(2) <- SimpleObject(1) 
+                var eo2 = SimpleObject(1) -> ExtendableObject() <- SimpleObject(2)
+                """;
+        // Run parser
+        reader.setReader(new BufferedReader(new StringReader(script)));
+        assertTrue(parser.parse());
+        assertTrue(logger.getLogs().isEmpty());
+        SimpleObject eo2So = (SimpleObject) ((ExtendableObject) varParser.getVariableValue("eo2")
+                .getValue()).getObject();
+        assertEquals(2, eo2So.getInt());
+        assertEquals(1, eo2So.getSo().getInt());
     }
 }
