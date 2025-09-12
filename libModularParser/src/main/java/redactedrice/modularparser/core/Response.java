@@ -89,19 +89,38 @@ public final class Response<T> {
     public String getError() {
         return errorStr;
     }
-    
+
     public <T2> Response<T2> convert(Class<T2> clazz) {
-    	if (wasNotHandled()) {
-    		return Response.notHandled();
-    	} else if (wasError()) {
-    		return Response.error(errorStr);
-    	}
-    	if (val == null) {
-    		return Response.is(null);
-    	}
-    	if (clazz.isInstance(val)) {
-			return Response.is(clazz.cast(val));
-		}
-    	return Response.error("Bad cast type");
+        if (wasNotHandled()) {
+            return Response.notHandled();
+        } else if (wasError()) {
+            return Response.error(errorStr);
+        }
+        if (val == null) {
+            return Response.is(null);
+        }
+        if (clazz.isInstance(val)) {
+            return Response.is(clazz.cast(val));
+        }
+        return Response.error("Bad cast type");
+    }
+
+    public static Response<Object> combineErrors(Response<?>... responses) {
+        StringBuilder errors = new StringBuilder();
+        boolean foundOne = false;
+        for (Response<?> resp : responses) {
+            if (resp.wasError()) {
+                if (!foundOne) {
+                    foundOne = true;
+                } else {
+                    errors.append('\n');
+                }
+                errors.append(resp.getError());
+            }
+        }
+        if (foundOne) {
+            return Response.error(errors.toString());
+        }
+        return Response.is(null);
     }
 }
