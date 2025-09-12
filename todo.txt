@@ -1,1 +1,3 @@
-Add some more functional test cases
+Add basic math expression parsing/evaluation
+Be consistent with parse/evaluate for literals
+Add parenthesis support in expressions (particularly for math support)
