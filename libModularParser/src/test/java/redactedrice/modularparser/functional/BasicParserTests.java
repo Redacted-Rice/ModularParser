@@ -169,8 +169,8 @@ class BasicParserTests {
         assertTrue(varParser.getVariableValue("unusedVal").wasNotHandled());
 
         String logs = logger.getLogsCombined();
-        assertTrue(logs
-                .contains("[ERROR] BasicConstHandler: For const badInt cannot parse value: 5.3i"));
+        assertTrue(logs.contains(
+                "[ERROR] BasicConstHandler: For const badInt cannot parse value \"5.3i\""));
         assertTrue(logs.contains("[ERROR] ModularParser: First Error Signaled"));
         assertTrue(logs
                 .contains("[ERROR] BasicVarHandler: Attempted to reassign value of constDouble"));
