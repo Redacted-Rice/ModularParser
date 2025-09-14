@@ -26,7 +26,7 @@ import redactedrice.modularparser.literal.DefaultLiteralSupporter;
 import redactedrice.modularparser.literal.DefaultNumberLiteralParser;
 import redactedrice.modularparser.literal.DefaultObjectPathParser;
 import redactedrice.modularparser.log.DefaultCacheLogHandler;
-import redactedrice.modularparser.reflectionutilsparsers.ExtendableObjectParser;
+import redactedrice.modularparser.reflectionhelpersparsers.ExtendableObjectParser;
 import redactedrice.modularparser.reserved.DefaultReservedWordSupporter;
 import redactedrice.modularparser.scope.DefaultScopeSupporter;
 import redactedrice.modularparser.scope.DefaultScopedVarConstParser;

@@ -1,4 +1,4 @@
-package redactedrice.modularparser.reflectionutilsparsers;
+package redactedrice.modularparser.reflectionhelpersparsers;
 
 
 import java.util.Map;
