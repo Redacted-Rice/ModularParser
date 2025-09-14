@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -92,6 +93,36 @@ class ArgumentUtilsTests {
         assertIterableEquals(streamCollection, parsed.getValue());
 
         parsed = ArgumentUtils.argToCollection(argIntName, args);
+        assertFalse(parsed.wasValueReturned());
+    }
+    
+    @Test
+    void argToStream() {
+        String argCollectionName = "colField";
+        String argArrayName = "arrField";
+        String argStreamName = "streamField";
+        String argIntName = "intField";
+        Collection<Integer> colVal = List.of(1, 2, 3, 4);
+        Boolean[] arrVal = {false, true, true};
+        Collection<Character> streamCollection = List.of('t', 'e', 's', 't');
+        int intVal = 5;
+
+        Map<String, Object> args = Map.of(argCollectionName, colVal, argArrayName, arrVal,
+                argStreamName, streamCollection.stream(), argIntName, intVal);
+
+        Response<Stream<Object>> parsed = ArgumentUtils.argToStream(argCollectionName, args);
+        assertTrue(parsed.wasValueReturned());
+        assertIterableEquals(colVal, parsed.getValue().toList());
+
+        parsed = ArgumentUtils.argToStream(argArrayName, args);
+        assertTrue(parsed.wasValueReturned());
+        assertIterableEquals(List.of(arrVal), parsed.getValue().toList());
+
+        parsed = ArgumentUtils.argToStream(argStreamName, args);
+        assertTrue(parsed.wasValueReturned());
+        assertIterableEquals(streamCollection, parsed.getValue().toList());
+
+        parsed = ArgumentUtils.argToStream(argIntName, args);
         assertFalse(parsed.wasValueReturned());
     }
 }

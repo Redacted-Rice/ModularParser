@@ -3,6 +3,7 @@ package redactedrice.modularparser.utils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ConversionUtils;
@@ -36,6 +37,20 @@ public class ArgumentUtils {
         }
         return Response.error(
                 "Invalid type: '" + clazz.getSimpleName() + "' expected for '" + fieldName + "'");
+    }
+
+    public static Response<Stream<Object>> argToStream(String fieldName, Map<String, Object> args) {
+    	Object arg = args.get(fieldName);
+    	if (arg instanceof Stream<?> asStream) {
+    		return Response.is(asStream.filter(Object.class::isInstance).map(Object.class::cast));
+    	} else {
+    		Collection<Object> collection = ConversionUtils.convertToCollection(args.get(fieldName));
+	        if (collection.size() <= 1) {
+	            return Response.error("Failed to get collection of '" + fieldName
+	                    + "'. Is it a valid list containing more than one object?");
+	        }
+	        return Response.is(collection.stream());
+    	}
     }
 
     public static Response<Collection<Object>> argToCollection(String fieldName, Map<String, Object> args) {
