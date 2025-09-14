@@ -1,4 +1,4 @@
-package redactedrice.modularparser.reflectionutilsparsers;
+package redactedrice.modularparser.reflectionhelpersparsers;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
