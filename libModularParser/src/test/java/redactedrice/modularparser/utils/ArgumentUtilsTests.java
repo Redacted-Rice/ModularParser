@@ -3,12 +3,12 @@ package redactedrice.modularparser.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -64,34 +64,34 @@ class ArgumentUtilsTests {
         assertTrue(strParsed.wasValueReturned());
         assertEquals(strVal, strParsed.getValue());
     }
-
+    
     @Test
-    void argToStream() {
+    void argToCollection() {
         String argCollectionName = "colField";
         String argArrayName = "arrField";
         String argStreamName = "streamField";
         String argIntName = "intField";
         Collection<Integer> colVal = List.of(1, 2, 3, 4);
         Boolean[] arrVal = {false, true, true};
-        Stream<Character> streamVal = Stream.of('t', 'e', 's', 't');
+        Collection<Character> streamCollection = List.of('t', 'e', 's', 't');
         int intVal = 5;
 
         Map<String, Object> args = Map.of(argCollectionName, colVal, argArrayName, arrVal,
-                argStreamName, streamVal, argIntName, intVal);
+                argStreamName, streamCollection.stream(), argIntName, intVal);
 
-        Response<Stream<Object>> parsed = ArgumentUtils.argToStream(argCollectionName, args);
+        Response<Collection<Object>> parsed = ArgumentUtils.argToCollection(argCollectionName, args);
         assertTrue(parsed.wasValueReturned());
-        // assertEquals(colVal.stream(), parsed.getValue());
+        assertIterableEquals(colVal, parsed.getValue());
 
-        parsed = ArgumentUtils.argToStream(argArrayName, args);
+        parsed = ArgumentUtils.argToCollection(argArrayName, args);
         assertTrue(parsed.wasValueReturned());
-        // assertEquals(Stream.of(arrVal), parsed.getValue());
+        assertIterableEquals(List.of(arrVal), parsed.getValue());
 
-        parsed = ArgumentUtils.argToStream(argStreamName, args);
+        parsed = ArgumentUtils.argToCollection(argStreamName, args);
         assertTrue(parsed.wasValueReturned());
-        // assertEquals(streamVal, parsed.getValue());
+        assertIterableEquals(streamCollection, parsed.getValue());
 
-        parsed = ArgumentUtils.argToStream(argIntName, args);
+        parsed = ArgumentUtils.argToCollection(argIntName, args);
         assertFalse(parsed.wasValueReturned());
     }
 }

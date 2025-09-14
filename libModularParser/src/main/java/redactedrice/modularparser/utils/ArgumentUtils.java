@@ -1,8 +1,8 @@
 package redactedrice.modularparser.utils;
 
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ConversionUtils;
@@ -38,13 +38,12 @@ public class ArgumentUtils {
                 "Invalid type: '" + clazz.getSimpleName() + "' expected for '" + fieldName + "'");
     }
 
-    public static Response<Stream<Object>> argToStream(String fieldName, Map<String, Object> args) {
-        Object collection = args.get(fieldName);
-        Stream<Object> stream = ConversionUtils.convertToStream(collection);
-        if (stream.count() <= 1) {
-            return Response.error("Failed to get stream of '" + fieldName
+    public static Response<Collection<Object>> argToCollection(String fieldName, Map<String, Object> args) {
+        Collection<Object> collection = ConversionUtils.convertToCollection(args.get(fieldName));
+        if (collection.size() <= 1) {
+            return Response.error("Failed to get collection of '" + fieldName
                     + "'. Is it a valid list containing more than one object?");
         }
-        return Response.is(stream);
+        return Response.is(collection);
     }
 }
