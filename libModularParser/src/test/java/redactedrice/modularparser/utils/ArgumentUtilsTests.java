@@ -57,15 +57,45 @@ class ArgumentUtilsTests {
         Response<Integer> intParsed = ArgumentUtils.argToType(argIntName, args, Integer.class);
         assertTrue(intParsed.wasValueReturned());
         assertEquals(intVal, intParsed.getValue());
+        assertTrue(
+                ArgumentUtils.argToType(argIntName, args, Integer.class, null).wasValueReturned());
 
-        intParsed = ArgumentUtils.argToType(argStringName, args, Integer.class);
-        assertTrue(intParsed.wasError());
+        assertTrue(ArgumentUtils.argToType(argStringName, args, Integer.class).wasError());
+        assertTrue(ArgumentUtils.argToType(argStringName, args, Integer.class, null).wasError());
 
         Response<String> strParsed = ArgumentUtils.argToType(argStringName, args, String.class);
         assertTrue(strParsed.wasValueReturned());
         assertEquals(strVal, strParsed.getValue());
+        assertTrue(ArgumentUtils.argToType(argStringName, args, String.class, null)
+                .wasValueReturned());
     }
-    
+
+    @Test
+    void argToType_specialValues() {
+        String argIntName = "intField";
+        int intVal = 5;
+        String argIntSpecialName = "intFieldSpecial";
+        String specialValName = "unlimited";
+        int specialVal = -1;
+        String argIntBadName = "intFieldBad";
+
+        Map<String, Object> args = Map.of(argIntName, intVal, argIntSpecialName, specialValName,
+                argIntBadName, "Bad value");
+        Map<Object, Integer> specialValues = Map.of(specialValName, specialVal);
+
+        Response<Integer> intParsed = ArgumentUtils.argToType(argIntName, args, Integer.class,
+                specialValues);
+        assertTrue(intParsed.wasValueReturned());
+        assertEquals(intVal, intParsed.getValue());
+
+        intParsed = ArgumentUtils.argToType(argIntSpecialName, args, Integer.class, specialValues);
+        assertTrue(intParsed.wasValueReturned());
+        assertEquals(specialVal, intParsed.getValue());
+
+        intParsed = ArgumentUtils.argToType(argIntBadName, args, Integer.class, specialValues);
+        assertTrue(intParsed.wasError());
+    }
+
     @Test
     void argToCollection() {
         String argCollectionName = "colField";
@@ -80,7 +110,8 @@ class ArgumentUtilsTests {
         Map<String, Object> args = Map.of(argCollectionName, colVal, argArrayName, arrVal,
                 argStreamName, streamCollection.stream(), argIntName, intVal);
 
-        Response<Collection<Object>> parsed = ArgumentUtils.argToCollection(argCollectionName, args);
+        Response<Collection<Object>> parsed = ArgumentUtils.argToCollection(argCollectionName,
+                args);
         assertTrue(parsed.wasValueReturned());
         assertIterableEquals(colVal, parsed.getValue());
 
@@ -95,7 +126,7 @@ class ArgumentUtilsTests {
         parsed = ArgumentUtils.argToCollection(argIntName, args);
         assertFalse(parsed.wasValueReturned());
     }
-    
+
     @Test
     void argToStream() {
         String argCollectionName = "colField";

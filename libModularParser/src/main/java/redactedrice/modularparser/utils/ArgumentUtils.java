@@ -31,29 +31,43 @@ public class ArgumentUtils {
 
     public static <T> Response<T> argToType(String fieldName, Map<String, Object> args,
             Class<T> clazz) {
+        return argToType(fieldName, args, clazz, null);
+    }
+
+    public static <T> Response<T> argToType(String fieldName, Map<String, Object> args,
+            Class<T> clazz, Map<Object, T> specialValues) {
         Object val = args.get(fieldName);
         if (clazz.isInstance(val)) {
             return Response.is(clazz.cast(val));
+        }
+        if (specialValues != null) {
+            if (specialValues.containsKey(val)) {
+                return Response.is(specialValues.get(val));
+            }
+            return Response.error("Invalid type/special value: '" + clazz.getSimpleName()
+                    + "' expected for '" + fieldName + "'. Special values: " + specialValues);
         }
         return Response.error(
                 "Invalid type: '" + clazz.getSimpleName() + "' expected for '" + fieldName + "'");
     }
 
     public static Response<Stream<Object>> argToStream(String fieldName, Map<String, Object> args) {
-    	Object arg = args.get(fieldName);
-    	if (arg instanceof Stream<?> asStream) {
-    		return Response.is(asStream.filter(Object.class::isInstance).map(Object.class::cast));
-    	} else {
-    		Collection<Object> collection = ConversionUtils.convertToCollection(args.get(fieldName));
-	        if (collection.size() <= 1) {
-	            return Response.error("Failed to get collection of '" + fieldName
-	                    + "'. Is it a valid list containing more than one object?");
-	        }
-	        return Response.is(collection.stream());
-    	}
+        Object arg = args.get(fieldName);
+        if (arg instanceof Stream<?> asStream) {
+            return Response.is(asStream.filter(Object.class::isInstance).map(Object.class::cast));
+        } else {
+            Collection<Object> collection = ConversionUtils
+                    .convertToCollection(args.get(fieldName));
+            if (collection.size() <= 1) {
+                return Response.error("Failed to get collection of '" + fieldName
+                        + "'. Is it a valid list containing more than one object?");
+            }
+            return Response.is(collection.stream());
+        }
     }
 
-    public static Response<Collection<Object>> argToCollection(String fieldName, Map<String, Object> args) {
+    public static Response<Collection<Object>> argToCollection(String fieldName,
+            Map<String, Object> args) {
         Collection<Object> collection = ConversionUtils.convertToCollection(args.get(fieldName));
         if (collection.size() <= 1) {
             return Response.error("Failed to get collection of '" + fieldName
