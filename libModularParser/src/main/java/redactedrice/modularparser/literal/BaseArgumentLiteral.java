@@ -137,7 +137,14 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
         if (!handleObjectLiteral(literal, parsedArgs)) {
             return Response.notHandled();
         }
-        return tryEvaluateObject(parsedArgs);
+        try {
+            return tryEvaluateObject(parsedArgs);
+        } catch (ClassCastException e) {
+            log(LogLevel.ERROR, e,
+                    "Incompatible types were passed causing class cast exception for literal "
+                            + literal);
+            return Response.error("ClassCastException while parsing " + literal);
+        }
     }
 
     protected boolean parseArgs(String args, List<String> positionalParams,
@@ -240,5 +247,6 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
         return true;
     }
 
-    public abstract Response<Object> tryEvaluateObject(Map<String, Object> args);
+    public abstract Response<Object> tryEvaluateObject(Map<String, Object> args)
+            throws ClassCastException;
 }
