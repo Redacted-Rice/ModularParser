@@ -217,19 +217,23 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
         while (requiredIdx + optionalIdx < positionalParams.size()) {
             int combined = requiredIdx + optionalIdx;
             String literal = positionalParams.get(combined);
+            
+            String argName;
+            if (requiredIdx < requiredArgs.length) {
+            	argName = requiredArgs[requiredIdx++];
+            } else if (optionalIdx < optionalArgs.length) {
+            	argName = optionalArgs[optionalIdx++];
+            } else {
+                log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
+                return false;
+            }
+            
             Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
             if (!parsed.wasValueReturned()) {
                 log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, combined);
                 return false;
             }
-            if (requiredIdx < requiredArgs.length) {
-                parsedArgs.put(requiredArgs[requiredIdx++], parsed.getValue());
-            } else if (optionalIdx < optionalArgs.length) {
-                parsedArgs.put(optionalArgs[optionalIdx++], parsed.getValue());
-            } else {
-                log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
-                return false;
-            }
+            parsedArgs.put(argName, parsed.getValue());
         }
         return true;
     }
