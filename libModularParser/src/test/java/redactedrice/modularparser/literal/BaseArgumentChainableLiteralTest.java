@@ -2,6 +2,7 @@ package redactedrice.modularparser.literal;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +60,18 @@ class BaseArgumentChainableLiteralTest {
         BaseArgumentChainableLiteral.setDefaultGrouper(null);
         assertThrows(IllegalArgumentException.class, SimpleObjectLiteralParser::new);
     }
+    
+    @Test
+    void constuctor() {
+        assertEquals(SimpleObjectLiteralParser.class.getSimpleName(), testee.getName());
+        assertEquals("so", testee.getChainedArg());
+        assertEquals("simpleobject", testee.getKeyword());
+        assertEquals(grouper, testee.getGrouper());
+        assertEquals(1, testee.getRequiredArgs().length);
+        assertEquals(4, testee.getOptionalArgs().length);
+        assertEquals(4, testee.getOptionalDefaults().length);
+        assertEquals(literalSupporter, testee.getLiteralSupporter());
+    }
 
     @Test
     void tryEvaluateChainedLiteral() {
@@ -72,5 +89,51 @@ class BaseArgumentChainableLiteralTest {
         assertTrue(res.wasValueReturned());
         assertEquals(5, ((SimpleObject) res.getValue()).getInt());
         assertEquals(baseObj, ((SimpleObject) res.getValue()).getSo());
+    }
+
+    @Test
+    void handlePositionalArgs() {
+        List<String> positionalParams = List.of("42", "f", "something", "5");
+        final SimpleObject baseObj = new SimpleObject(1, true, "baseSo", null);
+
+
+        Map<String, Object> parsedArgs = new HashMap<>();
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.notHandled());
+        assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
+
+        when(literalSupporter.evaluateLiteral("42")).thenReturn(Response.is(42));
+        when(literalSupporter.evaluateLiteral("f")).thenReturn(Response.is(false));
+        when(literalSupporter.evaluateLiteral("something")).thenReturn(Response.is("something"));
+        when(literalSupporter.evaluateLiteral("5"))
+                .thenReturn(Response.is(5));
+
+        parsedArgs.clear();
+        parsedArgs.put(CHAINED_ARG, baseObj);
+        assertTrue(testee.handlePositionalArgs(positionalParams, parsedArgs));
+        assertEquals(5, parsedArgs.size());
+        assertTrue(parsedArgs.containsKey("intVal"));
+        assertEquals(42, parsedArgs.get("intVal"));
+        assertTrue(parsedArgs.containsKey("boolVal"));
+        assertEquals(false, parsedArgs.get("boolVal"));
+        assertTrue(parsedArgs.containsKey("strVal"));
+        assertEquals("something", parsedArgs.get("strVal"));
+        assertTrue(parsedArgs.containsKey("so"));
+        assertEquals(baseObj, parsedArgs.get("so"));
+        assertTrue(parsedArgs.containsKey("intArrayVal"));
+        assertEquals(5, parsedArgs.get("intArrayVal"));
+
+        parsedArgs.clear();
+        when(literalSupporter.evaluateLiteral("baseObj")).thenReturn(Response.is(baseObj));
+        positionalParams = List.of("42", "f", "something", "baseObj", "5");
+        assertTrue(testee.handlePositionalArgs(positionalParams, parsedArgs));
+        assertEquals(5, parsedArgs.size());
+        assertTrue(parsedArgs.containsKey("so"));
+        assertEquals(baseObj, parsedArgs.get("so"));
+        assertTrue(parsedArgs.containsKey("intArrayVal"));
+        assertEquals(5, parsedArgs.get("intArrayVal"));
+        
+        when(literalSupporter.evaluateLiteral("so")).thenReturn(Response.is(baseObj));
+        positionalParams = List.of("42", "f", "something", "baseObj", "5", "oops");
+        assertFalse(testee.handlePositionalArgs(positionalParams, parsedArgs));
     }
 }
