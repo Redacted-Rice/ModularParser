@@ -44,9 +44,9 @@ public abstract class BaseArgumentChainableLiteral extends BaseArgumentLiteral
             Map<String, Object> parsedArgs) {
         int requiredIdx = 0;
         int optionalIdx = 0;
-        while (requiredIdx + optionalIdx < positionalParams.size()) {
-            int combined = requiredIdx + optionalIdx;
-            String literal = positionalParams.get(combined);
+        int positionalIdx = 0;
+        while (positionalIdx < positionalParams.size()) {
+            String literal = positionalParams.get(positionalIdx);
             
             String argName;
             if (requiredIdx < requiredArgs.length) {
@@ -64,10 +64,11 @@ public abstract class BaseArgumentChainableLiteral extends BaseArgumentLiteral
             
             Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
             if (!parsed.wasValueReturned()) {
-                log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, combined);
+                log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, positionalIdx);
                 return false;
             }
             parsedArgs.put(argName, parsed.getValue());
+            positionalIdx++;
         }
         return true;
     }

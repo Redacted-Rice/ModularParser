@@ -25,7 +25,7 @@ import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.testsupport.SimpleObject;
-import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
+import redactedrice.modularparser.testsupport.SimpleObjectUnchainedLiteralParser;
 
 class BaseArgumentLiteralTest {
 
@@ -43,7 +43,7 @@ class BaseArgumentLiteralTest {
         grouper = mock(Grouper.class);
         when(parser.getSupporterOfType(LiteralSupporter.class)).thenReturn(literalSupporter);
 
-        testee = new SimpleObjectLiteralParser(grouper);
+        testee = new SimpleObjectUnchainedLiteralParser(grouper);
         testee.setParser(parser);
         testee.setModuleRefs();
     }
@@ -56,17 +56,17 @@ class BaseArgumentLiteralTest {
 
         BaseArgumentLiteral.setDefaultGrouper(grouper);
         assertEquals(grouper, BaseArgumentLiteral.getDefaultGrouper());
-        BaseArgumentLiteral defaultGrouper = new SimpleObjectLiteralParser();
+        BaseArgumentLiteral defaultGrouper = new SimpleObjectUnchainedLiteralParser();
         assertEquals(grouper, defaultGrouper.getGrouper());
 
         // Set it back to null for other tests and test that constructor ensures not null
         BaseArgumentLiteral.setDefaultGrouper(null);
-        assertThrows(IllegalArgumentException.class, SimpleObjectLiteralParser::new);
+        assertThrows(IllegalArgumentException.class, SimpleObjectUnchainedLiteralParser::new);
     }
 
     @Test
     void constructor_setModuleRefs() {
-        assertEquals(SimpleObjectLiteralParser.class.getSimpleName(), testee.getName());
+        assertEquals(SimpleObjectUnchainedLiteralParser.class.getSimpleName(), testee.getName());
         assertEquals("simpleobject", testee.getKeyword());
         assertEquals(grouper, testee.getGrouper());
         assertEquals(1, testee.getRequiredArgs().length);
@@ -145,6 +145,11 @@ class BaseArgumentLiteralTest {
         Response<Object> res = testee.tryParseLiteral("simpleobject (1)");
         assertTrue(res.wasValueReturned());
         assertEquals(1, ((SimpleObject) res.getValue()).intField);
+        
+        // Pass a bad class
+        when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.is("oops"));
+        res = testee.tryParseLiteral("simpleobject (\"oops\")");
+        assertTrue(res.wasError());
     }
 
     @Test
