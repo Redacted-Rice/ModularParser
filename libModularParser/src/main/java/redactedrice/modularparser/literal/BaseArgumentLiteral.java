@@ -22,6 +22,7 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
     protected final String[] requiredArgs;
     protected final String[] optionalArgs;
     protected final Object[] optionalDefaults;
+    protected final Map<String, ArgumentParser> argParsers;
 
     protected LiteralSupporter literalSupporter;
 
@@ -35,11 +36,22 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
 
     protected BaseArgumentLiteral(String name, String keyword, String[] requiredArgs,
             String[] optionalArgs, Object[] optionalDefaults) {
-        this(name, keyword, null, requiredArgs, optionalArgs, optionalDefaults);
+        this(name, keyword, null, requiredArgs, optionalArgs, optionalDefaults, null);
     }
 
     protected BaseArgumentLiteral(String name, String keyword, Grouper grouper,
             String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
+        this(name, keyword, grouper, requiredArgs, optionalArgs, optionalDefaults, null);
+    }
+
+    protected BaseArgumentLiteral(String name, String keyword, String[] requiredArgs,
+            String[] optionalArgs, Object[] optionalDefaults, ArgumentParser[] argParsers) {
+        this(name, keyword, null, requiredArgs, optionalArgs, optionalDefaults, argParsers);
+    }
+
+    protected BaseArgumentLiteral(String name, String keyword, Grouper grouper,
+            String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults,
+            ArgumentParser[] argParsers) {
         super(name);
         if (grouper == null) {
             if (defaultGrouper == null) {
@@ -48,11 +60,48 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
             }
             grouper = defaultGrouper;
         }
+        
+        if (optionalArgs == null) {
+            optionalArgs = new String[0];
+        }
+        if (optionalDefaults == null) {
+            optionalDefaults = new Object[0];
+        }
+        if (optionalDefaults.length != optionalArgs.length) {
+            throw new IllegalArgumentException("optionalDefaults (" + optionalDefaults.length
+                    + ") must be the same length as optionalArgs (" + optionalArgs.length + ")");
+        }
         this.keyword = keyword.toLowerCase();
         this.grouper = grouper;
         this.requiredArgs = requiredArgs;
         this.optionalArgs = optionalArgs;
         this.optionalDefaults = optionalDefaults;
+        this.argParsers = new HashMap<>();
+        setArgParsers(argParsers);
+    }
+
+    protected void setArgParsers(ArgumentParser[] argParsers) {
+        if (argParsers == null || argParsers.length < 1) {
+            for (String required : requiredArgs) {
+                this.argParsers.put(required, new DefaultObjectArgumentParser());
+            }
+            for (String optional : optionalArgs) {
+                this.argParsers.put(optional, new DefaultObjectArgumentParser());
+            }
+        } else if (argParsers.length == requiredArgs.length + optionalArgs.length) {
+            int requiredIdx = 0;
+            int optionalIdx = 0;
+            for (requiredIdx = 0; requiredIdx < requiredArgs.length; requiredIdx++) {
+                this.argParsers.put(requiredArgs[requiredIdx], argParsers[requiredIdx]);
+            }
+            for (optionalIdx = 0; optionalIdx < optionalArgs.length; requiredIdx++) {
+                this.argParsers.put(optionalArgs[optionalIdx],
+                        argParsers[requiredIdx + optionalIdx]);
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "ArgParsers must be either null/empty or of length requiredArgs + optionalArgs");
+        }
     }
 
     @Override
@@ -217,23 +266,20 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
         while (requiredIdx + optionalIdx < positionalParams.size()) {
             int combined = requiredIdx + optionalIdx;
             String literal = positionalParams.get(combined);
-            
+
             String argName;
             if (requiredIdx < requiredArgs.length) {
-            	argName = requiredArgs[requiredIdx++];
+                argName = requiredArgs[requiredIdx++];
             } else if (optionalIdx < optionalArgs.length) {
-            	argName = optionalArgs[optionalIdx++];
+                argName = optionalArgs[optionalIdx++];
             } else {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
             }
-            
-            Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
-            if (!parsed.wasValueReturned()) {
-                log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, combined);
+
+            if (!tryParseArgument(argName, literal, parsedArgs)) {
                 return false;
             }
-            parsedArgs.put(argName, parsed.getValue());
         }
         return true;
     }
@@ -241,13 +287,37 @@ public abstract class BaseArgumentLiteral extends BaseModule implements LiteralP
     protected boolean handleNamedArgs(Map<String, String> namedParams,
             Map<String, Object> parsedArgs) {
         for (Entry<String, String> entry : namedParams.entrySet()) {
-            Response<Object> parsed = literalSupporter.evaluateLiteral(entry.getValue());
-            if (!parsed.wasValueReturned()) {
-                log(LogLevel.ERROR, "Failed to parse %s arg %s ", entry.getKey(), entry.getValue());
+            if (!tryParseArgument(entry.getKey(), entry.getValue(), parsedArgs)) {
                 return false;
             }
-            parsedArgs.put(entry.getKey(), parsed.getValue());
         }
+        return true;
+    }
+
+    protected boolean tryParseArgument(String argName, String argument,
+            Map<String, Object> parsedArgs) {
+        ArgumentParser argParser = argParsers.get(argName);
+        if (argParser == null) {
+            log(LogLevel.ERROR, "Internal error: Failed to find parser for arg %s", argName);
+            return false;
+        }
+
+        Response<Object> parsed = literalSupporter.evaluateLiteral(argument);
+        if (!parsed.wasValueReturned()) {
+            parsed = argParser.parseArgument(argument);
+        }
+        if (!parsed.wasValueReturned()) {
+            log(LogLevel.ERROR, "Failed to parse arg %s with value %s", argName, argument);
+            return false;
+        }
+
+        if (!argParser.isExpectedType(parsed.getValue())) {
+            log(LogLevel.ERROR,
+                    "Parsed arg %s (%s) but returned value was not the of expected type. Expected %s, found %s",
+                    argName, argument, argParser.getExpectedTypeName(), parsed.getValue());
+            return false;
+        }
+        parsedArgs.put(argName, parsed.getValue());
         return true;
     }
 
