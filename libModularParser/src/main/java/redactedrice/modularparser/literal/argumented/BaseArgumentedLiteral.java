@@ -21,10 +21,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
 
     protected final String keyword;
     protected final Grouper grouper;
-    protected final String[] requiredArgs;
-    protected final String[] optionalArgs;
-    protected final Object[] optionalDefaults;
-    protected final Map<String, ArgumentParser> argParsers;
+    protected final ArgumentsDefinition arguments;
 
     protected LiteralSupporter literalSupporter;
 
@@ -36,24 +33,12 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         BaseArgumentedLiteral.defaultGrouper = defaultGrouper;
     }
 
-    protected BaseArgumentedLiteral(String name, String keyword, String[] requiredArgs,
-            String[] optionalArgs, Object[] optionalDefaults) {
-        this(name, keyword, null, requiredArgs, optionalArgs, optionalDefaults, null);
+    protected BaseArgumentedLiteral(String name, String keyword, ArgumentsDefinition arguments) {
+        this(name, keyword, null, arguments);
     }
 
     protected BaseArgumentedLiteral(String name, String keyword, Grouper grouper,
-            String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
-        this(name, keyword, grouper, requiredArgs, optionalArgs, optionalDefaults, null);
-    }
-
-    protected BaseArgumentedLiteral(String name, String keyword, String[] requiredArgs,
-            String[] optionalArgs, Object[] optionalDefaults, ArgumentParser[] argParsers) {
-        this(name, keyword, null, requiredArgs, optionalArgs, optionalDefaults, argParsers);
-    }
-
-    protected BaseArgumentedLiteral(String name, String keyword, Grouper grouper,
-            String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults,
-            ArgumentParser[] argParsers) {
+            ArgumentsDefinition arguments) {
         super(name);
         if (grouper == null) {
             if (defaultGrouper == null) {
@@ -62,48 +47,9 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             }
             grouper = defaultGrouper;
         }
-
-        if (optionalArgs == null) {
-            optionalArgs = new String[0];
-        }
-        if (optionalDefaults == null) {
-            optionalDefaults = new Object[0];
-        }
-        if (optionalDefaults.length != optionalArgs.length) {
-            throw new IllegalArgumentException("optionalDefaults (" + optionalDefaults.length
-                    + ") must be the same length as optionalArgs (" + optionalArgs.length + ")");
-        }
+        this.arguments = arguments;
         this.keyword = keyword.toLowerCase();
         this.grouper = grouper;
-        this.requiredArgs = requiredArgs;
-        this.optionalArgs = optionalArgs;
-        this.optionalDefaults = optionalDefaults;
-        this.argParsers = new HashMap<>();
-        setArgParsers(argParsers);
-    }
-
-    protected void setArgParsers(ArgumentParser[] argParsers) {
-        if (argParsers == null || argParsers.length < 1) {
-            for (String required : requiredArgs) {
-                this.argParsers.put(required, new TypeUnenforced());
-            }
-            for (String optional : optionalArgs) {
-                this.argParsers.put(optional, new TypeUnenforced());
-            }
-        } else if (argParsers.length == requiredArgs.length + optionalArgs.length) {
-            int requiredIdx = 0;
-            int optionalIdx = 0;
-            for (requiredIdx = 0; requiredIdx < requiredArgs.length; requiredIdx++) {
-                this.argParsers.put(requiredArgs[requiredIdx], argParsers[requiredIdx]);
-            }
-            for (optionalIdx = 0; optionalIdx < optionalArgs.length; optionalIdx++) {
-                this.argParsers.put(optionalArgs[optionalIdx],
-                        argParsers[requiredIdx + optionalIdx]);
-            }
-        } else {
-            throw new IllegalArgumentException(
-                    "ArgParsers must be either null/empty or of length requiredArgs + optionalArgs");
-        }
     }
 
     @Override

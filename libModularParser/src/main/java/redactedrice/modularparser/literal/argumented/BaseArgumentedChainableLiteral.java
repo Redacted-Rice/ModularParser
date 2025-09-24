@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
+import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.literal.ChainableLiteralParser;
 
@@ -15,14 +15,13 @@ public abstract class BaseArgumentedChainableLiteral extends BaseArgumentedLiter
     protected final String chainedArg;
 
     protected BaseArgumentedChainableLiteral(String name, String keyword, String chainedArg,
-            String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
-        this(name, keyword, null, chainedArg, requiredArgs, optionalArgs, optionalDefaults);
+            ArgumentsDefinition arguments) {
+        this(name, keyword, null, chainedArg, arguments);
     }
 
     protected BaseArgumentedChainableLiteral(String name, String keyword, Grouper grouper,
-            String chainedArg, String[] requiredArgs, String[] optionalArgs,
-            Object[] optionalDefaults) {
-        super(name, keyword, grouper, requiredArgs, optionalArgs, optionalDefaults);
+            String chainedArg, ArgumentsDefinition arguments) {
+        super(name, keyword, grouper, arguments);
         this.chainedArg = chainedArg;
     }
 
@@ -48,21 +47,21 @@ public abstract class BaseArgumentedChainableLiteral extends BaseArgumentedLiter
         int positionalIdx = 0;
         while (positionalIdx < positionalParams.size()) {
             String literal = positionalParams.get(positionalIdx);
-            
+
             String argName;
             if (requiredIdx < requiredArgs.length) {
-            	argName = requiredArgs[requiredIdx++];
+                argName = requiredArgs[requiredIdx++];
             } else if (optionalIdx < optionalArgs.length) {
-            	argName = optionalArgs[optionalIdx++];
+                argName = optionalArgs[optionalIdx++];
             } else {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
-            } 
-            if (argName.equals(chainedArg) && parsedArgs.containsKey(argName)) {
-            	// Already added to the args
-            	continue;
             }
-            
+            if (argName.equals(chainedArg) && parsedArgs.containsKey(argName)) {
+                // Already added to the args
+                continue;
+            }
+
             Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
             if (!parsed.wasValueReturned()) {
                 log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, positionalIdx);
