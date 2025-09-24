@@ -5,9 +5,9 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
-import redactedrice.modularparser.literal.BaseArgumentLiteral;
+import redactedrice.modularparser.literal.argumented.BaseArgumentedLiteral;
 
-public class SimpleObjectUnchainedLiteralParser extends BaseArgumentLiteral {
+public class SimpleObjectUnchainedLiteralParser extends BaseArgumentedLiteral {
     protected static final String[] argsOrdered = new String[] {"intVal", "boolVal", "strVal",
             "so"};
 

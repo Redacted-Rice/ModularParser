@@ -5,10 +5,10 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
-import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
+import redactedrice.modularparser.literal.argumented.BaseArgumentedChainableLiteral;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
-public class ExtendableObjectParser extends BaseArgumentChainableLiteral {
+public class ExtendableObjectParser extends BaseArgumentedChainableLiteral {
     private static final String[] argsOrdered = new String[] {"object"};
 
     public ExtendableObjectParser() {

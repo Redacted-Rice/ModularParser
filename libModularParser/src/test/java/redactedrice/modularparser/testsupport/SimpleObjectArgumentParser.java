@@ -2,13 +2,13 @@ package redactedrice.modularparser.testsupport;
 
 
 import redactedrice.modularparser.core.Response;
-import redactedrice.modularparser.literal.ArgumentParser;
+import redactedrice.modularparser.literal.argumented.ArgumentParser;
 
 public class SimpleObjectArgumentParser implements ArgumentParser {
 
     @Override
     public Response<Object> parseArgument(String argument) {
-        return Response.is(new SimpleObject(1, false, argument, null));
+        return Response.is(new SimpleObject(42, false, argument, null));
     }
 
     @Override

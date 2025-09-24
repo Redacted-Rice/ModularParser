@@ -1,9 +1,9 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.literal.argumented;
 
 
 import redactedrice.modularparser.core.Response;
 
-public class DefaultObjectArgumentParser implements ArgumentParser {
+public class TypeUnenforced implements ArgumentParser {
 
     @Override
     public Response<Object> parseArgument(String argument) {

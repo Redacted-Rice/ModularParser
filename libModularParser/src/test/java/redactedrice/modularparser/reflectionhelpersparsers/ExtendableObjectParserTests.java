@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
-import redactedrice.modularparser.literal.BaseArgumentChainableLiteral;
 import redactedrice.modularparser.literal.LiteralSupporter;
+import redactedrice.modularparser.literal.argumented.BaseArgumentedChainableLiteral;
 import redactedrice.reflectionhelpers.objects.ExtendableObject;
 
 class ExtendableObjectParserTest {
@@ -42,13 +42,13 @@ class ExtendableObjectParserTest {
 
     @Test
     void defaultGrouperTest() {
-        BaseArgumentChainableLiteral.setDefaultGrouper(grouper);
-        assertEquals(grouper, BaseArgumentChainableLiteral.getDefaultGrouper());
+        BaseArgumentedChainableLiteral.setDefaultGrouper(grouper);
+        assertEquals(grouper, BaseArgumentedChainableLiteral.getDefaultGrouper());
         ExtendableObjectParser defaultGrouper = new ExtendableObjectParser();
         assertEquals(grouper, defaultGrouper.getGrouper());
 
         // Set it back to null for other tests and test that constructor ensures not null
-        BaseArgumentChainableLiteral.setDefaultGrouper(null);
+        BaseArgumentedChainableLiteral.setDefaultGrouper(null);
     }
 
     @Test
