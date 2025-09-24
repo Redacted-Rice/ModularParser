@@ -1,4 +1,4 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.literal.argumented;
 
 
 import java.util.HashMap;
@@ -8,17 +8,18 @@ import java.util.Map;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.core.LogSupporter.LogLevel;
 import redactedrice.modularparser.lineformer.Grouper;
+import redactedrice.modularparser.literal.ChainableLiteralParser;
 
-public abstract class BaseArgumentChainableLiteral extends BaseArgumentLiteral
+public abstract class BaseArgumentedChainableLiteral extends BaseArgumentedLiteral
         implements ChainableLiteralParser {
     protected final String chainedArg;
 
-    protected BaseArgumentChainableLiteral(String name, String keyword, String chainedArg,
+    protected BaseArgumentedChainableLiteral(String name, String keyword, String chainedArg,
             String[] requiredArgs, String[] optionalArgs, Object[] optionalDefaults) {
         this(name, keyword, null, chainedArg, requiredArgs, optionalArgs, optionalDefaults);
     }
 
-    protected BaseArgumentChainableLiteral(String name, String keyword, Grouper grouper,
+    protected BaseArgumentedChainableLiteral(String name, String keyword, Grouper grouper,
             String chainedArg, String[] requiredArgs, String[] optionalArgs,
             Object[] optionalDefaults) {
         super(name, keyword, grouper, requiredArgs, optionalArgs, optionalDefaults);

@@ -1,4 +1,4 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.literal.argumented;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
+import redactedrice.modularparser.literal.LiteralSupporter;
+import redactedrice.modularparser.literal.argumented.BaseArgumentedChainableLiteral;
 import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 
@@ -29,7 +31,7 @@ class BaseArgumentChainableLiteralTest {
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
     private Grouper grouper;
-    private BaseArgumentChainableLiteral testee;
+    private BaseArgumentedChainableLiteral testee;
 
     static final String CHAINED_ARG = "so";
 
@@ -48,16 +50,16 @@ class BaseArgumentChainableLiteralTest {
     @Test
     void defaultGrouper() {
         // Ensure default is null to keep order of tests from mattering
-        BaseArgumentChainableLiteral.setDefaultGrouper(null);
-        assertNull(BaseArgumentChainableLiteral.getDefaultGrouper());
+        BaseArgumentedChainableLiteral.setDefaultGrouper(null);
+        assertNull(BaseArgumentedChainableLiteral.getDefaultGrouper());
 
-        BaseArgumentChainableLiteral.setDefaultGrouper(grouper);
-        assertEquals(grouper, BaseArgumentChainableLiteral.getDefaultGrouper());
-        BaseArgumentChainableLiteral defaultGrouper = new SimpleObjectLiteralParser();
+        BaseArgumentedChainableLiteral.setDefaultGrouper(grouper);
+        assertEquals(grouper, BaseArgumentedChainableLiteral.getDefaultGrouper());
+        BaseArgumentedChainableLiteral defaultGrouper = new SimpleObjectLiteralParser();
         assertEquals(grouper, defaultGrouper.getGrouper());
 
         // Set it back to null for other tests and test that constructor ensures not null
-        BaseArgumentChainableLiteral.setDefaultGrouper(null);
+        BaseArgumentedChainableLiteral.setDefaultGrouper(null);
         assertThrows(IllegalArgumentException.class, SimpleObjectLiteralParser::new);
     }
     

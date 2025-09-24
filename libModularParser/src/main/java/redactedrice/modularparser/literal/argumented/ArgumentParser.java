@@ -1,4 +1,4 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.literal.argumented;
 
 
 import redactedrice.modularparser.core.Response;

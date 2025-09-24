@@ -1,4 +1,4 @@
-package redactedrice.modularparser.literal;
+package redactedrice.modularparser.literal.argumented;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
+import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.testsupport.SimpleObject;
+import redactedrice.modularparser.testsupport.SimpleObjectTypedLiteralParser;
 import redactedrice.modularparser.testsupport.SimpleObjectUnchainedLiteralParser;
 
 class BaseArgumentLiteralTest {
@@ -32,7 +34,7 @@ class BaseArgumentLiteralTest {
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
     private Grouper grouper;
-    private BaseArgumentLiteral testee;
+    private BaseArgumentedLiteral testee;
 
     static final String CHAINED_ARG = "so";
 
@@ -51,16 +53,16 @@ class BaseArgumentLiteralTest {
     @Test
     void defaultGrouper() {
         // Ensure default is null to keep order of tests from mattering
-        BaseArgumentLiteral.setDefaultGrouper(null);
-        assertNull(BaseArgumentLiteral.getDefaultGrouper());
+        BaseArgumentedLiteral.setDefaultGrouper(null);
+        assertNull(BaseArgumentedLiteral.getDefaultGrouper());
 
-        BaseArgumentLiteral.setDefaultGrouper(grouper);
-        assertEquals(grouper, BaseArgumentLiteral.getDefaultGrouper());
-        BaseArgumentLiteral defaultGrouper = new SimpleObjectUnchainedLiteralParser();
+        BaseArgumentedLiteral.setDefaultGrouper(grouper);
+        assertEquals(grouper, BaseArgumentedLiteral.getDefaultGrouper());
+        BaseArgumentedLiteral defaultGrouper = new SimpleObjectUnchainedLiteralParser();
         assertEquals(grouper, defaultGrouper.getGrouper());
 
         // Set it back to null for other tests and test that constructor ensures not null
-        BaseArgumentLiteral.setDefaultGrouper(null);
+        BaseArgumentedLiteral.setDefaultGrouper(null);
         assertThrows(IllegalArgumentException.class, SimpleObjectUnchainedLiteralParser::new);
     }
 
@@ -145,7 +147,7 @@ class BaseArgumentLiteralTest {
         Response<Object> res = testee.tryParseLiteral("simpleobject (1)");
         assertTrue(res.wasValueReturned());
         assertEquals(1, ((SimpleObject) res.getValue()).intField);
-        
+
         // Pass a bad class
         when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.is("oops"));
         res = testee.tryParseLiteral("simpleobject (\"oops\")");
@@ -318,5 +320,43 @@ class BaseArgumentLiteralTest {
         assertEquals(42, parsedArgs.get("intVal"));
         assertTrue(parsedArgs.containsKey("strVal"));
         assertEquals("something", parsedArgs.get("strVal"));
+    }
+
+    @Test
+    void tryParseArgument() {
+        testee = new SimpleObjectTypedLiteralParser(grouper);
+        testee.setParser(parser);
+        testee.setModuleRefs();
+
+        Map<String, Object> parsedArgs = new HashMap<>();
+        assertFalse(testee.tryParseArgument("badName", "anything", parsedArgs));
+
+        Object val = 5;
+        String valStr = "5";
+        String name = "intVal";
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.is(val));
+        assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
+        assertEquals(val, parsedArgs.get(name));
+
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.notHandled());
+        assertFalse(testee.tryParseArgument(name, valStr, parsedArgs));
+
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.is("wrong type"));
+        assertFalse(testee.tryParseArgument(name, valStr, parsedArgs));
+
+        val = true;
+        valStr = "true";
+        name = "boolVal";
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.is(val));
+        assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
+        assertEquals(val, parsedArgs.get(name));
+
+        valStr = "so1";
+        name = "so";
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.notHandled());
+        assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
+        SimpleObject so = (SimpleObject) parsedArgs.get(name);
+        assertEquals(valStr, so.strField);
+
     }
 }
