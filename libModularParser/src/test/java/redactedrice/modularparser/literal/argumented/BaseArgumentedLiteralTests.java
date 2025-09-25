@@ -29,7 +29,7 @@ import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectTypedLiteralParser;
 import redactedrice.modularparser.testsupport.SimpleObjectUnchainedLiteralParser;
 
-class BaseArgumentLiteralTest {
+class BaseArgumentedLiteralTests {
 
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
