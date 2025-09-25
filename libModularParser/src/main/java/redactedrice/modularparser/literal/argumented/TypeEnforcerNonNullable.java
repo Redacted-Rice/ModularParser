@@ -3,11 +3,10 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public class TypeEnforcerNonNullable<T> implements ArgumentParser {
-    protected final Class<T> clazz;
+public class TypeEnforcerNonNullable<T> extends TypeEnforcer<T> {
 
     public TypeEnforcerNonNullable(Class<T> clazz) {
-        this.clazz = clazz;
+        super(clazz);
     }
 
     @Override
@@ -18,10 +17,5 @@ public class TypeEnforcerNonNullable<T> implements ArgumentParser {
     @Override
     public boolean isExpectedType(Object argument) {
         return clazz.isInstance(argument);
-    }
-
-    @Override
-    public String getExpectedTypeName() {
-        return clazz.getSimpleName();
     }
 }

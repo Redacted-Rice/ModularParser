@@ -25,7 +25,7 @@ import redactedrice.modularparser.literal.LiteralSupporter;
 import redactedrice.modularparser.testsupport.SimpleObject;
 import redactedrice.modularparser.testsupport.SimpleObjectLiteralParser;
 
-class BaseArgumentChainableLiteralTest {
+class BaseArgumentedChainableLiteralTests {
 
     private ModularParser parser;
     private LiteralSupporter literalSupporter;
