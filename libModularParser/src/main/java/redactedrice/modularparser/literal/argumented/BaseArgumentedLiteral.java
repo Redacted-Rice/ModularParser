@@ -21,7 +21,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
 
     protected final String keyword;
     protected final Grouper grouper;
-    protected final ArgumentsDefinition arguments;
+    protected final ArgumentsDefinition argsDef;
 
     protected LiteralSupporter literalSupporter;
 
@@ -38,7 +38,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
     }
 
     protected BaseArgumentedLiteral(String name, String keyword, Grouper grouper,
-            ArgumentsDefinition arguments) {
+            ArgumentsDefinition argsDef) {
         super(name);
         if (grouper == null) {
             if (defaultGrouper == null) {
@@ -47,7 +47,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             }
             grouper = defaultGrouper;
         }
-        this.arguments = arguments;
+        this.argsDef = argsDef;
         this.keyword = keyword.toLowerCase();
         this.grouper = grouper;
     }
@@ -65,16 +65,8 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         return grouper;
     }
 
-    public String[] getRequiredArgs() {
-        return requiredArgs;
-    }
-
-    public String[] getOptionalArgs() {
-        return optionalArgs;
-    }
-
-    public Object[] getOptionalDefaults() {
-        return optionalDefaults;
+    public ArgumentsDefinition getArgumentsDefinition() {
+        return argsDef;
     }
 
     public LiteralSupporter getLiteralSupporter() {
@@ -113,17 +105,16 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             return false;
         }
 
-        for (String required : requiredArgs) {
+        for (int idx = 0; idx < argsDef.getNumRequiredArgs(); idx++) {
+            String required = argsDef.getRequiredArg(idx);
             if (!parsedArgs.containsKey(required)) {
                 log(LogLevel.ERROR, "Missing required arguement: %s", required);
                 return false;
             }
         }
 
-        for (int idx = 0; idx < optionalArgs.length; idx++) {
-            if (!parsedArgs.containsKey(optionalArgs[idx])) {
-                parsedArgs.put(optionalArgs[idx], optionalDefaults[idx]);
-            }
+        for (int idx = 0; idx < argsDef.getNumOptionalArgs(); idx++) {
+            parsedArgs.putIfAbsent(argsDef.getOptionalArg(idx), argsDef.getOptionalDefault(idx));
         }
         return true;
     }
@@ -209,18 +200,10 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
 
     protected boolean handlePositionalArgs(List<String> positionalParams,
             Map<String, Object> parsedArgs) {
-        int requiredIdx = 0;
-        int optionalIdx = 0;
-        while (requiredIdx + optionalIdx < positionalParams.size()) {
-            int combined = requiredIdx + optionalIdx;
-            String literal = positionalParams.get(combined);
-
-            String argName;
-            if (requiredIdx < requiredArgs.length) {
-                argName = requiredArgs[requiredIdx++];
-            } else if (optionalIdx < optionalArgs.length) {
-                argName = optionalArgs[optionalIdx++];
-            } else {
+        for (int argIdx = 0; argIdx < positionalParams.size(); argIdx++) {
+            String literal = positionalParams.get(argIdx);
+            String argName = argsDef.getArg(argIdx);
+            if (argName == null) {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
             }
@@ -244,7 +227,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
 
     protected boolean tryParseArgument(String argName, String argument,
             Map<String, Object> parsedArgs) {
-        ArgumentParser argParser = argParsers.get(argName);
+        ArgumentParser argParser = argsDef.getArgParser(argName);
         if (argParser == null) {
             log(LogLevel.ERROR, "Internal error: Failed to find parser for arg %s", argName);
             return false;

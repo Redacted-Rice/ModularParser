@@ -56,10 +56,9 @@ class ExtendableObjectParserTest {
         assertEquals(NAME, testee.getName());
         assertEquals("extendableobject", testee.getKeyword());
         assertEquals(CHAINED_ARG, testee.getChainedArg());
-        assertEquals(1, testee.getRequiredArgs().length);
-        assertEquals(CHAINED_ARG, testee.getRequiredArgs()[0]);
-        assertEquals(0, testee.getOptionalArgs().length);
-        assertEquals(0, testee.getOptionalDefaults().length);
+        assertEquals(1, testee.getArgumentsDefinition().getNumRequiredArgs());
+        assertEquals(CHAINED_ARG, testee.getArgumentsDefinition().getRequiredArg(0));
+        assertEquals(0, testee.getArgumentsDefinition().getNumOptionalArgs());
         assertEquals(literalSupporter, testee.getLiteralSupporter());
     }
 
