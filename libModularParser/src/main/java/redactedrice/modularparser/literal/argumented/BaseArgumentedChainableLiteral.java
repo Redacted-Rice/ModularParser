@@ -42,33 +42,23 @@ public abstract class BaseArgumentedChainableLiteral extends BaseArgumentedLiter
     @Override
     protected boolean handlePositionalArgs(List<String> positionalParams,
             Map<String, Object> parsedArgs) {
-        int requiredIdx = 0;
-        int optionalIdx = 0;
-        int positionalIdx = 0;
-        while (positionalIdx < positionalParams.size()) {
-            String literal = positionalParams.get(positionalIdx);
-
-            String argName;
-            if (requiredIdx < requiredArgs.length) {
-                argName = requiredArgs[requiredIdx++];
-            } else if (optionalIdx < optionalArgs.length) {
-                argName = optionalArgs[optionalIdx++];
-            } else {
+        int argIdx = 0;
+        for (int positionalIdx = 0; positionalIdx < positionalParams.size(); positionalIdx++) {
+            String literal = positionalParams.get(argIdx);
+            String argName = argsDef.getArg(argIdx);
+            if (chainedArg.equals(argName) && parsedArgs.containsKey(argName)) {
+                argIdx++;
+                argName = argsDef.getArg(argIdx);
+            }
+            if (argName == null) {
                 log(LogLevel.ERROR, "Too many args were found: %s", positionalParams.toString());
                 return false;
             }
-            if (argName.equals(chainedArg) && parsedArgs.containsKey(argName)) {
-                // Already added to the args
-                continue;
-            }
 
-            Response<Object> parsed = literalSupporter.evaluateLiteral(literal);
-            if (!parsed.wasValueReturned()) {
-                log(LogLevel.ERROR, "Failed to parse arg %s at index %d", literal, positionalIdx);
+            if (!tryParseArgument(argName, literal, parsedArgs)) {
                 return false;
             }
-            parsedArgs.put(argName, parsed.getValue());
-            positionalIdx++;
+            argIdx++;
         }
         return true;
     }

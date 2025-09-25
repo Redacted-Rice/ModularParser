@@ -2,6 +2,7 @@ package redactedrice.modularparser.literal.argumented;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,19 +19,19 @@ public class ArgumentsDefinition {
         if (requiredArgs == null) {
             this.requiredArgs = new ArrayList<>();
         } else {
-            this.requiredArgs = List.of(requiredArgs);
+            this.requiredArgs = Arrays.asList(requiredArgs);
         }
 
         if (optionalArgs == null) {
             this.optionalArgs = new ArrayList<>();
         } else {
-            this.optionalArgs = List.of(optionalArgs);
+            this.optionalArgs = Arrays.asList(optionalArgs);
         }
 
         if (optionalDefaults == null) {
             this.optionalDefaults = new ArrayList<>();
         } else {
-            this.optionalDefaults = List.of(optionalDefaults);
+            this.optionalDefaults = Arrays.asList(optionalDefaults);
         }
 
         // Ensure size of optionals and defaults match
@@ -77,5 +78,35 @@ public class ArgumentsDefinition {
 
     public int getNumArgs() {
         return requiredArgs.size() + optionalArgs.size();
+    }
+
+    public String getRequiredArg(int index) {
+        if (index < 0 || index >= getNumRequiredArgs()) {
+            return null;
+        }
+        return requiredArgs.get(index);
+    }
+
+    public String getOptionalArg(int index) {
+        if (index < 0 || index >= getNumOptionalArgs()) {
+            return null;
+        }
+        return optionalArgs.get(index);
+    }
+
+    public String getArg(int index) {
+        String arg = getRequiredArg(index);
+        if (arg == null) {
+            return getOptionalArg(index - getNumRequiredArgs());
+        }
+        return arg;
+    }
+
+    public Object getOptionalDefault(int index) {
+        return optionalDefaults.get(index);
+    }
+
+    public ArgumentParser getArgParser(String arg) {
+        return argParsers.get(arg);
     }
 }
