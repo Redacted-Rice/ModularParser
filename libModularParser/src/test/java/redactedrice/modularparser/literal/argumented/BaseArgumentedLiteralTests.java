@@ -71,8 +71,8 @@ class BaseArgumentedLiteralTests {
         assertEquals(SimpleObjectUnchainedLiteralParser.class.getSimpleName(), testee.getName());
         assertEquals("simpleobject", testee.getKeyword());
         assertEquals(grouper, testee.getGrouper());
-        assertEquals(1, testee.getArgumentsDefinition().getNumRequiredArgs());
-        assertEquals(3, testee.getArgumentsDefinition().getNumOptionalArgs());
+        assertEquals(1, testee.getArgsDef().getNumRequiredArgs());
+        assertEquals(3, testee.getArgsDef().getNumOptionalArgs());
         assertEquals(literalSupporter, testee.getLiteralSupporter());
     }
 

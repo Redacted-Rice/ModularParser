@@ -65,7 +65,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         return grouper;
     }
 
-    public ArgumentsDefinition getArgumentsDefinition() {
+    public ArgumentsDefinition getArgsDef() {
         return argsDef;
     }
 

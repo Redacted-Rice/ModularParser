@@ -12,11 +12,22 @@ public class ArgumentUtils {
     private ArgumentUtils() {
         throw new IllegalStateException("Utility class");
     }
+    
+    public static String unquoteString(String input) {
+        if (input == null || input.length() < 2) return input;
+        if (input.startsWith("\"") && input.endsWith("\"")) {
+            return input.substring(1, input.length() - 1);
+        }
+        return input;
+    }
 
     public static Response<Boolean> argDichotomyToBool(String fieldName, Map<String, Object> args,
             String trueString, String falseString) {
+    	trueString = unquoteString(trueString);
+    	falseString = unquoteString(falseString);
+    	
         if (args.get(fieldName) instanceof String asString) {
-            String lower = asString.toLowerCase();
+            String lower = unquoteString(asString).toLowerCase();
             if (lower.equals(trueString)) {
                 return Response.is(true);
             } else if (lower.equals(falseString)) {
