@@ -20,9 +20,9 @@ class TypeUnenforcedTests {
     void parseArgument() {
         // No parsing supported
         assertTrue(testee.parseArgument("5").wasNotHandled());
-        assertTrue(testee.parseArgument(null).wasHandled());
-        assertTrue(testee.parseArgument("\t").wasHandled());
-        assertTrue(testee.parseArgument("null").wasHandled());
+        assertTrue(testee.parseArgument(null).wasNotHandled());
+        assertTrue(testee.parseArgument("\t").wasNotHandled());
+        assertTrue(testee.parseArgument("null").wasNotHandled());
     }
 
     @Test
