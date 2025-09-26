@@ -13,6 +13,10 @@ public class ArgumentsDefinition {
     protected final List<Object> optionalDefaults;
     protected final Map<String, ArgumentParser> argParsers;
 
+    public ArgumentsDefinition() {
+    	this(null, null, null, null);
+    }
+    
     public ArgumentsDefinition(String[] requiredArgs, String[] optionalArgs,
             Object[] optionalDefaults, ArgumentParser[] argParsers) {
 
@@ -45,7 +49,7 @@ public class ArgumentsDefinition {
     }
 
     protected void setArgParsers(ArgumentParser[] argParsers) {
-        if (argParsers == null || argParsers.length < 1) {
+        if (argParsers == null) {
             for (String required : requiredArgs) {
                 this.argParsers.put(required, new TypeUnenforced());
             }
@@ -103,6 +107,9 @@ public class ArgumentsDefinition {
     }
 
     public Object getOptionalDefault(int index) {
+        if (index < 0 || index >= getNumOptionalArgs()) {
+            return null;
+        }
         return optionalDefaults.get(index);
     }
 

@@ -30,7 +30,6 @@ public class SimpleObjectTypedLiteralParser extends BaseArgumentedLiteral {
     public SimpleObjectTypedLiteralParser(Grouper grouper) {
         super(SimpleObjectTypedLiteralParser.class.getSimpleName(), "SimpleObject", grouper,
                 argsDef);
-        ;
     }
 
     @Override
