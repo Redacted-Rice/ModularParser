@@ -68,8 +68,8 @@ class BaseArgumentedChainableLiteralTests {
         assertEquals("so", testee.getChainedArg());
         assertEquals("simpleobject", testee.getKeyword());
         assertEquals(grouper, testee.getGrouper());
-        assertEquals(1, testee.getArgumentsDefinition().getNumRequiredArgs());
-        assertEquals(4, testee.getArgumentsDefinition().getNumOptionalArgs());
+        assertEquals(1, testee.getArgsDef().getNumRequiredArgs());
+        assertEquals(4, testee.getArgsDef().getNumOptionalArgs());
         assertEquals(literalSupporter, testee.getLiteralSupporter());
     }
 
