@@ -1,4 +1,4 @@
-package redactedrice.modularparser.utils;
+package redactedrice.modularparser.literal.argumented;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

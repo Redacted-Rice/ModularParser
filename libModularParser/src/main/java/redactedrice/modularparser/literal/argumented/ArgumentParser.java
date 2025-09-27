@@ -3,10 +3,6 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public interface ArgumentParser {
-    public Response<Object> parseArgument(String argument);
-
-    public boolean isExpectedType(Object argument);
-
-    public String getExpectedTypeName();
+public interface ArgumentParser {	
+	public Response<Object> tryParseArgument(Response<Object> parsed, String argument);
 }

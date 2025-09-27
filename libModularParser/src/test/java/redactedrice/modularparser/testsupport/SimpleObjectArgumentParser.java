@@ -2,22 +2,16 @@ package redactedrice.modularparser.testsupport;
 
 
 import redactedrice.modularparser.core.Response;
-import redactedrice.modularparser.literal.argumented.ArgumentParser;
+import redactedrice.modularparser.literal.argumented.ArgumentParserBase;
 
-public class SimpleObjectArgumentParser implements ArgumentParser {
+public class SimpleObjectArgumentParser extends ArgumentParserBase {
 
-    @Override
-    public Response<Object> parseArgument(String argument) {
-        return Response.is(new SimpleObject(42, false, argument, null));
+    public SimpleObjectArgumentParser() {
+    	super(true);
     }
 
-    @Override
-    public boolean isExpectedType(Object argument) {
-        return argument instanceof SimpleObject;
-    }
-
-    @Override
-    public String getExpectedTypeName() {
-        return SimpleObject.class.getSimpleName();
-    }
+	@Override
+	public Response<Object> tryParseNonNullArgument(Response<Object> parsed, String argument) {
+		return Response.is(new SimpleObject(42, false, argument, null));
+	}
 }
