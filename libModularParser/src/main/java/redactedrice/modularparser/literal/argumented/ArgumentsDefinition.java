@@ -51,10 +51,10 @@ public class ArgumentsDefinition {
     protected void setArgParsers(ArgumentParser[] argParsers) {
         if (argParsers == null) {
             for (String required : requiredArgs) {
-                this.argParsers.put(required, new TypeUnenforced());
+                this.argParsers.put(required, new TypeAny(true));
             }
             for (String optional : optionalArgs) {
-                this.argParsers.put(optional, new TypeUnenforced());
+                this.argParsers.put(optional, new TypeAny(true));
             }
         } else if (argParsers.length == getNumArgs()) {
             int requiredIdx = 0;

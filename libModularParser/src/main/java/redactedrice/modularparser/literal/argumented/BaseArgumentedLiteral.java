@@ -234,18 +234,10 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         }
 
         Response<Object> parsed = literalSupporter.evaluateLiteral(argument);
-        if (!parsed.wasValueReturned()) {
-            parsed = argParser.parseArgument(argument);
-            if (!parsed.wasValueReturned()) {
-                log(LogLevel.ERROR, "Failed to parse arg %s with value %s", argName, argument);
-                return false;
-            }
-        }
+        parsed = argParser.tryParseArgument(parsed, argument);
 
-        if (!argParser.isExpectedType(parsed.getValue())) {
-            log(LogLevel.ERROR,
-                    "Parsed arg %s (%s) but returned value was not the of expected type (%s). Found obj = %s",
-                    argName, argument, argParser.getExpectedTypeName(), parsed.getValue());
+        if (parsed.wasError()) {
+            log(LogLevel.ERROR, "Failed to parse arg %s with value %s: %s", argName, argument, parsed.getError());
             return false;
         }
         parsedArgs.put(argName, parsed.getValue());

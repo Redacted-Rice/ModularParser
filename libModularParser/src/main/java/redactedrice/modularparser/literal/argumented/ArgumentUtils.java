@@ -1,4 +1,4 @@
-package redactedrice.modularparser.utils;
+package redactedrice.modularparser.literal.argumented;
 
 
 import java.util.Collection;
@@ -19,6 +19,13 @@ public class ArgumentUtils {
             return input.substring(1, input.length() - 1);
         }
         return input;
+    }
+    
+    public static String getUnquotedString(Response<Object> parsed, String argument) {
+		if (parsed.wasValueReturned() && parsed.getValue() instanceof String asString) {
+	        return unquoteString(asString);
+		}
+		return unquoteString(argument);
     }
 
     public static Response<Boolean> argDichotomyToBool(String fieldName, Map<String, Object> args,
