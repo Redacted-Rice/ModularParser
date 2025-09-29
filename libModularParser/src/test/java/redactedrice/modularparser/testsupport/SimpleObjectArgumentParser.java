@@ -4,10 +4,10 @@ package redactedrice.modularparser.testsupport;
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.literal.argumented.ArgumentParserBase;
 
-public class SimpleObjectArgumentParser extends ArgumentParserBase {
+public class SimpleObjectArgumentParser extends ArgumentParserBase<SimpleObject> {
 
     public SimpleObjectArgumentParser() {
-    	super(true);
+    	super(SimpleObject.class, true);
     }
 
 	@Override

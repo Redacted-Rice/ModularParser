@@ -5,7 +5,11 @@ import redactedrice.modularparser.core.Response;
 
 public class ArgParserUnquotedString extends TypeEnforcer<String> {
     public ArgParserUnquotedString(boolean allowNull) {
-        super(allowNull, String.class);
+        super(String.class, allowNull);
+    }
+    
+    public ArgParserUnquotedString() {
+        this(false);
     }
 
 	@Override

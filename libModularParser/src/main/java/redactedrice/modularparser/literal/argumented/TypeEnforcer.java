@@ -3,19 +3,19 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public class TypeEnforcer<T> extends ArgumentParserBase {
-    protected final Class<T> clazz;
+public class TypeEnforcer<T> extends ArgumentParserBase<T> {
 
-    public TypeEnforcer(boolean allowNull, Class<T> clazz) {
-    	super(allowNull);
-        this.clazz = clazz;
+    public TypeEnforcer(Class<T> clazz, boolean allowNull) {
+    	super(clazz, allowNull);
+    }
+    
+    public TypeEnforcer(Class<T> clazz) {
+    	this(clazz, false);
     }
 
 	@Override
 	public Response<Object> tryParseNonNullArgument(Response<Object> parsed, String argument) {
-		if (parsed.wasValueReturned() && clazz.isInstance(parsed.getValue())) {
-			return parsed;
-		}
+		// Nothing else to do here
         return Response.error("Expected value of type " + clazz.getSimpleName());
 	}
 }
