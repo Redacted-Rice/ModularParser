@@ -12,38 +12,38 @@ class ArgumentParserBaseTests {
 
     @Test
     void constuctor() {
-    	ArgumentParserBase<Integer> testee = new TypeEnforcer<>(Integer.class, true);
+        ArgumentParserBase testee = new TypeEnforcer<>(Integer.class, true);
         assertEquals(true, testee.allowNull);
-        
+
         testee = new TypeEnforcer<>(Integer.class, false);
         assertEquals(false, testee.allowNull);
-        
+
         testee = new TypeEnforcer<>(Integer.class);
         assertEquals(false, testee.allowNull);
     }
-    
+
     @Test
     void tryParseArgument_type() {
-    	ArgumentParserBase<Integer> testee = new TypeEnforcer<>(Integer.class);
+        ArgumentParserBase testee = new TypeEnforcer<>(Integer.class);
         assertTrue(testee.tryParseArgument(Response.is(5), "doesn't matter").wasHandled());
         assertTrue(testee.tryParseArgument(Response.is("bad"), "doesn't matter").wasError());
     }
 
     @Test
     void tryParseArgument_nullable() {
-    	ArgumentParserBase<Integer> testee = new TypeEnforcer<>(Integer.class, true);
-    	Response<Object> unhandled = Response.notHandled();
+        ArgumentParserBase testee = new TypeEnforcer<>(Integer.class, true);
+        Response<Object> unhandled = Response.notHandled();
 
         assertTrue(testee.tryParseArgument(Response.is(null), "something").wasHandled());
         assertTrue(testee.tryParseArgument(unhandled, "\t").wasHandled());
         assertTrue(testee.tryParseArgument(unhandled, "null").wasHandled());
     }
-    
+
     @Test
     void tryParseArgument_nonNullable() {
-    	ArgumentParserBase<Integer> testee = new TypeEnforcer<>(Integer.class, false);
-    	Response<Object> unhandled = Response.notHandled();
-    	
+        ArgumentParserBase testee = new TypeEnforcer<>(Integer.class, false);
+        Response<Object> unhandled = Response.notHandled();
+
         assertTrue(testee.tryParseArgument(Response.is(null), "something").wasError());
         assertTrue(testee.tryParseArgument(unhandled, "\t").wasError());
         assertTrue(testee.tryParseArgument(unhandled, "null").wasError());
