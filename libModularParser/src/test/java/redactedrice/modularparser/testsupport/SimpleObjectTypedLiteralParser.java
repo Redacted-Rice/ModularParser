@@ -18,8 +18,8 @@ public class SimpleObjectTypedLiteralParser extends BaseArgumentedLiteral {
             new String[] {ARGS_NAMES[0]},
             new String[] {ARGS_NAMES[1], ARGS_NAMES[2], ARGS_NAMES[3], ARGS_NAMES[4]},
             new Object[] {false, "", null, null},
-            new ArgumentParser[] {new TypeEnforcer<>(false, Integer.class),
-                    new TypeEnforcer<>(false, Boolean.class), new TypeAny(true),
+            new ArgumentParser[] {new TypeEnforcer<>(Integer.class),
+                    new TypeEnforcer<>(Boolean.class), new TypeAny(true),
                     new SimpleObjectArgumentParser(), new TypeAny(true)});
 
     public SimpleObjectTypedLiteralParser() {

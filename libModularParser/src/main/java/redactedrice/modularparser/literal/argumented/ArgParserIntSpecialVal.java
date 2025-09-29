@@ -6,25 +6,30 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 
-public class ArgParserIntSpecialVal extends ArgumentParserBase {
+public class ArgParserIntSpecialVal extends ArgumentParserBase<Integer> {
 	protected final Map<String, Integer> specialValues;
     
-    public ArgParserIntSpecialVal(boolean allowNull, String specialValName, int specialVal) {
-    	super(allowNull);
+    public ArgParserIntSpecialVal(String specialValName, int specialVal, boolean allowNull) {
+    	super(Integer.class, allowNull);
     	specialValues = new HashMap<>();
     	specialValues.put(specialValName, specialVal);
     }
     
-    public ArgParserIntSpecialVal(boolean allowNull, Map<String, Integer> specialVals) {
-    	super(allowNull);
+    public ArgParserIntSpecialVal(String specialValName, int specialVal) {
+    	this(specialValName, specialVal, false);
+    }
+    
+    public ArgParserIntSpecialVal(Map<String, Integer> specialVals, boolean allowNull) {
+    	super(Integer.class, allowNull);
     	specialValues = new HashMap<>(specialVals);
+    }
+    
+    public ArgParserIntSpecialVal(Map<String, Integer> specialVals) {
+    	this(specialVals, false);
     }
 
 	@Override
 	public Response<Object> tryParseNonNullArgument(Response<Object> parsed, String argument) {
-		if (parsed.wasValueReturned() && parsed.getValue() instanceof Integer) {
-			return parsed;
-		}
 		String unquoted = ArgumentUtils.getUnquotedString(parsed, argument);
     	Integer val = specialValues.get(unquoted);
     	if (val != null) {
