@@ -6,15 +6,15 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 
-public class ArgParserStringEnum<T> extends ArgumentParserBase {
+public abstract class ArgParserStringEnum<T> extends ArgumentParserBase {
     protected final Map<String, T> enumMap;
 
-    public ArgParserStringEnum(Map<String, T> enumMap, boolean allowNull) {
+    protected ArgParserStringEnum(Map<String, T> enumMap, boolean allowNull) {
         super(allowNull);
         this.enumMap = new HashMap<>(enumMap);
     }
 
-    public ArgParserStringEnum(Map<String, T> enumMap) {
+    protected ArgParserStringEnum(Map<String, T> enumMap) {
         this(enumMap, false);
     }
 
@@ -26,10 +26,5 @@ public class ArgParserStringEnum<T> extends ArgumentParserBase {
             return Response.is(val);
         }
         return Response.error("Passed value is undefined. Defined values: " + enumMap);
-    }
-
-    @Override
-    protected Class<?> expectedType() {
-        return Integer.class;
     }
 }
