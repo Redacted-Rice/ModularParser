@@ -156,6 +156,9 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
                 arg = foundGroup[0];
                 restOfParams = " " + foundGroup[1].trim();
                 args = group.getValue()[2].trim();
+                if (args.startsWith(ARG_DELIMITER)) {
+                    args = args.substring(1).trim();
+                }
             } else {
                 // Its not an open group meaning its a standard arg or a object/function with
                 // no params. We can use the existing break and just need to update the args
@@ -237,7 +240,8 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         parsed = argParser.tryParseArgument(parsed, argument);
 
         if (parsed.wasError()) {
-            log(LogLevel.ERROR, "Failed to parse arg %s with value %s: %s", argName, argument, parsed.getError());
+            log(LogLevel.ERROR, "Failed to parse arg %s with value %s: %s", argName, argument,
+                    parsed.getError());
             return false;
         }
         parsedArgs.put(argName, parsed.getValue());
