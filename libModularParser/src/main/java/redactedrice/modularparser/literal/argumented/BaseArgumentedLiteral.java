@@ -243,6 +243,9 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             log(LogLevel.ERROR, "Failed to parse arg %s with value %s: %s", argName, argument,
                     parsed.getError());
             return false;
+        } else if (parsed.wasNotHandled()) {
+            log(LogLevel.ERROR, "Failed to parse arg %s with value %s. Unspecified error", argName, argument);
+            return false;
         }
         parsedArgs.put(argName, parsed.getValue());
         return true;
