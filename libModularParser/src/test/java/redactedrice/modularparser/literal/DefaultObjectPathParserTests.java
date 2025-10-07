@@ -18,7 +18,7 @@ import org.mockito.MockedStatic;
 
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
-import redactedrice.reflectionhelpers.utils.ReflectionUtils;
+import redactedrice.reflectionhelpers.utils.FunctionUtils;
 
 class DefaultObjectPathParserTest {
     private ModularParser parser;
@@ -65,15 +65,15 @@ class DefaultObjectPathParserTest {
 
         when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.is(1))
                 .thenReturn(Response.is(2)).thenReturn(Response.is(3));
-        try (MockedStatic<ReflectionUtils> mock = mockStatic(ReflectionUtils.class)) {
-            mock.when(() -> ReflectionUtils.invoke(any(), any())).thenReturn(noArgs);
-            mock.when(() -> ReflectionUtils.invoke(any(), any(), any(), any(), any()))
+        try (MockedStatic<FunctionUtils> mock = mockStatic(FunctionUtils.class)) {
+            mock.when(() -> FunctionUtils.invoke(any(), any())).thenReturn(noArgs);
+            mock.when(() -> FunctionUtils.invoke(any(), any(), any(), any(), any()))
                     .thenReturn(args);
 
             assertEquals(Response.is(noArgs), testee.handleWithArgs("anything", "method()"));
             assertEquals(Response.is(args), testee.handleWithArgs("anything", "method(1, 2, 3)"));
 
-            mock.when(() -> ReflectionUtils.invoke(any(), any()))
+            mock.when(() -> FunctionUtils.invoke(any(), any()))
                     .thenThrow(new NoSuchMethodException());
             assertTrue(testee.handleWithArgs("anything", "method()").wasNotHandled());
         }
@@ -99,11 +99,11 @@ class DefaultObjectPathParserTest {
         assertTrue(testee.tryEvaluateChainedLiteral("anything", "anythingToo").wasHandled());
 
         doReturn(Response.notHandled()).when(testee).handleWithArgs(any(), any());
-        try (MockedStatic<ReflectionUtils> mock = mockStatic(ReflectionUtils.class)) {
-            mock.when(() -> ReflectionUtils.getVariable(any(), any())).thenReturn("something");
+        try (MockedStatic<FunctionUtils> mock = mockStatic(FunctionUtils.class)) {
+            mock.when(() -> FunctionUtils.getVariable(any(), any())).thenReturn("something");
             assertTrue(testee.tryEvaluateChainedLiteral("anything", "anythingToo").wasHandled());
 
-            mock.when(() -> ReflectionUtils.getVariable(any(), any()))
+            mock.when(() -> FunctionUtils.getVariable(any(), any()))
                     .thenThrow(new NoSuchFieldException());
             assertTrue(testee.tryEvaluateChainedLiteral("anything", "anythingToo").wasNotHandled());
         }

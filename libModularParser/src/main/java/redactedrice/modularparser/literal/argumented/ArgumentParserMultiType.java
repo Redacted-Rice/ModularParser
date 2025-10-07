@@ -1,17 +1,20 @@
 package redactedrice.modularparser.literal.argumented;
 
 
+import java.util.Collection;
+
 import redactedrice.modularparser.core.Response;
 
-public abstract class ArgumentParserBase implements ArgumentParser {
+public abstract class ArgumentParserMultiType implements ArgumentParser {
     protected final boolean allowNull;
 
-    protected ArgumentParserBase(boolean allowNull) {
+    protected ArgumentParserMultiType(boolean allowNull) {
         this.allowNull = allowNull;
     }
 
     public Response<Object> tryParseArgument(Response<Object> parsed, String argument) {
-        if (parsed.wasValueReturned() && expectedType().isInstance(parsed.getValue())) {
+        if (parsed.wasValueReturned() &&
+                expectedTypes().stream().anyMatch(e -> e.isInstance(parsed.getValue()))) {
             return parsed;
         }
 
@@ -25,7 +28,7 @@ public abstract class ArgumentParserBase implements ArgumentParser {
         }
         Response<Object> response = tryParseNonNullArgument(parsed, argument);
         if (response.wasNotHandled()) {
-        	return Response.error("Passed arguement was of the wrong type");
+            return Response.error("Passed arguement was of the wrong type");
         }
         return response;
     }
@@ -33,5 +36,5 @@ public abstract class ArgumentParserBase implements ArgumentParser {
     protected abstract Response<Object> tryParseNonNullArgument(Response<Object> parsed,
             String argument);
 
-    protected abstract Class<?> expectedType();
+    protected abstract Collection<Class<?>> expectedTypes();
 }

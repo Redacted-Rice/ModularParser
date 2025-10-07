@@ -6,7 +6,7 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 
-public abstract class ArgParserStringEnum<T> extends ArgumentParserBase {
+public abstract class ArgParserStringEnum<T> extends ArgumentParserSingleType {
     protected final Map<String, T> enumMap;
 
     protected ArgParserStringEnum(Map<String, T> enumMap, boolean allowNull) {

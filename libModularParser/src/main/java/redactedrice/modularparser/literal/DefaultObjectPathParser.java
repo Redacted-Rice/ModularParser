@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import redactedrice.modularparser.core.BaseModule;
 import redactedrice.modularparser.core.ModularParser;
 import redactedrice.modularparser.core.Response;
-import redactedrice.reflectionhelpers.utils.ReflectionUtils;
+import redactedrice.reflectionhelpers.utils.FunctionUtils;
 
 public class DefaultObjectPathParser extends BaseModule implements ChainableLiteralParser {
     protected static final Pattern PARAMETERS_PATTERN = Pattern.compile("(\\w+)\\s*\\(([^)]*)\\)");
@@ -68,7 +68,7 @@ public class DefaultObjectPathParser extends BaseModule implements ChainableLite
         }
 
         try {
-            return Response.is(ReflectionUtils.invoke(chained, fieldName + "()", argsParsed));
+            return Response.is(FunctionUtils.invoke(chained, fieldName + "()", argsParsed));
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
             // Not handled by this but still could be valid for something else
@@ -100,7 +100,7 @@ public class DefaultObjectPathParser extends BaseModule implements ChainableLite
             return result;
         }
         try {
-            return Response.is(ReflectionUtils.getVariable(chained, literal));
+            return Response.is(FunctionUtils.getVariable(chained, literal));
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
             // fall through to empty return

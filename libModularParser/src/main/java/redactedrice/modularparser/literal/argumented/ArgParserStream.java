@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import redactedrice.modularparser.core.Response;
 import redactedrice.reflectionhelpers.utils.ConversionUtils;
 
-public class ArgParserStream extends ArgumentParserBase {
+public class ArgParserStream extends ArgumentParserSingleType {
 
     public ArgParserStream(boolean allowNull) {
         super(allowNull);

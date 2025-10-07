@@ -2,14 +2,13 @@ package redactedrice.modularparser.literal.argumented;
 
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 import redactedrice.modularparser.core.Response;
 
 public abstract class ArgParserValueTypedMapBase implements ArgumentParser {
     protected final boolean allowNull;
 
-    public ArgParserValueTypedMapBase(boolean allowNull) {
+    protected ArgParserValueTypedMapBase(boolean allowNull) {
         this.allowNull = allowNull;
     }
 
@@ -22,16 +21,16 @@ public abstract class ArgParserValueTypedMapBase implements ArgumentParser {
                 return Response.error("Null value was passed but is not allowed");
             }
         }
-        
-        if (parsed.wasValueReturned() && parsed.getValue() instanceof Map<?,?> map) {
-            if (!map.values().stream()
-            	    .allMatch(v -> v instanceof Stream<?>)) {
-            	return Response.error("Was not a map of stream");
+
+        if (parsed.wasValueReturned() && parsed.getValue() instanceof Map<?, ?> map) {
+            if (!map.values().stream().allMatch(v -> expectedType().isInstance(v))) {
+                return Response
+                        .error("Was not a map of expected type " + expectedType().getSimpleName());
             }
             return parsed;
         }
         return Response.notHandled();
     }
-    
+
     protected abstract Class<?> expectedType();
 }

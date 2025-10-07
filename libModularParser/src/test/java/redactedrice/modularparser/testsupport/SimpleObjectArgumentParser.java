@@ -2,9 +2,9 @@ package redactedrice.modularparser.testsupport;
 
 
 import redactedrice.modularparser.core.Response;
-import redactedrice.modularparser.literal.argumented.ArgumentParserBase;
+import redactedrice.modularparser.literal.argumented.ArgumentParserSingleType;
 
-public class SimpleObjectArgumentParser extends ArgumentParserBase {
+public class SimpleObjectArgumentParser extends ArgumentParserSingleType {
 
     public SimpleObjectArgumentParser() {
         super(true);
