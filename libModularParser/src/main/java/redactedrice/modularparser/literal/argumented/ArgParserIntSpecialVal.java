@@ -6,7 +6,7 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 
-public class ArgParserIntSpecialVal extends ArgumentParserBase {
+public class ArgParserIntSpecialVal extends ArgumentParserSingleType {
     protected final Map<String, Integer> specialValues;
 
     public ArgParserIntSpecialVal(String specialValName, int specialVal, boolean allowNull) {

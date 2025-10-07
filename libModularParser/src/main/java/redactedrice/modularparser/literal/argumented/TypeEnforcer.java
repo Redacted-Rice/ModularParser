@@ -3,7 +3,7 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public class TypeEnforcer<T> extends ArgumentParserBase {
+public class TypeEnforcer<T> extends ArgumentParserSingleType {
     protected final Class<T> clazz;
 
     public TypeEnforcer(Class<T> clazz, boolean allowNull) {
