@@ -10,4 +10,9 @@ public interface Grouper extends Module {
     public boolean hasOpenGroup(String line);
 
     public Response<String[]> tryGetNextGroup(String line, boolean stripTokens);
+
+    public default boolean startsWithAGroup(String string) {
+        Response<String[]> nextGroup = tryGetNextGroup(string, false);
+        return nextGroup.wasValueReturned() && nextGroup.getValue()[0].isBlank();
+    }
 }

@@ -4,9 +4,9 @@ package redactedrice.modularparser.literal.argumented;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class ArgumentParserSingleType extends ArgumentParserMultiType {
+public abstract class ArgParserSingleType extends ArgParserMultiType {
 
-    protected ArgumentParserSingleType(boolean allowNull) {
+    protected ArgParserSingleType(boolean allowNull) {
         super(allowNull);
     }
 

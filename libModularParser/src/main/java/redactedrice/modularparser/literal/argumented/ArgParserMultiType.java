@@ -5,10 +5,10 @@ import java.util.Collection;
 
 import redactedrice.modularparser.core.Response;
 
-public abstract class ArgumentParserMultiType implements ArgumentParser {
+public abstract class ArgParserMultiType implements ArgumentParser {
     protected final boolean allowNull;
 
-    protected ArgumentParserMultiType(boolean allowNull) {
+    protected ArgParserMultiType(boolean allowNull) {
         this.allowNull = allowNull;
     }
 
@@ -27,8 +27,11 @@ public abstract class ArgumentParserMultiType implements ArgumentParser {
             }
         }
         Response<Object> response = tryParseNonNullArgument(parsed, argument);
+        // TODO: Add more logging here to show found type or if parsed was unhandled
+        // also use simple name
         if (response.wasNotHandled()) {
-            return Response.error("Passed arguement was of the wrong type");
+            return Response
+                    .error("Passed arguement was of the wrong type! Expected: " + expectedTypes());
         }
         return response;
     }

@@ -3,7 +3,7 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public class ArgParserUnquotedString extends TypeEnforcer<String> {
+public class ArgParserUnquotedString extends ArgParserTyped<String> {
     public ArgParserUnquotedString(boolean allowNull) {
         super(String.class, allowNull);
     }

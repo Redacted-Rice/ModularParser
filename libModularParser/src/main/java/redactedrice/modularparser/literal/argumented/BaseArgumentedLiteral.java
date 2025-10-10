@@ -138,34 +138,17 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
     protected boolean parseArgs(String args, List<String> positionalParams,
             Map<String, String> namedParams) {
         boolean hasFoundNamed = false;
+        String[] argSplit;
         while (!args.isBlank()) {
-            // Split on arg separators
-            String[] argPopped = args.split(ARG_DELIMITER, 2);
-            // If it has an open group, then we need to parse it differently instead
-            String arg = argPopped[0];
-            String restOfParams = "";
-            if (grouper.hasOpenGroup(arg)) {
-                // Get the next group and break it by that instead
-                Response<String[]> group = grouper.tryGetNextGroup(args, false);
-                if (!group.wasValueReturned()) {
-                    log(LogLevel.ERROR,
-                            "Ill formed arg. Found grouper but was not closed: " + args);
-                    return false;
-                }
-                String[] foundGroup = group.getValue();
-                arg = foundGroup[0];
-                restOfParams = " " + foundGroup[1].trim();
-                args = group.getValue()[2].trim();
-                if (args.startsWith(ARG_DELIMITER)) {
-                    args = args.substring(1).trim();
-                }
-            } else {
-                // Its not an open group meaning its a standard arg or a object/function with
-                // no params. We can use the existing break and just need to update the args
-                args = argPopped.length > 1 ? argPopped[1].trim() : "";
+            argSplit = popNextArg(args);
+            if (args.length() < 2) {
+                log(LogLevel.ERROR, "TODO Error");
+                return false;
             }
-            Response<Boolean> wasNamed = tryAddParam(arg.trim(), restOfParams, positionalParams,
-                    namedParams, hasFoundNamed);
+            args = argSplit[1];
+
+            Response<Boolean> wasNamed = tryAddParam(argSplit[0], positionalParams, namedParams,
+                    hasFoundNamed);
             if (wasNamed.wasError()) {
                 log(LogLevel.ERROR, wasNamed.getError());
                 return false;
@@ -175,30 +158,60 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         return true;
     }
 
-    protected Response<Boolean> tryAddParam(String arg, String restOfParams,
-            List<String> positionalParams, Map<String, String> namedParams, boolean hasFoundNamed) {
-        // Split on the arg <-> name splitter
+    protected String[] popNextArg(String args) {
+        // Split on arg separators
+        String[] argPopped = args.split(ARG_DELIMITER, 2);
+        // If it has an open group, then we need to parse it differently instead
+        String arg = argPopped[0].trim();
+        if (grouper.hasOpenGroup(arg)) {
+            do {
+                if (argPopped[1].isBlank()) {
+                    log(LogLevel.ERROR,
+                            "Ill formed arg. Found arg delimiter in grouper but could not find end of arg: "
+                                    + args);
+                    return new String[0];
+                }
+                argPopped = argPopped[1].split(ARG_DELIMITER, 2);
+                arg += ARG_DELIMITER + " " + argPopped[0].trim();
+            } while (grouper.hasOpenGroup(arg));
+        }
+        String remainder = argPopped.length > 1 ? argPopped[1].trim() : "";
+        return new String[] {arg, remainder};
+    }
+
+    protected Response<Boolean> tryAddParam(String arg, List<String> positionalParams,
+            Map<String, String> namedParams, boolean hasFoundNamed) {
+        if (arg.startsWith("\"")) {
+            if (!arg.endsWith("\"")) {
+                return Response.error("Bad String");
+            }
+            return addPositionalParam(arg, positionalParams, hasFoundNamed);
+        } else if (arg.startsWith("'")) {
+            if (!arg.endsWith("'")) {
+                return Response.error("Bad char");
+            }
+            return addPositionalParam(arg, positionalParams, hasFoundNamed);
+        }
+
         String[] tryNameSplit = arg.split(ARG_NAME_DELIMITER, 2);
-        if (tryNameSplit.length > 1 && grouper.isEmptyGroup(tryNameSplit[1])) {
-            // No name, empty fn
-            if (hasFoundNamed) {
-                return Response.error(
-                        "Found positional void object/function arg after a named arg was used");
-            }
-            positionalParams.add(arg);
-            return Response.is(false);
-        } else if (tryNameSplit.length == 1 || arg.startsWith("\"") || arg.startsWith("'")) {
-            // If there is no space or its a quoted string, it doesn't have a name
-            if (hasFoundNamed) {
-                return Response.error("Found positional literal arg after a named arg was used");
-            }
-            positionalParams.add(arg + restOfParams);
-            return Response.is(false);
+        if (tryNameSplit.length == 1 ||
+                (tryNameSplit.length > 1 && grouper.startsWithAGroup(tryNameSplit[1]))) {
+            return addPositionalParam(arg, positionalParams, hasFoundNamed);
         } else {
             // Otherwise the group is a later arg and this is named
-            namedParams.put(tryNameSplit[0], tryNameSplit[1] + restOfParams);
+            namedParams.put(tryNameSplit[0], tryNameSplit[1]);
             return Response.is(true);
         }
+    }
+
+    protected Response<Boolean> addPositionalParam(String arg, List<String> positionalParams,
+            boolean hasFoundNamed) {
+        if (hasFoundNamed) {
+            return Response
+                    .error("Found positional literal arg '" + arg + "' after a named arg was used");
+        }
+        positionalParams.add(arg);
+        return Response.is(false);
     }
 
     protected boolean handlePositionalArgs(List<String> positionalParams,
@@ -235,19 +248,23 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             log(LogLevel.ERROR, "Internal error: Failed to find parser for arg %s", argName);
             return false;
         }
+        if (argParser instanceof ArgUnparsed) {
+            parsedArgs.put(argName, argument);
+        } else {
+            Response<Object> parsed = literalSupporter.evaluateLiteral(argument);
+            parsed = argParser.tryParseArgument(parsed, argument);
 
-        Response<Object> parsed = literalSupporter.evaluateLiteral(argument);
-        parsed = argParser.tryParseArgument(parsed, argument);
-
-        if (parsed.wasError()) {
-            log(LogLevel.ERROR, "Failed to parse arg %s with value %s: %s", argName, argument,
-                    parsed.getError());
-            return false;
-        } else if (parsed.wasNotHandled()) {
-            log(LogLevel.ERROR, "Failed to parse arg %s with value %s. Unspecified error", argName, argument);
-            return false;
+            if (parsed.wasError()) {
+                log(LogLevel.ERROR, "Failed to parse arg '%s' with value '%s': %s", argName,
+                        argument, parsed.getError());
+                return false;
+            } else if (parsed.wasNotHandled()) {
+                log(LogLevel.ERROR, "Failed to parse arg '%s' with value '%s'. Unspecified error",
+                        argName, argument);
+                return false;
+            }
+            parsedArgs.put(argName, parsed.getValue());
         }
-        parsedArgs.put(argName, parsed.getValue());
         return true;
     }
 

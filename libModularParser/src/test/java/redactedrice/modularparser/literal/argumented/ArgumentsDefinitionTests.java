@@ -118,8 +118,8 @@ class ArgumentsDefinitionTests {
     
     @Test
     void constuctor_argParsers() {
-    	TypeAny type1 = new TypeAny(true);
-    	TypeEnforcer<Integer> type2 = new TypeEnforcer<>(Integer.class);
+    	ArgParserAny type1 = new ArgParserAny(true);
+    	ArgParserTyped<Integer> type2 = new ArgParserTyped<>(Integer.class);
     	SimpleObjectArgumentParser type3 = new SimpleObjectArgumentParser();
     	
     	ArgumentsDefinition testee = new ArgumentsDefinition(

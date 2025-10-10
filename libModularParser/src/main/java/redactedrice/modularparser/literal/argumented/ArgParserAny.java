@@ -1,12 +1,12 @@
 package redactedrice.modularparser.literal.argumented;
 
 
-public class TypeAny extends TypeEnforcer<Object> {
-    public TypeAny(boolean allowNull) {
+public class ArgParserAny extends ArgParserTyped<Object> {
+    public ArgParserAny(boolean allowNull) {
         super(Object.class, allowNull);
     }
     
-    public TypeAny() {
+    public ArgParserAny() {
         this(false);
     }
 }

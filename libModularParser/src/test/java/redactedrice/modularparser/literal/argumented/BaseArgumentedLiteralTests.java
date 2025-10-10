@@ -199,75 +199,152 @@ class BaseArgumentedLiteralTests {
     }
 
     @Test
+    void parseArgs_commandChain() {
+        String args = "do Select (foo bar, value so) -> Set (field intVal, to 5)";
+
+        when(grouper.hasOpenGroup(any())).thenReturn(false);
+        when(grouper.hasOpenGroup("do Select (foo bar")).thenReturn(true);
+        when(grouper.hasOpenGroup("do Select (foo bar, value so) -> Set (field intVal"))
+                .thenReturn(true);
+
+        when(grouper.tryGetNextGroup(
+                argThat(str -> str != null && str.startsWith("SimpleObject (3, true)")),
+                anyBoolean()))
+                .thenReturn(Response.is(new String[] {"SimpleObject ", "(3, true)",
+                        "strVal \"something\", so SimpleObject (2, false)"}));
+        when(grouper.tryGetNextGroup(eq("so SimpleObject (2, false)"), anyBoolean()))
+                .thenReturn(Response.is(new String[] {"so SimpleObject ", "(2, false)", ""}));
+
+        List<String> positional = new ArrayList<>();
+        Map<String, String> named = new HashMap<>();
+        assertTrue(testee.parseArgs(args, positional, named));
+        assertEquals(3, positional.size());
+        assertEquals("42", positional.get(0));
+        assertEquals("SimpleObject ()", positional.get(1));
+        assertEquals("SimpleObject (3, true)", positional.get(2));
+        assertEquals("\"something\"", named.get("strVal"));
+        assertEquals("SimpleObject (2, false)", named.get("so"));
+        positional.clear();
+        named.clear();
+
+        args = "42, 3";
+        assertTrue(testee.parseArgs(args, positional, named));
+        assertEquals(2, positional.size());
+        assertEquals("42", positional.get(0));
+        assertEquals("3", positional.get(1));
+        assertTrue(named.isEmpty());
+    }
+
+    @Test
     void tryAddParam_literal() {
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
-        assertTrue(testee.tryAddParam("2", "", positional, named, true).wasError());
-        assertTrue(testee.tryAddParam("'2'", "", positional, named, true).wasError());
-        assertTrue(testee.tryAddParam("\"string\"", "", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("2", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("'2'", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("\"string\"", positional, named, true).wasError());
 
         when(grouper.isEmptyGroup(any())).thenReturn(false);
-        Response<Boolean> res = testee.tryAddParam("intVal 2", "", positional, named, false);
+        Response<Boolean> res = testee.tryAddParam("intVal 2", positional, named, false);
         assertTrue(res.wasValueReturned());
         assertTrue(res.getValue());
         assertTrue(positional.isEmpty());
         assertEquals("2", named.get("intVal"));
         named.clear();
 
-        res = testee.tryAddParam("intVal 2", "", positional, named, true);
+        res = testee.tryAddParam("intVal 2", positional, named, true);
         assertTrue(res.wasValueReturned());
         assertTrue(res.getValue());
         assertTrue(positional.isEmpty());
         assertEquals("2", named.get("intVal"));
         named.clear();
 
-        res = testee.tryAddParam("2", "", positional, named, false);
+        res = testee.tryAddParam("2", positional, named, false);
         assertTrue(res.wasValueReturned());
         assertFalse(res.getValue());
         assertEquals("2", positional.get(0));
         assertTrue(named.isEmpty());
+        positional.clear();
+
+        res = testee.tryAddParam("\"string (with lots of spaces and confusing syntax)\"",
+                positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertFalse(res.getValue());
+        assertEquals("\"string (with lots of spaces and confusing syntax)\"", positional.get(0));
+        assertTrue(named.isEmpty());
+        positional.clear();
+
+        res = testee.tryAddParam("named \"(namedstring (with spaces and) odd syntax)\"", positional,
+                named, false);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("\"(namedstring (with spaces and) odd syntax)\"", named.get("named"));
+        named.clear();
     }
 
     @Test
     void tryAddParam_object() {
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
-        assertTrue(testee.tryAddParam("SimpleObject", "(5, false)", positional, named, true)
-                .wasError());
-        when(grouper.isEmptyGroup(any())).thenReturn(true);
-        assertTrue(testee.tryAddParam("SimpleObject ()", "", positional, named, true).wasError());
 
+        when(grouper.startsWithAGroup(any())).thenReturn(false);
+        when(grouper.startsWithAGroup("(2)")).thenReturn(true);
+        Response<Boolean> res = testee.tryAddParam("so SimpleObject (2)", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("SimpleObject (2)", named.get("so"));
+        named.clear();
+
+        res = testee.tryAddParam("so SimpleObject (2)", positional, named, true);
+        assertTrue(res.wasValueReturned());
+        assertTrue(res.getValue());
+        assertTrue(positional.isEmpty());
+        assertEquals("SimpleObject (2)", named.get("so"));
+        named.clear();
+
+        res = testee.tryAddParam("SimpleObject (2)", positional, named, false);
+        assertTrue(res.wasValueReturned());
+        assertFalse(res.getValue());
+        assertEquals("SimpleObject (2)", positional.get(0));
+        assertTrue(named.isEmpty());
+        positional.clear();
+    }
+
+    @Test
+    void tryAddParam_badParams() {
+        List<String> positional = new ArrayList<>();
+        Map<String, String> named = new HashMap<>();
+
+        when(grouper.startsWithAGroup(any())).thenReturn(false);
+        when(grouper.startsWithAGroup("(5, false)")).thenReturn(true);
+        when(grouper.startsWithAGroup("()")).thenReturn(true);
+
+        // Already found a named param
+        assertTrue(
+                testee.tryAddParam("SimpleObject (5, false)", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("SimpleObject ()", positional, named, true).wasError());
+
+        // Bad string
+        assertTrue(testee.tryAddParam("\"no close string", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("'E", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("\"mixed str'", positional, named, true).wasError());
+        assertTrue(testee.tryAddParam("'E\"", positional, named, true).wasError());
+    }
+
+    @Test
+    void tryAddParam_commandChain() {
+        List<String> positional = new ArrayList<>();
+        Map<String, String> named = new HashMap<>();
+
+        // A longer, multiple operation arg
         when(grouper.isEmptyGroup(any())).thenReturn(false);
-        Response<Boolean> res = testee.tryAddParam("so SimpleObject", "(2)", positional, named,
-                false);
+        Response<Boolean> res = testee.tryAddParam(
+                "do Select (value so) -> Set (field intVal, to 5)", positional, named, false);
         assertTrue(res.wasValueReturned());
         assertTrue(res.getValue());
         assertTrue(positional.isEmpty());
-        assertEquals("SimpleObject(2)", named.get("so"));
-        named.clear();
-
-        res = testee.tryAddParam("so SimpleObject", "(2)", positional, named, true);
-        assertTrue(res.wasValueReturned());
-        assertTrue(res.getValue());
-        assertTrue(positional.isEmpty());
-        assertEquals("SimpleObject(2)", named.get("so"));
-        named.clear();
-
-        res = testee.tryAddParam("SimpleObject", "(2)", positional, named, false);
-        assertTrue(res.wasValueReturned());
-        assertFalse(res.getValue());
-        assertEquals("SimpleObject(2)", positional.get(0));
-        assertTrue(named.isEmpty());
-        positional.clear();
-
-        // Can only ever be an unnamed in this case
-        when(grouper.isEmptyGroup(any())).thenReturn(true);
-        res = testee.tryAddParam("SimpleObject ()", "", positional, named, false);
-        assertTrue(res.wasValueReturned());
-        assertFalse(res.getValue());
-        assertEquals("SimpleObject ()", positional.get(0));
-        assertTrue(named.isEmpty());
-        positional.clear();
+        assertEquals("Select (value so) -> Set (field intVal, to 5)", named.get("do"));
     }
 
     @Test
