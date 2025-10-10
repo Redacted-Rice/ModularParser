@@ -12,26 +12,26 @@ class ArgumentParserBaseTests {
 
     @Test
     void constuctor() {
-        ArgumentParserSingleType testee = new TypeEnforcer<>(Integer.class, true);
+        ArgParserSingleType testee = new ArgParserTyped<>(Integer.class, true);
         assertEquals(true, testee.allowNull);
 
-        testee = new TypeEnforcer<>(Integer.class, false);
+        testee = new ArgParserTyped<>(Integer.class, false);
         assertEquals(false, testee.allowNull);
 
-        testee = new TypeEnforcer<>(Integer.class);
+        testee = new ArgParserTyped<>(Integer.class);
         assertEquals(false, testee.allowNull);
     }
 
     @Test
     void tryParseArgument_type() {
-        ArgumentParserSingleType testee = new TypeEnforcer<>(Integer.class);
+        ArgParserSingleType testee = new ArgParserTyped<>(Integer.class);
         assertTrue(testee.tryParseArgument(Response.is(5), "doesn't matter").wasHandled());
         assertTrue(testee.tryParseArgument(Response.is("bad"), "doesn't matter").wasError());
     }
 
     @Test
     void tryParseArgument_nullable() {
-        ArgumentParserSingleType testee = new TypeEnforcer<>(Integer.class, true);
+        ArgParserSingleType testee = new ArgParserTyped<>(Integer.class, true);
         Response<Object> unhandled = Response.notHandled();
 
         assertTrue(testee.tryParseArgument(Response.is(null), "something").wasHandled());
@@ -41,7 +41,7 @@ class ArgumentParserBaseTests {
 
     @Test
     void tryParseArgument_nonNullable() {
-        ArgumentParserSingleType testee = new TypeEnforcer<>(Integer.class, false);
+        ArgParserSingleType testee = new ArgParserTyped<>(Integer.class, false);
         Response<Object> unhandled = Response.notHandled();
 
         assertTrue(testee.tryParseArgument(Response.is(null), "something").wasError());

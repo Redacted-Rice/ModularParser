@@ -8,8 +8,8 @@ import redactedrice.modularparser.lineformer.Grouper;
 import redactedrice.modularparser.literal.argumented.ArgumentParser;
 import redactedrice.modularparser.literal.argumented.ArgumentsDefinition;
 import redactedrice.modularparser.literal.argumented.BaseArgumentedLiteral;
-import redactedrice.modularparser.literal.argumented.TypeEnforcer;
-import redactedrice.modularparser.literal.argumented.TypeAny;
+import redactedrice.modularparser.literal.argumented.ArgParserTyped;
+import redactedrice.modularparser.literal.argumented.ArgParserAny;
 
 public class SimpleObjectTypedLiteralParser extends BaseArgumentedLiteral {
     protected static final String[] ARGS_NAMES = new String[] {"intVal", "boolVal", "strVal", "so",
@@ -18,9 +18,9 @@ public class SimpleObjectTypedLiteralParser extends BaseArgumentedLiteral {
             new String[] {ARGS_NAMES[0]},
             new String[] {ARGS_NAMES[1], ARGS_NAMES[2], ARGS_NAMES[3], ARGS_NAMES[4]},
             new Object[] {false, "", null, null},
-            new ArgumentParser[] {new TypeEnforcer<>(Integer.class),
-                    new TypeEnforcer<>(Boolean.class), new TypeAny(true),
-                    new SimpleObjectArgumentParser(), new TypeAny(true)});
+            new ArgumentParser[] {new ArgParserTyped<>(Integer.class),
+                    new ArgParserTyped<>(Boolean.class), new ArgParserAny(true),
+                    new SimpleObjectArgumentParser(), new ArgParserAny(true)});
 
     public SimpleObjectTypedLiteralParser() {
         this(null);

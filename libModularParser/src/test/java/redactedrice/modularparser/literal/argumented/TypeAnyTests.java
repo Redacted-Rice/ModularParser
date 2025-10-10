@@ -12,9 +12,9 @@ class TypeAnyTests {
     @Test
     void tryParseArgument() {
     	// Test null
-    	TypeAny testee = new TypeAny(true);
+    	ArgParserAny testee = new ArgParserAny(true);
         assertTrue(testee.tryParseArgument(Response.notHandled(), "null").wasHandled());
-        testee = new TypeAny(false);
+        testee = new ArgParserAny(false);
         assertTrue(testee.tryParseArgument(Response.notHandled(), "null").wasError());
     	
         // Test return objects - anything is accepted

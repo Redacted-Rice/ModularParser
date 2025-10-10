@@ -3,15 +3,15 @@ package redactedrice.modularparser.literal.argumented;
 
 import redactedrice.modularparser.core.Response;
 
-public class TypeEnforcer<T> extends ArgumentParserSingleType {
+public class ArgParserTyped<T> extends ArgParserSingleType {
     protected final Class<T> clazz;
 
-    public TypeEnforcer(Class<T> clazz, boolean allowNull) {
+    public ArgParserTyped(Class<T> clazz, boolean allowNull) {
         super(allowNull);
         this.clazz = clazz;
     }
 
-    public TypeEnforcer(Class<T> clazz) {
+    public ArgParserTyped(Class<T> clazz) {
         this(clazz, false);
     }
 

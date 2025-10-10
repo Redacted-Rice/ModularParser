@@ -12,15 +12,15 @@ class TypeEnforcerTests {
 
     @Test
     void constuctor() {
-    	TypeEnforcer<Integer> testee = new TypeEnforcer<>(Integer.class);
+    	ArgParserTyped<Integer> testee = new ArgParserTyped<>(Integer.class);
         assertEquals(Integer.class, testee.clazz);
     }
     
     @Test
     void tryParseArgument() {
-    	TypeEnforcer<Integer> testee = new TypeEnforcer<>(Integer.class, true);
+    	ArgParserTyped<Integer> testee = new ArgParserTyped<>(Integer.class, true);
         assertTrue(testee.tryParseArgument(Response.notHandled(), "null").wasHandled());
-    	testee = new TypeEnforcer<>(Integer.class, false);
+    	testee = new ArgParserTyped<>(Integer.class, false);
         assertTrue(testee.tryParseArgument(Response.notHandled(), "null").wasError());
     	
         assertTrue(testee.tryParseArgument(Response.is(5), "doesn't matter").wasHandled());
