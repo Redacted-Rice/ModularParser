@@ -141,7 +141,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         String[] argSplit;
         while (!args.isBlank()) {
             argSplit = popNextArg(args);
-            if (args.length() < 2) {
+            if (argSplit.length < 2) {
                 log(LogLevel.ERROR, "TODO Error");
                 return false;
             }
@@ -243,7 +243,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
 
     protected boolean tryParseArgument(String argName, String argument,
             Map<String, Object> parsedArgs) {
-        ArgumentParser argParser = argsDef.getArgParser(argName);
+        ArgumentParser argParser = getArgParser(argName);
         if (argParser == null) {
             log(LogLevel.ERROR, "Internal error: Failed to find parser for arg %s", argName);
             return false;
@@ -251,7 +251,7 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         if (argParser instanceof ArgUnparsed) {
             parsedArgs.put(argName, argument);
         } else {
-            Response<Object> parsed = literalSupporter.evaluateLiteral(argument);
+            Response<Object> parsed = getLiteralSupporter().evaluateLiteral(argument);
             parsed = argParser.tryParseArgument(parsed, argument);
 
             if (parsed.wasError()) {
@@ -266,6 +266,10 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             parsedArgs.put(argName, parsed.getValue());
         }
         return true;
+    }
+
+    protected ArgumentParser getArgParser(String name) {
+        return argsDef.getArgParser(name);
     }
 
     public abstract Response<Object> tryEvaluateObject(Map<String, Object> args)

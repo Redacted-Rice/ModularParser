@@ -8,8 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -158,14 +157,9 @@ class BaseArgumentedLiteralTests {
         when(grouper.hasOpenGroup(any())).thenReturn(false);
         when(grouper.hasOpenGroup("SimpleObject (3")).thenReturn(true);
         when(grouper.hasOpenGroup("so SimpleObject (2")).thenReturn(true);
-        when(grouper.isEmptyGroup("()")).thenReturn(true);
-        when(grouper.tryGetNextGroup(
-                argThat(str -> str != null && str.startsWith("SimpleObject (3, true)")),
-                anyBoolean()))
-                .thenReturn(Response.is(new String[] {"SimpleObject ", "(3, true)",
-                        "strVal \"something\", so SimpleObject (2, false)"}));
-        when(grouper.tryGetNextGroup(eq("so SimpleObject (2, false)"), anyBoolean()))
-                .thenReturn(Response.is(new String[] {"so SimpleObject ", "(2, false)", ""}));
+        when(grouper.startsWithAGroup(any())).thenReturn(false);
+        when(grouper.startsWithAGroup("()")).thenReturn(true);
+        when(grouper.startsWithAGroup("(3, true)")).thenReturn(true);
 
         String args = "42, SimpleObject (), SimpleObject (3, true), strVal \"something\", so SimpleObject (2, false)";
         List<String> positional = new ArrayList<>();
@@ -194,8 +188,9 @@ class BaseArgumentedLiteralTests {
         assertFalse(testee.parseArgs("intVal 42, boolVal f, \"some string", positional, named));
         assertFalse(testee.parseArgs("intVal 42, SimpleObject (3, true)", positional, named));
 
-        when(grouper.tryGetNextGroup(any(), anyBoolean())).thenReturn(Response.notHandled());
-        assertFalse(testee.parseArgs("so SimpleObject (2, false)", positional, named));
+        // Check the ill formed case
+        when(grouper.hasOpenGroup(any())).thenReturn(true);
+        assertFalse(testee.parseArgs("\"have and empty arg\",", positional, named));
     }
 
     @Test
@@ -206,33 +201,14 @@ class BaseArgumentedLiteralTests {
         when(grouper.hasOpenGroup("do Select (foo bar")).thenReturn(true);
         when(grouper.hasOpenGroup("do Select (foo bar, value so) -> Set (field intVal"))
                 .thenReturn(true);
-
-        when(grouper.tryGetNextGroup(
-                argThat(str -> str != null && str.startsWith("SimpleObject (3, true)")),
-                anyBoolean()))
-                .thenReturn(Response.is(new String[] {"SimpleObject ", "(3, true)",
-                        "strVal \"something\", so SimpleObject (2, false)"}));
-        when(grouper.tryGetNextGroup(eq("so SimpleObject (2, false)"), anyBoolean()))
-                .thenReturn(Response.is(new String[] {"so SimpleObject ", "(2, false)", ""}));
+        when(grouper.startsWithAGroup(any())).thenReturn(false);
 
         List<String> positional = new ArrayList<>();
         Map<String, String> named = new HashMap<>();
         assertTrue(testee.parseArgs(args, positional, named));
-        assertEquals(3, positional.size());
-        assertEquals("42", positional.get(0));
-        assertEquals("SimpleObject ()", positional.get(1));
-        assertEquals("SimpleObject (3, true)", positional.get(2));
-        assertEquals("\"something\"", named.get("strVal"));
-        assertEquals("SimpleObject (2, false)", named.get("so"));
-        positional.clear();
-        named.clear();
-
-        args = "42, 3";
-        assertTrue(testee.parseArgs(args, positional, named));
-        assertEquals(2, positional.size());
-        assertEquals("42", positional.get(0));
-        assertEquals("3", positional.get(1));
-        assertTrue(named.isEmpty());
+        assertEquals(0, positional.size());
+        assertEquals(1, named.size());
+        assertEquals("Select (foo bar, value so) -> Set (field intVal, to 5)", named.get("do"));
     }
 
     @Test
@@ -433,6 +409,31 @@ class BaseArgumentedLiteralTests {
         assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
         SimpleObject so = (SimpleObject) parsedArgs.get(name);
         assertEquals(valStr, so.strField);
+    }
 
+    @Test
+    void tryParseArgument_specialCases() {
+        testee = mock(BaseArgumentedLiteral.class);
+        doCallRealMethod().when(testee).tryParseArgument(any(), any(), any());
+
+        when(literalSupporter.evaluateLiteral(any())).thenReturn(Response.notHandled());
+        when(testee.getLiteralSupporter()).thenReturn(literalSupporter);
+
+        ArgumentParser mockArg = mock(ArgumentParser.class);
+        when(mockArg.tryParseArgument(any(), any())).thenReturn(Response.notHandled());
+        when(testee.getArgParser(any())).thenReturn(mockArg);
+
+        Map<String, Object> parsedArgs = new HashMap<>();
+        Object val = 5;
+        String valStr = "5";
+        String name = "intVal";
+        when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.is(val));
+        assertFalse(testee.tryParseArgument(name, valStr, parsedArgs));
+
+        ArgUnparsed mockUnparsed = mock(ArgUnparsed.class);
+        when(testee.getArgParser(any())).thenReturn(mockUnparsed);
+        assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
+        String unparsed = (String) parsedArgs.get(name);
+        assertEquals(valStr, unparsed);
     }
 }

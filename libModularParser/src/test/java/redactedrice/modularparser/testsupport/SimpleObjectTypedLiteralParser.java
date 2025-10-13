@@ -5,11 +5,11 @@ import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 import redactedrice.modularparser.lineformer.Grouper;
+import redactedrice.modularparser.literal.argumented.ArgParserAny;
+import redactedrice.modularparser.literal.argumented.ArgParserTyped;
 import redactedrice.modularparser.literal.argumented.ArgumentParser;
 import redactedrice.modularparser.literal.argumented.ArgumentsDefinition;
 import redactedrice.modularparser.literal.argumented.BaseArgumentedLiteral;
-import redactedrice.modularparser.literal.argumented.ArgParserTyped;
-import redactedrice.modularparser.literal.argumented.ArgParserAny;
 
 public class SimpleObjectTypedLiteralParser extends BaseArgumentedLiteral {
     protected static final String[] ARGS_NAMES = new String[] {"intVal", "boolVal", "strVal", "so",
