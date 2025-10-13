@@ -27,11 +27,10 @@ public abstract class ArgParserMultiType implements ArgumentParser {
             }
         }
         Response<Object> response = tryParseNonNullArgument(parsed, argument);
-        // TODO: Add more logging here to show found type or if parsed was unhandled
-        // also use simple name
         if (response.wasNotHandled()) {
-            return Response
-                    .error("Passed arguement was of the wrong type! Expected: " + expectedTypes());
+            return Response.error("Passed arguement was of the wrong type! Expected: "
+                    + expectedTypes().stream().map(Class::getSimpleName).toList() + " but found "
+                    + parsed.getValue());
         }
         return response;
     }

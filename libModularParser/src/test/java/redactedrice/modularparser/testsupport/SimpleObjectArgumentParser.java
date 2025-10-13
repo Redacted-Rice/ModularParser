@@ -12,6 +12,9 @@ public class SimpleObjectArgumentParser extends ArgParserSingleType {
 
     @Override
     public Response<Object> tryParseNonNullArgument(Response<Object> parsed, String argument) {
+        if (argument.equals("unhandledTest")) {
+            return Response.notHandled();
+        }
         return Response.is(new SimpleObject(42, false, argument, null));
     }
 
