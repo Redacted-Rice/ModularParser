@@ -122,6 +122,6 @@ class TypeEnforcingTests {
         String logs = logger.getLogsCombined();
         assertFalse(logs.isBlank());
         assertTrue(logs.contains(
-                "[ERROR] SimpleObjectTypedLiteralParser: Failed to parse arg intVal with value \"bad\""));
+                "[ERROR] SimpleObjectTypedLiteralParser: Failed to parse arg 'intVal' with value '\"bad\"'"));
     }
 }
