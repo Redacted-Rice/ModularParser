@@ -15,7 +15,7 @@ public abstract class ArgParserMultiType implements ArgumentParser {
     public Response<Object> tryParseArgument(Response<Object> parsed, String argument) {
         if (parsed.wasValueReturned() &&
                 expectedTypes().stream().anyMatch(e -> e.isInstance(parsed.getValue()))) {
-            return parsed;
+            return modifyMatchingResponse(parsed);
         }
 
         if ((parsed.wasHandled() && parsed.getValue() == null) || argument.isBlank() ||
@@ -33,6 +33,10 @@ public abstract class ArgParserMultiType implements ArgumentParser {
                     + parsed.getValue());
         }
         return response;
+    }
+
+    protected Response<Object> modifyMatchingResponse(Response<Object> matchingType) {
+        return matchingType;
     }
 
     protected abstract Response<Object> tryParseNonNullArgument(Response<Object> parsed,

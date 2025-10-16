@@ -27,4 +27,9 @@ public abstract class ArgParserStringEnum<T> extends ArgParserSingleType {
         }
         return Response.error("Passed value is undefined. Defined values: " + enumMap);
     }
+
+    @Override
+    protected Class<?> expectedType() {
+        return Map.class;
+    }
 }
