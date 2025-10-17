@@ -1,3 +1,4 @@
 Add basic math expression parsing/evaluation
 Be consistent with parse/evaluate for literals
 Add parenthesis support in expressions (particularly for math support)
+Handle streams in var assignment? Have a copy function or similar to call? Or maybe an arg from eval literal

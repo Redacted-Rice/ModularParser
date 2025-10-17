@@ -1,13 +1,16 @@
 package redactedrice.modularparser.literal.argumented;
 
 
-// TODO: Instead just implement argparser and return the arg always
-public class ArgUnparsed extends ArgParserTyped<String> {
-    public ArgUnparsed(boolean allowNull) {
-        super(String.class, allowNull);
+import redactedrice.modularparser.core.Response;
+
+public class ArgUnparsed implements ArgumentParser {
+    @Override
+    public Response<Object> preparseEvaluate(String argument) {
+        return Response.is(argument);
     }
 
-    public ArgUnparsed() {
-        this(false);
+    @Override
+    public Response<Object> tryParseArgument(Response<Object> parsed, String argument) {
+        return Response.error("Not expected to get here!");
     }
 }
