@@ -14,17 +14,17 @@ public class ArgParserStream extends ArgParserSingleType {
 
     @Override
     protected Response<Object> tryParseNonNullArgument(Response<Object> parsed, String argument) {
-    	if (parsed.wasHandled()) {
-        	Stream<Object> stream = ConversionUtils.convertToStreamOrNull(parsed.getValue());
-        	if (stream != null) {
-        		return Response.is(stream);
-        	}
-    	}
+        if (parsed.wasHandled()) {
+            Stream<Object> stream = ConversionUtils.convertToStreamOrNull(parsed.getValue());
+            if (stream != null) {
+                return Response.is(stream);
+            }
+        }
         return Response.notHandled();
     }
 
     @Override
-    protected Class<?> expectedType() {
+    public Class<?> expectedType() {
         return Stream.class;
     }
 }

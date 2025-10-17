@@ -29,7 +29,7 @@ public abstract class ArgParserStringEnum<T> extends ArgParserSingleType {
     }
 
     @Override
-    protected Class<?> expectedType() {
+    public Class<?> expectedType() {
         return Map.class;
     }
 }

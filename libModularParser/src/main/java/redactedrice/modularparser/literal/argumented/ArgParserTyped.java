@@ -22,7 +22,7 @@ public class ArgParserTyped<T> extends ArgParserSingleType {
     }
 
     @Override
-    protected Class<?> expectedType() {
+    public Class<?> expectedType() {
         return clazz;
     }
 }
