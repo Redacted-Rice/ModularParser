@@ -12,6 +12,10 @@ public abstract class ArgParserMultiType implements ArgumentParser {
         this.allowNull = allowNull;
     }
 
+    public Response<Object> preparseEvaluate(String argument) {
+        return Response.notHandled();
+    }
+
     public Response<Object> tryParseArgument(Response<Object> parsed, String argument) {
         if (parsed.wasValueReturned() &&
                 expectedTypes().stream().anyMatch(e -> e.isInstance(parsed.getValue()))) {

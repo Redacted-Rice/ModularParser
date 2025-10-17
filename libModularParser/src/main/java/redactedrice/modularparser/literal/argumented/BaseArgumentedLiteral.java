@@ -162,8 +162,9 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
         // Split on arg separators
         String[] argPopped = args.split(ARG_DELIMITER, 2);
         // If it has an open group, then we need to parse it differently instead
-        String arg = argPopped[0].trim();
-        if (grouper.hasOpenGroup(arg)) {
+        StringBuilder arg = new StringBuilder();
+        arg.append(argPopped[0].trim());
+        if (grouper.hasOpenGroup(arg.toString())) {
             do {
                 if (argPopped[1].isBlank()) {
                     log(LogLevel.ERROR,
@@ -172,11 +173,11 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
                     return new String[0];
                 }
                 argPopped = argPopped[1].split(ARG_DELIMITER, 2);
-                arg += ARG_DELIMITER + " " + argPopped[0].trim();
-            } while (grouper.hasOpenGroup(arg));
+                arg.append(ARG_DELIMITER).append(" ").append(argPopped[0].trim());
+            } while (grouper.hasOpenGroup(arg.toString()));
         }
         String remainder = argPopped.length > 1 ? argPopped[1].trim() : "";
-        return new String[] {arg, remainder};
+        return new String[] {arg.toString(), remainder};
     }
 
     protected Response<Boolean> tryAddParam(String arg, List<String> positionalParams,
@@ -248,10 +249,11 @@ public abstract class BaseArgumentedLiteral extends BaseModule implements Litera
             log(LogLevel.ERROR, "Internal error: Failed to find parser for arg %s", argName);
             return false;
         }
-        if (argParser instanceof ArgUnparsed) {
+        Response<Object> parsed = argParser.preparseEvaluate(argument);
+        if (parsed.wasValueReturned()) {
             parsedArgs.put(argName, argument);
         } else {
-            Response<Object> parsed = getLiteralSupporter().evaluateLiteral(argument);
+            parsed = getLiteralSupporter().evaluateLiteral(argument);
             parsed = argParser.tryParseArgument(parsed, argument);
 
             if (parsed.wasError()) {

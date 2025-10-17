@@ -4,7 +4,6 @@ package redactedrice.modularparser.literal.argumented;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.spy;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,8 +42,14 @@ class ArgParserMultiTypeTests {
     }
 
     @Test
+    void preparseEvaluate() {
+        ArgParserMultiType testee = new TestMultiType(true);
+        assertTrue(testee.preparseEvaluate("anything").wasNotHandled());
+    }
+
+    @Test
     void tryParseArgument_type() {
-        ArgParserMultiType testee = spy(new TestMultiType(false));
+        ArgParserMultiType testee = new TestMultiType(false);
         Response<Object> unhandled = Response.notHandled();
 
         assertTrue(testee.tryParseArgument(Response.is(5), "doesn't matter").wasValueReturned());
@@ -55,7 +60,7 @@ class ArgParserMultiTypeTests {
 
     @Test
     void tryParseArgument_nullable() {
-        ArgParserMultiType testee = spy(new TestMultiType(true));
+        ArgParserMultiType testee = new TestMultiType(true);
         Response<Object> unhandled = Response.notHandled();
 
         assertTrue(testee.tryParseArgument(Response.is(null), "something").wasValueReturned());
@@ -65,7 +70,7 @@ class ArgParserMultiTypeTests {
 
     @Test
     void tryParseArgument_nonNullable() {
-        ArgParserMultiType testee = spy(new TestMultiType(false));
+        ArgParserMultiType testee = new TestMultiType(false);
         Response<Object> unhandled = Response.notHandled();
 
         assertFalse(testee.tryParseArgument(Response.is(null), "something").wasValueReturned());
@@ -75,7 +80,7 @@ class ArgParserMultiTypeTests {
 
     @Test
     void modifyMatchingResponse() {
-        ArgParserMultiType testee = spy(new TestMultiType(false));
+        ArgParserMultiType testee = new TestMultiType(false);
         assertEquals("test", testee.modifyMatchingResponse(Response.is("test")).getValue());
         assertEquals(6, testee.modifyMatchingResponse(Response.is(6)).getValue());
     }

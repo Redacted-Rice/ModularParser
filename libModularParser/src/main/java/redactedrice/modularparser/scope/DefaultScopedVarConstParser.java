@@ -117,7 +117,6 @@ public class DefaultScopedVarConstParser extends BaseScopedKeywordParser impleme
     protected void addLiteral(String literal, String scopeName, String name, boolean assignment) {
         Response<Object> obj = literalSupporter.evaluateLiteral(literal);
         if (obj.wasValueReturned()) {
-        	// TODO: Handle streams? Have a copy function or similar to call? Or maybe an arg from eval literal
             if (scopeSupporter.setData(scopeName, name, this, obj.getValue())) {
                 log(LogLevel.DEBUG, "%s %s %s in scope %s with %s",
                         (assignment ? "Added " : "Changed "), getKeyword(), name, scopeName,

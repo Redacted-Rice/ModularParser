@@ -420,6 +420,7 @@ class BaseArgumentedLiteralTests {
         when(testee.getLiteralSupporter()).thenReturn(literalSupporter);
 
         ArgumentParser mockArg = mock(ArgumentParser.class);
+        when(mockArg.preparseEvaluate(any())).thenReturn(Response.notHandled());
         when(mockArg.tryParseArgument(any(), any())).thenReturn(Response.notHandled());
         when(testee.getArgParser(any())).thenReturn(mockArg);
 
@@ -430,8 +431,12 @@ class BaseArgumentedLiteralTests {
         when(literalSupporter.evaluateLiteral(valStr)).thenReturn(Response.is(val));
         assertFalse(testee.tryParseArgument(name, valStr, parsedArgs));
 
-        ArgUnparsed mockUnparsed = mock(ArgUnparsed.class);
+        // Test an uparsed case
+        ArgumentParser mockUnparsed = mock(ArgumentParser.class);
+        when(mockUnparsed.preparseEvaluate(valStr)).thenReturn(Response.is(valStr));
+        when(mockUnparsed.tryParseArgument(any(), any())).thenReturn(Response.notHandled());
         when(testee.getArgParser(any())).thenReturn(mockUnparsed);
+
         assertTrue(testee.tryParseArgument(name, valStr, parsedArgs));
         String unparsed = (String) parsedArgs.get(name);
         assertEquals(valStr, unparsed);

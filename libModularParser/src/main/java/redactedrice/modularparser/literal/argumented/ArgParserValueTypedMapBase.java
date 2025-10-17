@@ -12,6 +12,11 @@ public abstract class ArgParserValueTypedMapBase implements ArgumentParser {
         this.allowNull = allowNull;
     }
 
+    @Override
+    public Response<Object> preparseEvaluate(String argument) {
+        return Response.notHandled();
+    }
+
     public Response<Object> tryParseArgument(Response<Object> parsed, String argument) {
         if ((parsed.wasHandled() && parsed.getValue() == null) || argument.isBlank() ||
                 argument.equalsIgnoreCase("null")) {
