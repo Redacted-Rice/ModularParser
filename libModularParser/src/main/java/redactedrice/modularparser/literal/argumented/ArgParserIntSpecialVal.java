@@ -40,7 +40,7 @@ public class ArgParserIntSpecialVal extends ArgParserSingleType {
     }
 
     @Override
-    protected Class<?> expectedType() {
+    public Class<?> expectedType() {
         return Integer.class;
     }
 }

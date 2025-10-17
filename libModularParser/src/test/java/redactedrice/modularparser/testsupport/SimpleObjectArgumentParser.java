@@ -19,7 +19,7 @@ public class SimpleObjectArgumentParser extends ArgParserSingleType {
     }
 
     @Override
-    protected Class<?> expectedType() {
+    public Class<?> expectedType() {
         return SimpleObject.class;
     }
 }

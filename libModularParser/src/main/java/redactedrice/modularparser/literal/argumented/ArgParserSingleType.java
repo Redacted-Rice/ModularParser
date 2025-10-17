@@ -10,9 +10,9 @@ public abstract class ArgParserSingleType extends ArgParserMultiType {
         super(allowNull);
     }
 
-    protected Collection<Class<?>> expectedTypes() {
+    public Collection<Class<?>> expectedTypes() {
         return List.of(expectedType());
     }
 
-    protected abstract Class<?> expectedType();
+    public abstract Class<?> expectedType();
 }
