@@ -1,12 +1,14 @@
 package redactedrice.modularparser.literal.argumented;
 
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import redactedrice.modularparser.core.Response;
 
-public abstract class ArgParserStringEnum<T> extends ArgParserSingleType {
+public abstract class ArgParserStringEnum<T> extends ArgParserMultiType {
     protected final Map<String, T> enumMap;
 
     protected ArgParserStringEnum(Map<String, T> enumMap, boolean allowNull) {
@@ -29,7 +31,14 @@ public abstract class ArgParserStringEnum<T> extends ArgParserSingleType {
     }
 
     @Override
-    public Class<?> expectedType() {
-        return Map.class;
+    public Collection<Class<?>> expectedTypes() {
+        Class<?> type = nativeTypeOrNull();
+        if (type != null) {
+            return List.of(type);
+        } else {
+            return List.of();
+        }
     }
+
+    public abstract Class<?> nativeTypeOrNull();
 }
