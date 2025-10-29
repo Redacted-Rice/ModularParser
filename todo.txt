@@ -1,3 +1,6 @@
+No more plans to update or enhance. See README for more details
+
+Some ideas that were not done but would be nice if developed picked back up again:
 Add basic math expression parsing/evaluation
 Be consistent with parse/evaluate for literals
 Add parenthesis support in expressions (particularly for math support)
